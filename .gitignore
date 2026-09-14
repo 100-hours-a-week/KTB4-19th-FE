@@ -1,0 +1,79 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+dist-ssr/
+storybook-static/
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
+
+# Test outputs
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+blob-report/
+
+# Tool caches
+.vite/
+.cache/
+.parcel-cache/
+.turbo/
+.eslintcache
+.stylelintcache
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local environment files
+.env
+.env.*
+!.env.example
+*.local
+
+# Hosting metadata
+.vercel/
+.netlify/
+
+# Editors
+.idea/
+.vscode/
+*.iml
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local certificates and credentials
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+credentials.json
+service-account*.json
+
+# Internal project specifications and agent context
+source/
+docs/
+skills/building-management-frontend/
+AGENTS.md
+CLAUDE.md
+IMPLEMENT_FRONTEND.md
+MCP_SETUP.md
+manifest.json
+design-assumptions.md
+README.md
