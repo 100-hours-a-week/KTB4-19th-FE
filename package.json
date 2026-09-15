@@ -13,6 +13,7 @@
     "@karrotmarket/react-monochrome-icon": "^1.26.0",
     "@seed-design/css": "^2.8.1",
     "@seed-design/react": "^2.4.1",
+    "@tanstack/react-query": "^5.102.8",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "react-router-dom": "^7.18.3"

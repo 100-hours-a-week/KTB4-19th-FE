@@ -18,15 +18,20 @@ import {
   IconSparkle2Line,
 } from "@karrotmarket/react-monochrome-icon";
 import { useState, type ReactNode } from "react";
-import { Link, NavLink, Navigate, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
+import { Link, NavLink, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
 import { ActionButton } from "seed-design/ui/action-button";
 import { Checkbox } from "seed-design/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "seed-design/ui/radio-group";
 import { SegmentedControl, SegmentedControlItem } from "seed-design/ui/segmented-control";
-import { TextField, TextFieldInput, TextFieldTextarea } from "seed-design/ui/text-field";
+import { TextField, TextFieldInput } from "seed-design/ui/text-field";
+import { LoginPage } from "./features/auth/pages/LoginPage";
+import { ConversationList } from "./features/conversations/components/ConversationList";
+import { ChatPage, NewChatPage } from "./features/conversations/pages/ChatPage";
+import { ConversationsPage } from "./features/conversations/pages/ConversationsPage";
+import { useAuth } from "./shared/auth/AuthProvider";
+import { HomeRedirect, RequireRole } from "./shared/auth/RequireRole";
 import {
   complaints,
-  conversations,
   documents,
   insights,
   notifications,
@@ -159,7 +164,7 @@ function AppShell({ role, setRole, state, setState, children }: { role: Role; se
           <Link to="/auth/role">역할 선택</Link>
           {role === "manager" ? <Link to="/manager/building/new">건물 등록</Link> : <Link to="/resident/connect">입주 연결</Link>}
         </div>
-        <div className="sidebar-profile"><span className="avatar">김</span><div><strong>김관리</strong><small>A타워</small></div></div>
+        <SidebarProfile role={role} />
       </aside>
       <div className="app-main">
         <header className="topbar">
@@ -178,6 +183,13 @@ function AppShell({ role, setRole, state, setState, children }: { role: Role; se
       </div>
     </div>
   );
+}
+
+function SidebarProfile({ role }: { role: Role }) {
+  const auth = useAuth();
+  const fallbackName = role === "manager" ? "김관리" : "박입주";
+  const name = auth.user?.userName ?? fallbackName;
+  return <div className="sidebar-profile"><span className="avatar">{name.slice(0, 1)}</span><div><strong>{name}</strong><small>{auth.user?.email ?? "A타워"}</small></div></div>;
 }
 
 function ManagerHome({ state }: { state: ViewState }) {
@@ -262,17 +274,8 @@ function NotificationsPage({ state, role }: { state: ViewState; role: Role }) {
 }
 
 function ResidentHome({ state }: { state: ViewState }) {
-  return <><PageTitle eyebrow="A타워 302호" title="안녕하세요, 박입주 님" description="생활 문의와 민원 접수를 AI 도우미에게 편하게 말씀해 주세요." /><StateBoundary state={state} emptyTitle="아직 대화가 없어요"><section className="resident-hero"><div><span className="ai-orb"><IconSparkle2Line /></span><p className="eyebrow">AI 생활 도우미</p><h2>무엇을 도와드릴까요?</h2><p>시설 문제부터 건물 생활 규칙까지 편하게 물어보세요.</p><Link to="/resident/conversations/new"><ActionButton variant="brandSolid">새 대화 시작</ActionButton></Link></div><div className="suggestion-list"><span>이렇게 물어볼 수 있어요</span><Link to="/resident/conversations/new">“천장에서 물이 새요” <IconChevronRightLine /></Link><Link to="/resident/conversations/new">“분리수거 요일이 언제예요?” <IconChevronRightLine /></Link><Link to="/resident/conversations/new">“주차 등록은 어떻게 하나요?” <IconChevronRightLine /></Link></div></section><section className="panel"><div className="section-heading"><h2>최근 대화</h2><Link to="/resident/conversations">전체 보기</Link></div><ConversationRows compact /></section></StateBoundary></>;
-}
-
-function ConversationRows({ compact = false }: { compact?: boolean }) { return <div className="list-stack">{conversations.slice(0, compact ? 3 : undefined).map((item) => <Link className="list-row" to={`/resident/conversations/${item.id}`} key={item.id}><span className="conversation-icon"><IconDot3HorizontalChatbubbleLeftLine /></span><div className="grow"><div className="row-title"><strong>{item.title}</strong><Badge tone={item.status === "답변완료" ? "positive" : "informative"} variant="weak">{item.status}</Badge></div><p>{item.type} · {item.time}</p></div><IconChevronRightLine /></Link>)}</div>; }
-
-function ConversationsPage({ state }: { state: ViewState }) { return <><PageTitle eyebrow="AI 생활 도우미" title="대화 목록" description="이전 문의와 민원 접수 대화를 다시 확인하세요." action={<Link to="/resident/conversations/new"><ActionButton variant="brandSolid"><PrefixIcon svg={<IconPlusLine />} />새 대화</ActionButton></Link>} /><section className="panel list-panel"><TextField prefixIcon={<IconMagnifyingglassLine />}><TextFieldInput aria-label="대화 검색" placeholder="대화 제목 검색" /></TextField><StateBoundary state={state} emptyTitle="아직 대화가 없어요"><ConversationRows /></StateBoundary></section></>; }
-
-function ChatPage({ isNew = false }: { isNew?: boolean }) {
-  const [message, setMessage] = useState("");
-  const [sent, setSent] = useState(!isNew);
-  return <div className="chat-layout"><header className="chat-header"><div><p className="eyebrow">AI 생활 도우미</p><h1>{isNew ? "새 대화" : "천장에서 물이 새요"}</h1></div>{!isNew && <Badge tone="informative" variant="weak">민원 접수 가능</Badge>}</header><div className="chat-body"><div className="message assistant"><span className="message-name">집사이 AI</span><p>불편한 점이나 궁금한 점을 편하게 말씀해 주세요.</p></div>{sent && <><div className="message resident"><p>천장에서 물이 새요. 안방 천장 가운데예요.</p></div><div className="message assistant"><span className="message-name">집사이 AI</span><p>확인했어요. 접수할 내용을 정리했어요.</p><div className="summary-card"><div className="summary-title"><IconCheckmarkCircleFill /><strong>민원 접수 내용</strong></div><InfoRow label="위치" value="302호 안방 천장" /><InfoRow label="시점" value="어제 저녁부터" /><InfoRow label="증상" value="천장 가운데 물이 떨어짐" /><InfoRow label="사진" value="1장" /><div className="button-row"><ActionButton variant="brandSolid">이대로 접수</ActionButton><ActionButton variant="neutralOutline">내용 수정</ActionButton></div></div></div></>}</div><form className="composer" onSubmit={(event) => { event.preventDefault(); if (message.trim()) { setSent(true); setMessage(""); } }}><TextField value={message} onValueChange={({ value }) => setMessage(value)} maxGraphemeCount={200} hideCharacterCount={false}><TextFieldTextarea aria-label="메시지" placeholder="메시지를 입력해 주세요" /></TextField><div className="composer-actions"><span>사진은 최대 3장까지 첨부할 수 있어요</span><ActionButton type="submit" variant="brandSolid" disabled={!message.trim()}>전송</ActionButton></div></form></div>;
+  const auth = useAuth();
+  return <><PageTitle eyebrow="A타워 302호" title={`안녕하세요, ${auth.user?.userName ?? "입주민"} 님`} description="생활 문의와 민원 접수를 AI 도우미에게 편하게 말씀해 주세요." /><StateBoundary state={state} emptyTitle="아직 대화가 없어요"><section className="resident-hero"><div><span className="ai-orb"><IconSparkle2Line /></span><p className="eyebrow">AI 생활 도우미</p><h2>무엇을 도와드릴까요?</h2><p>시설 문제부터 건물 생활 규칙까지 편하게 물어보세요.</p><Link to="/resident/conversations/new"><ActionButton variant="brandSolid">새 대화 시작</ActionButton></Link></div><div className="suggestion-list"><span>이렇게 물어볼 수 있어요</span><Link to="/resident/conversations/new">“천장에서 물이 새요” <IconChevronRightLine /></Link><Link to="/resident/conversations/new">“분리수거 요일이 언제예요?” <IconChevronRightLine /></Link><Link to="/resident/conversations/new">“주차 등록은 어떻게 하나요?” <IconChevronRightLine /></Link></div></section><section className="panel"><div className="section-heading"><h2>최근 대화</h2><Link to="/resident/conversations">전체 보기</Link></div><ConversationList size={3} compact /></section></StateBoundary></>;
 }
 
 function ConnectPage() {
@@ -280,13 +283,20 @@ function ConnectPage() {
   return <div className="focused-flow"><div className="focused-brand"><span className="brand-mark">집</span><strong>집사이</strong></div><div className="flow-progress"><span className="active" /><span className={step !== "input" ? "active" : ""} /><span className={step === "done" ? "active" : ""} /></div>{step === "input" && <div className="flow-card"><p className="eyebrow">입주 연결</p><h1>초대코드를 입력해 주세요</h1><p>관리자에게 받은 6자리 코드를 입력하면 내 호실과 연결돼요.</p><TextField label="초대코드" description="영문 대문자와 숫자 6자리"><TextFieldInput defaultValue="AB3K9F" aria-label="초대코드" /></TextField><ActionButton variant="brandSolid" onClick={() => setStep("confirm")}>코드 확인</ActionButton></div>}{step === "confirm" && <div className="flow-card"><p className="eyebrow">세대 확인</p><h1>이 세대가 맞나요?</h1><div className="unit-confirm"><span className="large-symbol">302</span><h2>A타워 302호</h2><p>관리자 김관리</p></div><div className="button-column"><ActionButton variant="brandSolid" onClick={() => setStep("done")}>맞아요, 연결할게요</ActionButton><ActionButton variant="neutralOutline" onClick={() => setStep("input")}>다시 입력</ActionButton></div></div>}{step === "done" && <div className="flow-card flow-card--center"><span className="success-icon"><IconCheckmarkCircleFill /></span><h1>A타워 302호에 연결됐어요</h1><p>이제 AI 생활 도우미와 민원 기능을 사용할 수 있어요.</p><Link to="/resident"><ActionButton variant="brandSolid">홈으로 가기</ActionButton></Link></div>}</div>;
 }
 
-function MyPage({ role }: { role: Role }) { return <><PageTitle eyebrow="내 정보" title="마이페이지" description="프로필과 연결된 건물 정보를 확인하세요." /><div className="detail-grid"><section className="panel profile-panel"><div className="profile-head"><span className="avatar avatar--large">{role === "manager" ? "김" : "박"}</span><div><h2>{role === "manager" ? "김관리" : "박입주"}</h2><p>{role === "manager" ? "관리자" : "입주민"}</p></div><ActionButton variant="neutralOutline">프로필 수정</ActionButton></div><InfoRow label="이메일" value={role === "manager" ? "manager@zips.ai" : "resident@zips.ai"} /><InfoRow label="연락처" value={role === "manager" ? "010-1234-5678" : "010-9876-5432"} /></section><aside className="panel detail-aside"><h2>{role === "manager" ? "관리 건물" : "내 거주지"}</h2><InfoRow label="건물" value="A타워" /><InfoRow label={role === "manager" ? "주소" : "호실"} value={role === "manager" ? "서울 강남구 역삼동 123-4" : "302호"} />{role === "resident" && <InfoRow label="관리인" value="김관리 · 010-1234-5678" />}<div className="settings-links"><Link to="/terms/service">서비스 이용약관 <IconChevronRightLine /></Link><Link to="/terms/privacy">개인정보 처리방침 <IconChevronRightLine /></Link><ActionButton variant="ghost" color="fg.critical">로그아웃</ActionButton></div></aside></div></>;
+function MyPage({ role }: { role: Role }) {
+  const auth = useAuth();
+  const navigate = useNavigate();
+  const logout = async () => {
+    await auth.logout();
+    navigate("/auth/login", { replace: true });
+  };
+  return <><PageTitle eyebrow="내 정보" title="마이페이지" description="프로필과 연결된 건물 정보를 확인하세요." /><div className="detail-grid"><section className="panel profile-panel"><div className="profile-head"><span className="avatar avatar--large">{role === "manager" ? "김" : "박"}</span><div><h2>{role === "manager" ? "김관리" : "박입주"}</h2><p>{role === "manager" ? "관리자" : "입주민"}</p></div><ActionButton variant="neutralOutline">프로필 수정</ActionButton></div><InfoRow label="이메일" value={role === "manager" ? "manager@zips.ai" : "resident@zips.ai"} /><InfoRow label="연락처" value={role === "manager" ? "010-1234-5678" : "010-9876-5432"} /></section><aside className="panel detail-aside"><h2>{role === "manager" ? "관리 건물" : "내 거주지"}</h2><InfoRow label="건물" value="A타워" /><InfoRow label={role === "manager" ? "주소" : "호실"} value={role === "manager" ? "서울 강남구 역삼동 123-4" : "302호"} />{role === "resident" && <InfoRow label="관리인" value="김관리 · 010-1234-5678" />}<div className="settings-links"><Link to="/terms/service">서비스 이용약관 <IconChevronRightLine /></Link><Link to="/terms/privacy">개인정보 처리방침 <IconChevronRightLine /></Link><ActionButton variant="ghost" color="fg.critical" onClick={logout}>로그아웃</ActionButton></div></aside></div></>;
 }
 
-function AuthPage({ kind }: { kind: "login" | "signup" | "role" }) {
+function AuthPage({ kind }: { kind: "signup" | "role" }) {
   const navigate = useNavigate();
   const [selectedRole, setSelectedRole] = useState<Role>("resident");
-  return <div className="auth-page"><div className="auth-visual"><div className="auth-visual-content"><span className="brand-mark brand-mark--large">집</span><h1>건물 생활을 더 가깝고 편하게</h1><p>입주부터 문의, 민원 처리까지 집사이에서 연결하세요.</p></div></div><main className="auth-form"><Link className="brand brand--mobile" to="/auth/login"><span className="brand-mark">집</span><span>집사이</span></Link>{kind === "login" && <><p className="eyebrow">다시 만나서 반가워요</p><h1>로그인</h1><p>건물 생활을 이어서 관리해 보세요.</p><div className="form-stack"><TextField label="이메일"><TextFieldInput type="email" defaultValue="manager@zips.ai" /></TextField><TextField label="비밀번호"><TextFieldInput type="password" defaultValue="password123!" /></TextField><ActionButton variant="brandSolid" onClick={() => navigate("/manager")}>로그인</ActionButton></div><p className="auth-footer">아직 계정이 없나요? <Link to="/auth/signup">회원가입</Link></p></>}{kind === "signup" && <><p className="eyebrow">집사이 시작하기</p><h1>회원가입</h1><p>필수 정보만 입력하면 바로 시작할 수 있어요.</p><div className="form-stack"><TextField label="이메일" suffix={<ActionButton variant="ghost" size="small">중복 확인</ActionButton>}><TextFieldInput type="email" placeholder="example@email.com" /></TextField><TextField label="비밀번호" description="영문, 숫자, 특수문자를 포함해 8자 이상"><TextFieldInput type="password" /></TextField><TextField label="이름"><TextFieldInput /></TextField><TextField label="연락처"><TextFieldInput placeholder="010-0000-0000" /></TextField><Checkbox inputProps={{ defaultChecked: true }} label="서비스 이용약관과 개인정보 처리방침에 동의합니다." /><ActionButton variant="brandSolid" onClick={() => navigate("/auth/role")}>가입하기</ActionButton></div></>}{kind === "role" && <><p className="eyebrow">마지막 단계예요</p><h1>어떻게 이용하시나요?</h1><p>역할은 처음 한 번만 선택할 수 있어요.</p><RadioGroup aria-label="사용자 역할" value={selectedRole} onValueChange={(value) => setSelectedRole(value as Role)}><div className="role-cards"><RadioGroupItem value="manager" label={<span className="role-card-content"><IconBuilding2Line /><strong>관리자</strong><span>건물과 호실, 민원을 관리해요</span></span>} /><RadioGroupItem value="resident" label={<span className="role-card-content"><IconPersonLine /><strong>입주민</strong><span>AI 문의와 민원 접수를 이용해요</span></span>} /></div></RadioGroup><ActionButton variant="brandSolid" onClick={() => navigate(selectedRole === "manager" ? "/manager" : "/resident/connect")}>선택 완료</ActionButton></>}</main></div>;
+  return <div className="auth-page"><div className="auth-visual"><div className="auth-visual-content"><span className="brand-mark brand-mark--large">집</span><h1>건물 생활을 더 가깝고 편하게</h1><p>입주부터 문의, 민원 처리까지 집사이에서 연결하세요.</p></div></div><main className="auth-form"><Link className="brand brand--mobile" to="/auth/login"><span className="brand-mark">집</span><span>집사이</span></Link>{kind === "signup" && <><p className="eyebrow">집사이 시작하기</p><h1>회원가입</h1><p>필수 정보만 입력하면 바로 시작할 수 있어요.</p><div className="form-stack"><TextField label="이메일" suffix={<ActionButton variant="ghost" size="small">중복 확인</ActionButton>}><TextFieldInput type="email" placeholder="example@email.com" /></TextField><TextField label="비밀번호" description="영문, 숫자, 특수문자를 포함해 8자 이상"><TextFieldInput type="password" /></TextField><TextField label="이름"><TextFieldInput /></TextField><TextField label="연락처"><TextFieldInput placeholder="010-0000-0000" /></TextField><Checkbox inputProps={{ defaultChecked: true }} label="서비스 이용약관과 개인정보 처리방침에 동의합니다." /><ActionButton variant="brandSolid" onClick={() => navigate("/auth/role")}>가입하기</ActionButton></div></>}{kind === "role" && <><p className="eyebrow">마지막 단계예요</p><h1>어떻게 이용하시나요?</h1><p>역할은 처음 한 번만 선택할 수 있어요.</p><RadioGroup aria-label="사용자 역할" value={selectedRole} onValueChange={(value) => setSelectedRole(value as Role)}><div className="role-cards"><RadioGroupItem value="manager" label={<span className="role-card-content"><IconBuilding2Line /><strong>관리자</strong><span>건물과 호실, 민원을 관리해요</span></span>} /><RadioGroupItem value="resident" label={<span className="role-card-content"><IconPersonLine /><strong>입주민</strong><span>AI 문의와 민원 접수를 이용해요</span></span>} /></div></RadioGroup><ActionButton variant="brandSolid" onClick={() => navigate(selectedRole === "manager" ? "/manager" : "/resident/connect")}>선택 완료</ActionButton></>}</main></div>;
 }
 
 function ConversationReadonly() { return <><PageTitle eyebrow="민원 #77" title="AI 대화 원본" description="입주민이 민원을 접수한 당시의 대화예요. 관리자는 읽기만 할 수 있어요." /><section className="panel readonly-chat"><div className="message assistant"><span className="message-name">집사이 AI</span><p>불편한 점이나 궁금한 점을 편하게 말씀해 주세요.</p></div><div className="message resident"><span className="message-name">박입주 · 302호</span><p>천장에서 물이 새요. 안방 천장 가운데예요.</p></div><div className="message assistant"><span className="message-name">집사이 AI</span><p>언제부터 물이 떨어졌나요?</p></div><div className="message resident"><span className="message-name">박입주 · 302호</span><p>어제 저녁부터요. 오늘 아침에 더 심해졌어요.</p></div><div className="readonly-notice">관리자 화면에서는 원본 대화에 메시지를 보낼 수 없어요.</div></section></>; }
@@ -301,9 +311,11 @@ export function App() {
   const [, setRole] = useState<Role>("manager");
   const [viewState, setViewState] = useState<ViewState>("default");
   const shell = (content: ReactNode, routeRole: Role) => <AppShell role={routeRole} setRole={setRole} state={viewState} setState={setViewState}>{content}</AppShell>;
+  // 입주민 화면은 실제 로그인·역할(RESIDENT)이 필요하다. 관리자 화면은 아직 mock 프로토타입이다.
+  const residentShell = (content: ReactNode) => <RequireRole role="RESIDENT">{shell(content, "resident")}</RequireRole>;
   return <Routes>
-    <Route path="/" element={<Navigate to="/manager" replace />} />
-    <Route path="/auth/login" element={<AuthPage kind="login" />} />
+    <Route path="/" element={<HomeRedirect />} />
+    <Route path="/auth/login" element={<LoginPage />} />
     <Route path="/auth/signup" element={<AuthPage kind="signup" />} />
     <Route path="/auth/role" element={<AuthPage kind="role" />} />
     <Route path="/terms/:termsType" element={<TermsPage />} />
@@ -319,15 +331,15 @@ export function App() {
     <Route path="/manager/insights" element={shell(<InsightsPage state={viewState} />, "manager")} />
     <Route path="/manager/mypage" element={shell(<MyPage role="manager" />, "manager")} />
     <Route path="/manager/notifications" element={shell(<NotificationsPage state={viewState} role="manager" />, "manager")} />
-    <Route path="/resident" element={shell(<ResidentHome state={viewState} />, "resident")} />
+    <Route path="/resident" element={residentShell(<ResidentHome state={viewState} />)} />
     <Route path="/resident/connect" element={<ConnectPage />} />
-    <Route path="/resident/conversations" element={shell(<ConversationsPage state={viewState} />, "resident")} />
-    <Route path="/resident/conversations/new" element={shell(<ChatPage isNew />, "resident")} />
-    <Route path="/resident/conversations/:conversationId" element={shell(<ChatPage />, "resident")} />
-    <Route path="/resident/complaints" element={shell(<ComplaintsPage state={viewState} role="resident" />, "resident")} />
-    <Route path="/resident/complaints/:complaintId" element={shell(<ComplaintDetail state={viewState} role="resident" />, "resident")} />
-    <Route path="/resident/mypage" element={shell(<MyPage role="resident" />, "resident")} />
-    <Route path="/resident/notifications" element={shell(<NotificationsPage state={viewState} role="resident" />, "resident")} />
-    <Route path="*" element={<Navigate to="/manager" replace />} />
+    <Route path="/resident/conversations" element={residentShell(<ConversationsPage />)} />
+    <Route path="/resident/conversations/new" element={residentShell(<NewChatPage />)} />
+    <Route path="/resident/conversations/:conversationId" element={residentShell(<ChatPage />)} />
+    <Route path="/resident/complaints" element={residentShell(<ComplaintsPage state={viewState} role="resident" />)} />
+    <Route path="/resident/complaints/:complaintId" element={residentShell(<ComplaintDetail state={viewState} role="resident" />)} />
+    <Route path="/resident/mypage" element={residentShell(<MyPage role="resident" />)} />
+    <Route path="/resident/notifications" element={residentShell(<NotificationsPage state={viewState} role="resident" />)} />
+    <Route path="*" element={<HomeRedirect />} />
   </Routes>;
 }
