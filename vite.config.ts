@@ -8,6 +8,7 @@ export default defineConfig({
     tsconfigPaths: true,
   },
   server: {
+    allowedHosts: [".ngrok-free.app"],
     // refresh 쿠키(SameSite=Strict, Path=/api/v1/auth)를 같은 origin으로 주고받기 위해 API를 프록시한다.
     proxy: {
       "/api": {

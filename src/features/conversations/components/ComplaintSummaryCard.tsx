@@ -3,11 +3,17 @@ import { useState, type FormEvent } from "react";
 import { ActionButton } from "seed-design/ui/action-button";
 import { TextField, TextFieldInput } from "seed-design/ui/text-field";
 import type { ApiError } from "../../../shared/api/errors";
+import {
+  formatOccurredTime,
+  fromDateTimeLocalValue,
+  toDateTimeLocalValue,
+} from "../../../shared/ui/formatDateTime";
 import { InfoRow } from "../../../shared/ui/InfoRow";
 import type { SummaryCard } from "../model/types";
 
 export type ComplaintDraft = {
   location: string | null;
+  /** ISO-8601 오프셋 시각. 서버에 그대로 보내고 화면에서만 포맷한다. */
   occurredTime: string | null;
   symptom: string | null;
 };
@@ -21,7 +27,7 @@ type Props = {
   onSubmit: (draft: ComplaintDraft) => void;
 };
 
-const LIMITS = { location: 50, occurredTime: 50, symptom: 100 } as const;
+const LIMITS = { location: 50, symptom: 100 } as const;
 
 export function ComplaintSummaryCard({ summaryCard, actionable, submitting, error, onSubmit }: Props) {
   const [editing, setEditing] = useState(false);
@@ -41,7 +47,7 @@ export function ComplaintSummaryCard({ summaryCard, actionable, submitting, erro
       <form className="summary-card summary-card--editing" onSubmit={saveEdit}>
         <div className="summary-title"><strong>접수 내용 수정</strong></div>
         <DraftField label="위치" field="location" draft={draft} setDraft={setDraft} />
-        <DraftField label="시점" field="occurredTime" draft={draft} setDraft={setDraft} />
+        <OccurredTimeField draft={draft} setDraft={setDraft} />
         <DraftField label="증상" field="symptom" draft={draft} setDraft={setDraft} />
         <div className="button-row">
           <ActionButton type="submit" variant="brandSolid">수정 완료</ActionButton>
@@ -55,7 +61,7 @@ export function ComplaintSummaryCard({ summaryCard, actionable, submitting, erro
     <div className="summary-card">
       <div className="summary-title"><IconCheckmarkCircleFill /><strong>민원 접수 내용</strong></div>
       <InfoRow label="위치" value={<DraftValue value={draft.location} />} />
-      <InfoRow label="시점" value={<DraftValue value={draft.occurredTime} />} />
+      <InfoRow label="시점" value={<DraftValue value={formatOccurredTime(draft.occurredTime)} />} />
       <InfoRow label="증상" value={<DraftValue value={draft.symptom} />} />
       <InfoRow label="사진" value={`${summaryCard.attachmentCount}장`} />
       {error && <p className="summary-error" role="alert">{complaintErrorMessage(error)}</p>}
@@ -73,9 +79,25 @@ function DraftValue({ value }: { value: string | null }) {
   return value ?? <span className="summary-unknown">미상</span>;
 }
 
+/** 시점은 자유 문장이 아니라 시각이다. "어제 저녁"은 시간이 지나면 가리키는 날이 달라진다. */
+function OccurredTimeField({ draft, setDraft }: {
+  draft: ComplaintDraft;
+  setDraft: (draft: ComplaintDraft) => void;
+}) {
+  return (
+    <TextField
+      label="시점"
+      value={toDateTimeLocalValue(draft.occurredTime)}
+      onValueChange={({ value }) => setDraft({ ...draft, occurredTime: fromDateTimeLocalValue(value) })}
+    >
+      <TextFieldInput type="datetime-local" />
+    </TextField>
+  );
+}
+
 function DraftField({ label, field, draft, setDraft }: {
   label: string;
-  field: keyof ComplaintDraft;
+  field: keyof typeof LIMITS;
   draft: ComplaintDraft;
   setDraft: (draft: ComplaintDraft) => void;
 }) {

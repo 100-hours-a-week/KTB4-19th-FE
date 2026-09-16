@@ -217,7 +217,6 @@ button { cursor: pointer; }
 .summary-error { margin-top: var(--seed-dimension-x3); color: var(--seed-color-fg-critical); font-size: var(--seed-font-size-t3); }
 .summary-card--editing { display: grid; gap: var(--seed-dimension-x4); }
 .summary-card--editing .button-row { margin-top: 0; }
-.summary-card-missing { margin-top: var(--seed-dimension-x2); padding: var(--seed-dimension-x3); border-radius: var(--seed-radius-r3); color: var(--seed-color-fg-neutral-muted); background: var(--seed-color-bg-neutral-weak); font-size: var(--seed-font-size-t3); }
 .chat-load-more { align-self: center; }
 .chat-closed { position: sticky; bottom: 96px; }
 .skeleton-row { height: 64px; border-radius: var(--seed-radius-r3); background: var(--seed-color-bg-layer-fill); animation: skeleton-pulse 1.2s ease-in-out infinite alternate; }

@@ -8,19 +8,17 @@ import { formatRoomNo } from "../../../shared/ui/formatRoomNo";
 import { useRetryCountdown } from "../../../shared/ui/useRetryCountdown";
 import { useCreateComplaint } from "../../complaints/api/complaintApi";
 import type { ComplaintCreateResponse } from "../../complaints/model/types";
-import {
-  useConversationMessages,
-  useSendMessage,
-  useStartConversation,
-  useSummaryCards,
-} from "../api/conversationQueries";
+import { useConversationMessages, useSendMessage, useStartConversation } from "../api/conversationQueries";
 import { ChatComposer } from "../components/ChatComposer";
 import { ComplaintSummaryCard, type ComplaintDraft } from "../components/ComplaintSummaryCard";
 import { ConversationMessage, PendingResidentMessage } from "../components/ConversationMessage";
-import type { ConversationMessagesResponse, Message } from "../model/types";
+import type { ConversationMessagesResponse } from "../model/types";
 
 // 대화 시작 인사는 서버가 저장하지 않는 클라이언트 고정 문구다.
 const GREETING = "불편한 점이나 궁금한 점을 편하게 말씀해 주세요.";
+
+// 받으면 화면의 대화 상태가 서버와 어긋났다는 뜻이라 상세를 다시 받아온다.
+const CONVERSATION_STATE_CODES = ["CONVERSATION_CLOSED", "CONVERSATION_AWAITING_CONFIRMATION"];
 
 export function NewChatPage() {
   const navigate = useNavigate();
@@ -70,7 +68,6 @@ export function ChatPage() {
 
 function ConversationChat({ conversationId }: { conversationId: number }) {
   const messagesQuery = useConversationMessages(conversationId);
-  const summaryCards = useSummaryCards(conversationId);
   const sendMessage = useSendMessage(conversationId);
   const createComplaint = useCreateComplaint();
   const countdown = useRetryCountdown();
@@ -99,7 +96,9 @@ function ConversationChat({ conversationId }: { conversationId: number }) {
   // 페이지는 최신 → 과거 순으로 쌓이므로 뒤집어서 오래된 메시지부터 그린다.
   const messages = [...messagesQuery.data.pages].reverse().flatMap((page) => page.messages);
   const isActive = conversation.conversationStatus === "ACTIVE";
-  const latestSummaryCardId = [...messages].reverse().find((message) => message.messageType === "SUMMARY_CARD")?.messageId;
+  // 카드는 메시지가 아니라 대화 상태에서 파생돼 응답 최상위로 온다. 카드가 있으면 수집이 끝났다는 뜻이고,
+  // 서버가 이 동안 메시지를 받지 않으므로(CONVERSATION_AWAITING_CONFIRMATION) 입력창 대신 카드로 유도한다.
+  const summaryCard = conversation.summaryCard;
 
   const submitMessage = () => {
     setSendError(null);
@@ -107,7 +106,7 @@ function ConversationChat({ conversationId }: { conversationId: number }) {
       onSuccess: () => setInput(""),
       onError: (caught) => {
         handleSendError(caught, setSendError, countdown.start);
-        if (isApiError(caught) && caught.code === "CONVERSATION_CLOSED") messagesQuery.refetch();
+        if (isApiError(caught) && CONVERSATION_STATE_CODES.includes(caught.code ?? "")) messagesQuery.refetch();
       },
     });
   };
@@ -132,23 +131,30 @@ function ConversationChat({ conversationId }: { conversationId: number }) {
           <ConversationMessage message={{ senderType: "ASSISTANT", content: GREETING, createdAt: "" }} />
         )}
         {messages.map((message) => (
-          <ConversationMessage message={message} key={message.messageId}>
-            {message.messageType === "SUMMARY_CARD" && (
-              <SummaryCardSlot
-                message={message}
-                summaryCard={summaryCards[message.messageId]}
-                actionable={isActive && message.messageId === latestSummaryCardId}
-                submitting={createComplaint.isPending}
-                error={message.messageId === latestSummaryCardId && complaintError?.code !== "COMPLAINT_ALREADY_CREATED" ? complaintError : null}
-                onSubmit={submitComplaint}
-              />
-            )}
-          </ConversationMessage>
+          <ConversationMessage message={message} key={message.messageId} />
         ))}
+        {summaryCard && (
+          <ComplaintSummaryCard
+            summaryCard={summaryCard}
+            actionable={isActive}
+            submitting={createComplaint.isPending}
+            error={complaintError?.code === "COMPLAINT_ALREADY_CREATED" ? null : complaintError}
+            onSubmit={submitComplaint}
+          />
+        )}
         {sendMessage.isPending && <PendingResidentMessage content={sendMessage.variables ?? ""} />}
         <div ref={bottomRef} />
       </div>
-      {isActive ? (
+      {!isActive ? (
+        <ClosedNotice conversation={conversation} createdComplaint={createdComplaint} alreadyCreated={complaintError?.code === "COMPLAINT_ALREADY_CREATED"} />
+      ) : summaryCard ? (
+        <Callout
+          className="chat-closed"
+          tone="informative"
+          title="접수 내용을 확인해 주세요"
+          description="위 카드의 내용이 맞으면 [이대로 접수]를, 고칠 부분이 있으면 [내용 수정]을 눌러 주세요."
+        />
+      ) : (
         <ChatComposer
           value={input}
           onChange={setInput}
@@ -157,30 +163,9 @@ function ConversationChat({ conversationId }: { conversationId: number }) {
           lockedSeconds={countdown.remaining}
           errorMessage={sendError ? sendErrorMessage(sendError) : undefined}
         />
-      ) : (
-        <ClosedNotice conversation={conversation} createdComplaint={createdComplaint} alreadyCreated={complaintError?.code === "COMPLAINT_ALREADY_CREATED"} />
       )}
     </ChatLayout>
   );
-}
-
-function SummaryCardSlot({ message, summaryCard, ...cardProps }: {
-  message: Message;
-  summaryCard: Message["summaryCard"];
-  actionable: boolean;
-  submitting: boolean;
-  error: ApiError | null;
-  onSubmit: (draft: ComplaintDraft) => void;
-}) {
-  if (!summaryCard) {
-    // TODO(spec-contract): 대화 상세 조회가 요약 카드 내용을 반환하면 카드로 렌더링한다.
-    return (
-      <p className="summary-card-missing">
-        요약 카드는 대화 중에만 확인할 수 있어요. 접수하려면 메시지를 한 번 더 보내 다시 정리받아 주세요.
-      </p>
-    );
-  }
-  return <ComplaintSummaryCard key={message.messageId} summaryCard={summaryCard} {...cardProps} />;
 }
 
 function ClosedNotice({ conversation, createdComplaint, alreadyCreated }: {
@@ -251,6 +236,8 @@ function sendErrorMessage(error: ApiError) {
   if (error.status === 400 || error.status === 422) return error.violations[0]?.reason ?? "메시지를 확인해 주세요.";
   if (error.status === 429) return "요청이 너무 많아요. 잠시 후 다시 보내 주세요.";
   if (error.code === "CONVERSATION_CLOSED") return "종료된 대화에는 메시지를 보낼 수 없어요.";
+  if (error.code === "CONVERSATION_AWAITING_CONFIRMATION") return "접수 내용을 확인하는 중이에요. 카드에서 접수하거나 내용을 수정해 주세요.";
+  if (error.code === "CONVERSATION_BUSY") return "직전 메시지에 답하는 중이에요. 잠시 후 다시 보내 주세요.";
   if (error.status === 403) return "이 대화에 메시지를 보낼 수 없어요.";
   if (error.status === 404) return "대화를 찾을 수 없어요.";
   return "메시지를 보내지 못했어요. 입력한 내용은 그대로 두었으니 다시 전송해 주세요.";
