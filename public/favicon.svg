@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="집사이">
+  <rect width="64" height="64" rx="16" fill="#217cf9"/>
+  <path d="M32 13.5 50.5 29.5H13.5Z" fill="#fff" stroke="#fff" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M17 26h30v16.5a4.5 4.5 0 0 1-4.5 4.5H29l-8.2 6.4a1 1 0 0 1-1.6-.8V47h-.2A2 2 0 0 1 17 45Z" fill="#fff"/>
+  <circle cx="24.5" cy="36.5" r="2.7" fill="#217cf9"/>
+  <circle cx="32" cy="36.5" r="2.7" fill="#217cf9"/>
+  <circle cx="39.5" cy="36.5" r="2.7" fill="#217cf9"/>
+</svg>

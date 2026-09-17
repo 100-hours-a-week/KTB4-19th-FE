@@ -1,4 +1,4 @@
-import { tokenStore } from "../auth/tokenStore";
+import { tokenStore } from "./tokenStore";
 import { networkError, toApiError } from "./errors";
 import type { DataResponse, ErrorResponseBody } from "./types";
 
