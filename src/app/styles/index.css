@@ -114,6 +114,9 @@ button { cursor: pointer; }
 .upload-file { background: var(--seed-color-bg-positive-weak); border-color: var(--seed-color-stroke-positive-weak); }
 .inline-success { display: flex; align-items: center; gap: var(--seed-dimension-x2); padding: var(--seed-dimension-x3); border-radius: var(--seed-radius-r2); background: var(--seed-color-bg-positive-weak); color: var(--seed-color-fg-positive-contrast); }
 .inline-success svg { width: 20px; color: var(--seed-color-fg-positive); }
+.email-check-feedback { margin: var(--seed-dimension-x2) 0 0 var(--seed-dimension-x1); font-size: var(--seed-font-size-t3); }
+.email-check-feedback--positive { color: var(--seed-color-fg-positive); }
+.email-check-feedback--critical { color: var(--seed-color-fg-critical); }
 .form-actions { justify-content: flex-end; }
 .detail-status { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: var(--seed-dimension-x5); border-bottom: 1px solid var(--seed-color-stroke-neutral-muted); }
 .detail-status span { color: var(--seed-color-fg-neutral-subtle); font-size: var(--seed-font-size-t3); }

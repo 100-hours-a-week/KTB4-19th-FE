@@ -12,7 +12,9 @@ export function LoginPage() {
   const auth = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [email, setEmail] = useState("");
+  const signupState = location.state as { from?: string; signupComplete?: boolean; email?: string } | null;
+  const signupComplete = signupState?.signupComplete ?? false;
+  const [email, setEmail] = useState(signupComplete ? signupState?.email ?? "" : "");
   const [password, setPassword] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
@@ -25,7 +27,7 @@ export function LoginPage() {
     setError(null);
     try {
       const user = await auth.login({ email, password });
-      const from = (location.state as { from?: string } | null)?.from;
+      const from = signupState?.from;
       navigate(from && user.userRole !== "NONE" ? from : roleHome(user.userRole), { replace: true });
     } catch (caught) {
       if (!isApiError(caught)) throw caught;
@@ -41,6 +43,7 @@ export function LoginPage() {
       <p className="eyebrow">다시 만나서 반가워요</p>
       <h1>로그인</h1>
       <p>건물 생활을 이어서 관리해 보세요.</p>
+      {signupComplete && <Callout tone="positive" description="회원가입이 완료됐어요. 가입한 이메일로 로그인해 주세요." />}
       <form className="form-stack" onSubmit={submit} noValidate>
         <TextField
           label="이메일"
