@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { reissueAccessToken, tokenStore } from "@/shared/api";
-import { authApi, type AuthUser, type LoginRequest } from "../api/authApi";
+import { authApi, type AuthUser, type LoginRequest, type ManagerProfileRequest, type SelectedUserRole } from "../api/authApi";
 
 type AuthState =
   | { status: "loading"; user: null }
@@ -11,6 +11,8 @@ type AuthState =
 type AuthContextValue = AuthState & {
   login: (request: LoginRequest) => Promise<AuthUser>;
   logout: () => Promise<void>;
+  selectRole: (role: SelectedUserRole) => Promise<SelectedUserRole>;
+  updateManagerProfile: (request: ManagerProfileRequest) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -63,6 +65,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return result.user;
   }, []);
 
+  const selectRole = useCallback(async (role: SelectedUserRole) => {
+    const result = await authApi.selectRole({ userRole: role });
+    // 서버가 역할이 반영된 새 토큰을 돌려주므로 이후 요청은 새 권한으로 보낸다.
+    tokenStore.set(result.accessToken);
+    setState((current) =>
+      current.status === "authenticated"
+        ? { ...current, user: { ...current.user, userRole: result.userRole } }
+        : current,
+    );
+    return result.userRole;
+  }, []);
+
+  const updateManagerProfile = useCallback(async (request: ManagerProfileRequest) => {
+    const result = await authApi.updateManagerProfile(request);
+    setState((current) =>
+      current.status === "authenticated"
+        ? {
+            ...current,
+            user: {
+              ...current.user,
+              userName: result.userName ?? request.userName,
+              phone: result.phone ?? request.phone,
+              agreements: result.agreements ?? current.user.agreements,
+            },
+          }
+        : current,
+    );
+  }, []);
+
   const logout = useCallback(async () => {
     try {
       await authApi.logout();
@@ -75,7 +106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [queryClient]);
 
-  const value = useMemo(() => ({ ...state, login, logout }), [state, login, logout]);
+  const value = useMemo(() => ({ ...state, login, logout, selectRole, updateManagerProfile }), [state, login, logout, selectRole, updateManagerProfile]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
