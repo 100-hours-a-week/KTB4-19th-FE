@@ -10,7 +10,7 @@ import type {
 const BASE = "/residents/me/conversations";
 
 export const conversationApi = {
-  list: (params: { keyword?: string; page?: number; size?: number }) =>
+  list: (params: { keyword?: string; cursor?: string; size?: number }) =>
     apiRequest<ConversationListResponse>(BASE, { query: params }),
   start: (request: ContentRequest) =>
     apiRequest<ConversationCreateResponse>(BASE, { method: "POST", body: request }),

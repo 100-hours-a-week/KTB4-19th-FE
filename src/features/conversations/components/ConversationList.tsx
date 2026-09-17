@@ -1,5 +1,6 @@
 import { IconChevronRightLine, IconDot3HorizontalChatbubbleLeftLine } from "@karrotmarket/react-monochrome-icon";
 import { Badge } from "@seed-design/react";
+import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { ActionButton } from "seed-design/ui/action-button";
 import { formatListTime } from "../../../shared/ui/formatDateTime";
@@ -19,12 +20,25 @@ const statusTone: Record<string, "neutral" | "informative" | "positive"> = {
 type Props = {
   keyword?: string;
   size?: number;
-  /** true면 첫 페이지만 보여주고 더 보기를 숨긴다. */
+  /** true면 첫 페이지만 보여주고 다음 목록을 불러오지 않는다. */
   compact?: boolean;
 };
 
 export function ConversationList({ keyword, size, compact = false }: Props) {
   const query = useConversationList({ keyword, size });
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+  const { hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage } = query;
+
+  // 목록 끝이 화면에 가까워지면 다음 목록을 불러온다. 실패하면 자동 재시도하지 않고 버튼으로 다시 시도한다.
+  useEffect(() => {
+    const target = loadMoreRef.current;
+    if (!target || compact || !hasNextPage || isFetchingNextPage || isFetchNextPageError) return;
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) fetchNextPage();
+    }, { rootMargin: "200px" });
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [compact, hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage]);
 
   if (query.isPending) {
     return (
@@ -57,10 +71,14 @@ export function ConversationList({ keyword, size, compact = false }: Props) {
   return (
     <div className="list-stack">
       {conversations.map((item) => <ConversationRow item={item} key={item.conversationId} />)}
-      {!compact && query.hasNextPage && (
-        <ActionButton variant="neutralOutline" loading={query.isFetchingNextPage} onClick={() => query.fetchNextPage()}>
-          더 보기
-        </ActionButton>
+      {!compact && hasNextPage && (
+        <div ref={loadMoreRef}>
+          {isFetchNextPageError ? (
+            <ActionButton variant="neutralOutline" onClick={() => fetchNextPage()}>다시 불러오기</ActionButton>
+          ) : (
+            isFetchingNextPage && <div className="skeleton-row" aria-label="불러오는 중" />
+          )}
+        </div>
       )}
     </div>
   );

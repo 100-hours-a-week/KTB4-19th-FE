@@ -96,9 +96,10 @@ function ConversationChat({ conversationId }: { conversationId: number }) {
   // 페이지는 최신 → 과거 순으로 쌓이므로 뒤집어서 오래된 메시지부터 그린다.
   const messages = [...messagesQuery.data.pages].reverse().flatMap((page) => page.messages);
   const isActive = conversation.conversationStatus === "ACTIVE";
-  // 카드는 메시지가 아니라 대화 상태에서 파생돼 응답 최상위로 온다. 카드가 있으면 수집이 끝났다는 뜻이고,
-  // 서버가 이 동안 메시지를 받지 않으므로(CONVERSATION_AWAITING_CONFIRMATION) 입력창 대신 카드로 유도한다.
-  const summaryCard = conversation.summaryCard;
+  // 접수 확인 카드는 SUMMARY_CARD 메시지에 실려 온다. 접수 후에도 기록으로 남기되 버튼은 진행 중일 때만 누를 수 있다.
+  const summaryCard = [...messages].reverse().find((message) => message.messageType === "SUMMARY_CARD")?.summaryCard;
+  // 마지막 메시지가 카드면 서버가 메시지를 받지 않으므로(CONVERSATION_AWAITING_CONFIRMATION) 입력창 대신 카드로 유도한다.
+  const awaitingConfirmation = isActive && messages.at(-1)?.messageType === "SUMMARY_CARD";
 
   const submitMessage = () => {
     setSendError(null);
@@ -147,7 +148,7 @@ function ConversationChat({ conversationId }: { conversationId: number }) {
       </div>
       {!isActive ? (
         <ClosedNotice conversation={conversation} createdComplaint={createdComplaint} alreadyCreated={complaintError?.code === "COMPLAINT_ALREADY_CREATED"} />
-      ) : summaryCard ? (
+      ) : awaitingConfirmation ? (
         <Callout
           className="chat-closed"
           tone="informative"

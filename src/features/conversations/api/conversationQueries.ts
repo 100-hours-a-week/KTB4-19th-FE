@@ -3,7 +3,6 @@ import type {
   ConversationMessagesResponse,
   Message,
   MessageSendResponse,
-  SummaryCard,
 } from "../model/types";
 import { conversationApi } from "./conversationApi";
 
@@ -23,9 +22,9 @@ export function useConversationList(params: { keyword?: string; size?: number } 
   const size = params.size ?? 20;
   return useInfiniteQuery({
     queryKey: conversationKeys.list({ keyword, size }),
-    queryFn: ({ pageParam }) => conversationApi.list({ keyword, page: pageParam, size }),
-    initialPageParam: 0,
-    getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.page + 1 : undefined),
+    queryFn: ({ pageParam }) => conversationApi.list({ keyword, cursor: pageParam, size }),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => (lastPage.hasNext && lastPage.nextCursor !== null ? lastPage.nextCursor : undefined),
   });
 }
 
@@ -63,27 +62,20 @@ export function useSendMessage(conversationId: number) {
     mutationFn: (content: string) => conversationApi.send(conversationId, { content }),
     onSuccess: (sent) => {
       queryClient.setQueryData<MessagesData>(conversationKeys.messages(conversationId), (data) =>
-        appendTurn(data, [toResidentMessage(sent), sent.assistantMessage], sent.summaryCard),
+        appendTurn(data, [toResidentMessage(sent), sent.assistantMessage]),
       );
       queryClient.invalidateQueries({ queryKey: conversationKeys.lists() });
     },
   });
 }
 
-/**
- * 이번 턴의 메시지와 접수 확인 카드를 최신 페이지에 반영한다.
- * 카드는 대화 상태에서 파생되므로 서버가 이번 턴에 주지 않았으면 함께 지운다.
- */
-function appendTurn(
-  data: MessagesData | undefined,
-  messages: Message[],
-  summaryCard: SummaryCard | undefined,
-): MessagesData | undefined {
+/** 이번 턴의 메시지를 최신 페이지에 반영한다. 접수 확인 카드는 AI 메시지에 실려 온다. */
+function appendTurn(data: MessagesData | undefined, messages: Message[]): MessagesData | undefined {
   if (!data || data.pages.length === 0) return data;
   const [latest, ...older] = data.pages;
   return {
     ...data,
-    pages: [{ ...latest, messages: [...latest.messages, ...messages], summaryCard }, ...older],
+    pages: [{ ...latest, messages: [...latest.messages, ...messages] }, ...older],
   };
 }
 
