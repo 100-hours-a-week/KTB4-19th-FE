@@ -1,10 +1,13 @@
+import { ViewModeFrame } from "./layouts/ViewModeFrame";
 import { AppProviders } from "./providers/AppProviders";
 import { AppRouter } from "./router/AppRouter";
 
 export function App() {
   return (
     <AppProviders>
-      <AppRouter />
+      <ViewModeFrame>
+        <AppRouter />
+      </ViewModeFrame>
     </AppProviders>
   );
 }

@@ -11,6 +11,8 @@
 }
 
 :root {
+  /* 앱 화면 높이. 모바일 모드 프레임 안에서는 프레임 높이로 바뀐다. */
+  --app-vh: 100vh;
   font-family: var(--seed-font-family);
   color: var(--seed-color-fg-neutral);
   background: var(--seed-color-bg-layer-fill);
@@ -24,7 +26,7 @@ a { color: inherit; text-decoration: none; }
 h1, h2, h3, p { margin: 0; }
 button { cursor: pointer; }
 
-.app-shell { min-height: 100vh; display: grid; grid-template-columns: 248px minmax(0, 1fr); }
+.app-shell { min-height: var(--app-vh); display: grid; grid-template-columns: 248px minmax(0, 1fr); }
 .sidebar { position: fixed; inset: 0 auto 0 0; width: 248px; padding: 28px 20px 20px; background: var(--seed-color-bg-layer-default); border-right: 1px solid var(--seed-color-stroke-neutral-muted); display: flex; flex-direction: column; z-index: 20; }
 .brand { display: inline-flex; align-items: center; gap: var(--seed-dimension-x2); font-size: var(--seed-font-size-t8); font-weight: 700; width: fit-content; }
 .brand-mark { display: grid; place-items: center; width: 38px; height: 38px; border-radius: var(--seed-radius-r3); color: var(--seed-color-fg-neutral-inverted); background: var(--seed-color-bg-brand-solid); font-size: var(--seed-font-size-t5); font-weight: 700; }
@@ -194,7 +196,7 @@ button { cursor: pointer; }
 .suggestion-list svg { width: 18px; }
 .grow { flex: 1; min-width: 0; }
 
-.chat-layout { max-width: 860px; margin: 0 auto; min-height: calc(100vh - 248px); display: grid; grid-template-rows: auto 1fr auto; }
+.chat-layout { max-width: 860px; margin: 0 auto; min-height: calc(var(--app-vh) - 248px); display: grid; grid-template-rows: auto 1fr auto; }
 .chat-header { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--seed-dimension-x4); padding-bottom: var(--seed-dimension-x5); border-bottom: 1px solid var(--seed-color-stroke-neutral-muted); }
 .chat-body { padding: var(--seed-dimension-x6) 0; display: flex; flex-direction: column; gap: var(--seed-dimension-x4); }
 .message { max-width: 74%; line-height: 1.6; }
@@ -203,7 +205,7 @@ button { cursor: pointer; }
 .message.resident { align-self: flex-end; }
 .message.resident > p { color: var(--seed-color-fg-neutral-inverted); background: var(--seed-color-bg-brand-solid); border-color: transparent; }
 .message-name { display: block; margin: 0 0 var(--seed-dimension-x1) var(--seed-dimension-x2); font-size: var(--seed-font-size-t2); color: var(--seed-color-fg-neutral-subtle); }
-.summary-card { margin-top: var(--seed-dimension-x3); padding: var(--seed-dimension-x5); border: 1px solid var(--seed-color-stroke-brand-weak); border-radius: var(--seed-radius-r4); background: var(--seed-color-bg-layer-default); min-width: min(480px, 76vw); }
+.summary-card { margin-top: var(--seed-dimension-x3); padding: var(--seed-dimension-x5); border: 1px solid var(--seed-color-stroke-brand-weak); border-radius: var(--seed-radius-r4); background: var(--seed-color-bg-layer-default); min-width: min(480px, 76cqw); }
 .summary-title { display: flex; align-items: center; gap: var(--seed-dimension-x2); margin-bottom: var(--seed-dimension-x3); }
 .summary-title svg { width: 24px; color: var(--seed-color-fg-positive); }
 .summary-card .button-row { margin-top: var(--seed-dimension-x4); }
@@ -221,14 +223,14 @@ button { cursor: pointer; }
 .chat-closed { position: sticky; bottom: 96px; }
 .skeleton-row { height: 64px; border-radius: var(--seed-radius-r3); background: var(--seed-color-bg-layer-fill); animation: skeleton-pulse 1.2s ease-in-out infinite alternate; }
 .result-state--compact { min-height: 220px; }
-.full-page-loading { min-height: 100vh; display: grid; place-items: center; }
+.full-page-loading { min-height: var(--app-vh); display: grid; place-items: center; }
 .dev-account-hint { margin-top: var(--seed-dimension-x5); }
 .readonly-chat { display: flex; min-height: 620px; flex-direction: column; gap: var(--seed-dimension-x4); }
 .readonly-notice { margin-top: auto; text-align: center; padding: var(--seed-dimension-x3); border-radius: var(--seed-radius-r2); color: var(--seed-color-fg-neutral-subtle); background: var(--seed-color-bg-layer-fill); }
 
-.focused-flow { min-height: 100vh; padding: var(--seed-dimension-x6); display: flex; flex-direction: column; align-items: center; background: var(--seed-color-bg-layer-fill); }
+.focused-flow { min-height: var(--app-vh); padding: var(--seed-dimension-x6); display: flex; flex-direction: column; align-items: center; background: var(--seed-color-bg-layer-fill); }
 .focused-brand { display: flex; align-items: center; gap: var(--seed-dimension-x2); align-self: flex-start; font-size: var(--seed-font-size-t7); }
-.flow-progress { display: flex; gap: var(--seed-dimension-x2); margin: 7vh 0 var(--seed-dimension-x6); }
+.flow-progress { display: flex; gap: var(--seed-dimension-x2); margin: calc(var(--app-vh) * .07) 0 var(--seed-dimension-x6); }
 .flow-progress span { width: 36px; height: 4px; border-radius: var(--seed-radius-full); background: var(--seed-color-bg-neutral-weak); }
 .flow-progress span.active { background: var(--seed-color-bg-brand-solid); }
 .flow-card { width: min(520px, 100%); padding: var(--seed-dimension-x8); border: 1px solid var(--seed-color-stroke-neutral-muted); border-radius: var(--seed-radius-r5); background: var(--seed-color-bg-layer-default); display: grid; gap: var(--seed-dimension-x5); }
@@ -248,8 +250,8 @@ button { cursor: pointer; }
 .settings-links button { color: var(--seed-color-fg-critical); border-bottom: 0; }
 .settings-links svg { width: 18px; }
 
-.auth-page { min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr; background: var(--seed-color-bg-layer-default); }
-.auth-visual { display: flex; align-items: flex-end; padding: 9vw; color: var(--seed-color-fg-neutral-inverted); background: var(--seed-color-bg-neutral-inverted); }
+.auth-page { min-height: var(--app-vh); display: grid; grid-template-columns: 1fr 1fr; background: var(--seed-color-bg-layer-default); }
+.auth-visual { display: flex; align-items: flex-end; padding: 9cqw; color: var(--seed-color-fg-neutral-inverted); background: var(--seed-color-bg-neutral-inverted); }
 .auth-visual-content { max-width: 480px; }
 .auth-visual h1 { margin-top: var(--seed-dimension-x6); font-size: var(--seed-font-size-t14); line-height: 1.22; letter-spacing: -.045em; }
 .auth-visual p { color: var(--seed-color-fg-neutral-inverted); opacity: .72; margin-top: var(--seed-dimension-x4); line-height: 1.6; }
@@ -265,14 +267,14 @@ button { cursor: pointer; }
 .role-card-content svg { width: 32px; height: 32px; color: var(--seed-color-fg-brand); margin-bottom: auto; }
 .role-card-content strong { color: var(--seed-color-fg-neutral); font-size: var(--seed-font-size-t6); }
 .role-card-content > span { color: var(--seed-color-fg-neutral-subtle); font-size: var(--seed-font-size-t3); line-height: 1.4; }
-.terms-page { min-height: 100vh; padding: var(--seed-dimension-x8); background: var(--seed-color-bg-layer-default); }
+.terms-page { min-height: var(--app-vh); padding: var(--seed-dimension-x8); background: var(--seed-color-bg-layer-default); }
 .terms-page article { max-width: 760px; margin: var(--seed-dimension-x10) auto; }
 .terms-page h1 { font-size: var(--seed-font-size-t12); }
 .terms-date { color: var(--seed-color-fg-neutral-subtle); margin-top: var(--seed-dimension-x2); }
 .terms-page h2 { margin-top: var(--seed-dimension-x8); font-size: var(--seed-font-size-t7); }
 .terms-page article > p:not(.eyebrow):not(.terms-date) { color: var(--seed-color-fg-neutral-muted); margin-top: var(--seed-dimension-x3); line-height: 1.8; }
 
-.review-toolbar { position: fixed; left: calc(248px + 50%); transform: translateX(-50%); bottom: 20px; width: min(760px, calc(100vw - 296px)); padding: var(--seed-dimension-x3) var(--seed-dimension-x4); border: 1px solid var(--seed-color-stroke-neutral-muted); border-radius: var(--seed-radius-r4); background: var(--seed-color-bg-layer-floating); box-shadow: var(--seed-shadow-s3); display: flex; align-items: center; justify-content: space-between; gap: var(--seed-dimension-x4); z-index: 30; }
+.review-toolbar { position: fixed; left: calc(248px + 50%); transform: translateX(-50%); bottom: 20px; width: min(760px, calc(100cqw - 296px)); padding: var(--seed-dimension-x3) var(--seed-dimension-x4); border: 1px solid var(--seed-color-stroke-neutral-muted); border-radius: var(--seed-radius-r4); background: var(--seed-color-bg-layer-floating); box-shadow: var(--seed-shadow-s3); display: flex; align-items: center; justify-content: space-between; gap: var(--seed-dimension-x4); z-index: 30; }
 .review-toolbar > div { display: grid; gap: 2px; }
 .review-toolbar span { color: var(--seed-color-fg-neutral-subtle); font-size: var(--seed-font-size-t2); }
 .bottom-nav { display: none; }
@@ -286,18 +288,18 @@ button { cursor: pointer; }
 .result-icon svg { width: 30px; }
 .result-icon--critical { color: var(--seed-color-fg-critical); background: var(--seed-color-bg-critical-weak); }
 
-@media (max-width: 1000px) {
+@container app-viewport (max-width: 1000px) {
   .metrics-grid { grid-template-columns: repeat(2, 1fr); }
   .dashboard-grid, .detail-grid, .form-page-grid, .resident-hero { grid-template-columns: 1fr; }
   .room-grid, .document-grid { grid-template-columns: repeat(2, 1fr); }
   .quick-grid { grid-template-columns: 1fr; }
 }
 
-@media (max-width: 760px) {
-  body { font-size: var(--seed-font-size-t4); }
+@container app-viewport (max-width: 760px) {
+  .app-viewport > * { font-size: var(--seed-font-size-t4); }
   .app-shell { display: block; }
   .sidebar { display: none; }
-  .app-main { min-height: 100vh; }
+  .app-main { min-height: var(--app-vh); }
   .topbar { height: 58px; padding: 0 var(--seed-dimension-spacing-x-global-gutter); }
   .content { padding: var(--seed-dimension-x5) var(--seed-dimension-spacing-x-global-gutter) 184px; }
   .page-title { align-items: flex-start; margin-bottom: var(--seed-dimension-x5); }
@@ -341,7 +343,7 @@ button { cursor: pointer; }
   .resident-hero { padding: var(--seed-dimension-x5); gap: var(--seed-dimension-x6); }
   .message { max-width: 88%; }
   .message > p { padding: var(--seed-dimension-x3); }
-  .summary-card { min-width: min(430px, 84vw); }
+  .summary-card { min-width: min(430px, 84cqw); }
   .composer, .chat-closed { bottom: 128px; }
   .chat-header { align-items: flex-start; flex-direction: column; }
   .auth-page { grid-template-columns: 1fr; }
@@ -361,7 +363,7 @@ button { cursor: pointer; }
   .terms-page h2 { margin-top: var(--seed-dimension-x6); font-size: var(--seed-font-size-t6); }
 }
 
-@media (max-width: 420px) {
+@container app-viewport (max-width: 420px) {
   .metrics-grid, .metrics-grid--three { grid-template-columns: 1fr 1fr; }
   .metric-card { min-height: 104px; }
   .metric-card strong { font-size: var(--seed-font-size-t7); }
@@ -370,3 +372,47 @@ button { cursor: pointer; }
   .page-title h1, .chat-header h1, .auth-form h1, .flow-card h1, .terms-page h1 { font-size: var(--seed-font-size-t8); }
   .row-title strong, .notification-row strong { font-size: var(--seed-font-size-t4); }
 }
+
+/* ---------- 화면 모드 (web / mobile) ---------- */
+/* 반응형 규칙은 @container app-viewport 기준이라, 프레임 폭만 줄이면 데스크톱에서도 모바일 레이아웃이 적용된다. */
+.app-viewport { container: app-viewport / inline-size; }
+
+.view-mode-toggle label { white-space: nowrap; }
+.view-mode-toggle--floating { position: fixed; top: var(--seed-dimension-x4); right: var(--seed-dimension-x4); z-index: 40; padding: var(--seed-dimension-x1); border: 1px solid var(--seed-color-stroke-neutral-muted); border-radius: var(--seed-radius-r3); background: var(--seed-color-bg-layer-floating); box-shadow: var(--seed-shadow-s2); }
+/* 웹 모드의 앱 화면에서는 상단바 안의 토글을 쓰고, 모바일 모드에서는 프레임 밖 토글을 쓴다. */
+.view-mode--web:has(.app-shell) .view-mode-toggle--floating { display: none; }
+.view-mode--mobile .view-mode-toggle--topbar { display: none; }
+
+@media (min-width: 761px) {
+  .view-mode--mobile {
+    /* 미리보기 기기 크기: iPhone 15 논리 해상도 */
+    --view-mode-device-width: 390px;
+    --view-mode-device-height: 844px;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--seed-dimension-x8) var(--seed-dimension-x6);
+    background: var(--seed-color-bg-neutral-weak);
+  }
+  .view-mode--mobile .view-mode__device {
+    --app-vh: min(var(--view-mode-device-height), calc(100vh - 2 * var(--seed-dimension-x8)));
+    flex: 0 0 auto;
+    width: var(--view-mode-device-width);
+    height: var(--app-vh);
+    overflow: hidden;
+    /* position: fixed 요소(하단 탭, 페이지 CTA)가 브라우저가 아니라 프레임 기준으로 붙도록 containing block을 만든다. */
+    transform: translateZ(0);
+    border: 1px solid var(--seed-color-stroke-neutral-muted);
+    border-radius: var(--seed-radius-r6);
+    background: var(--seed-color-bg-layer-fill);
+    box-shadow: var(--seed-shadow-s3);
+  }
+  .view-mode--mobile .app-viewport { height: 100%; overflow-y: auto; overscroll-behavior: contain; }
+}
+
+/* 실제 모바일 기기에서는 이미 모바일 화면이므로 프레임과 토글을 쓰지 않는다. */
+@media (max-width: 760px) {
+  .view-mode-toggle { display: none; }
+}
+

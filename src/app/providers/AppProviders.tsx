@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "@/entities/session";
+import { ViewModeProvider } from "@/features/switch-view-mode";
 import { isApiError } from "@/shared/api";
 
 const queryClient = new QueryClient({
@@ -21,7 +22,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <AuthProvider>
-          {children}
+          <ViewModeProvider>{children}</ViewModeProvider>
         </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>

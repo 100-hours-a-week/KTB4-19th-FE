@@ -5,6 +5,7 @@ import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { SegmentedControl, SegmentedControlItem } from "seed-design/ui/segmented-control";
 import { useAuth } from "@/entities/session";
 import { PreviewStateToolbar } from "@/features/switch-preview-state";
+import { ViewModeToggle } from "@/features/switch-view-mode";
 import type { RouteRole } from "@/shared/config";
 import type { ViewState } from "@/shared/ui";
 import { managerNav, residentNav } from "../model/navigation";
@@ -51,7 +52,10 @@ export function AppShell({ role, state, onStateChange, children }: Props) {
       <div className="app-main">
         <header className="topbar">
           <div><span className="topbar-building">A타워</span><span className="prototype-badge">MOCK PROTOTYPE</span></div>
-          <Link className="notification-link" to={`/${role}/notifications`} aria-label="알림 2개"><IconBellLine /><NotificationBadge>2</NotificationBadge></Link>
+          <div className="topbar-actions">
+            <ViewModeToggle className="view-mode-toggle--topbar" />
+            <Link className="notification-link" to={`/${role}/notifications`} aria-label="알림 2개"><IconBellLine /><NotificationBadge>2</NotificationBadge></Link>
+          </div>
         </header>
         <main className="content" key={location.pathname}>{children}</main>
         <PreviewStateToolbar state={state} onStateChange={onStateChange} />
