@@ -20,11 +20,11 @@ import {
 import { useState, type ReactNode } from "react";
 import { Link, NavLink, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
 import { ActionButton } from "seed-design/ui/action-button";
-import { Checkbox } from "seed-design/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "seed-design/ui/radio-group";
 import { SegmentedControl, SegmentedControlItem } from "seed-design/ui/segmented-control";
 import { TextField, TextFieldInput } from "seed-design/ui/text-field";
 import { LoginPage } from "./features/auth/pages/LoginPage";
+import { SignupForm } from "./features/auth/pages/SignupForm";
 import { ConversationList } from "./features/conversations/components/ConversationList";
 import { ChatPage, NewChatPage } from "./features/conversations/pages/ChatPage";
 import { ConversationsPage } from "./features/conversations/pages/ConversationsPage";
@@ -296,7 +296,35 @@ function MyPage({ role }: { role: Role }) {
 function AuthPage({ kind }: { kind: "signup" | "role" }) {
   const navigate = useNavigate();
   const [selectedRole, setSelectedRole] = useState<Role>("resident");
-  return <div className="auth-page"><div className="auth-visual"><div className="auth-visual-content"><span className="brand-mark brand-mark--large">집</span><h1>건물 생활을 더 가깝고 편하게</h1><p>입주부터 문의, 민원 처리까지 집사이에서 연결하세요.</p></div></div><main className="auth-form"><Link className="brand brand--mobile" to="/auth/login"><span className="brand-mark">집</span><span>집사이</span></Link>{kind === "signup" && <><p className="eyebrow">집사이 시작하기</p><h1>회원가입</h1><p>필수 정보만 입력하면 바로 시작할 수 있어요.</p><div className="form-stack"><TextField label="이메일" suffix={<ActionButton variant="ghost" size="small">중복 확인</ActionButton>}><TextFieldInput type="email" placeholder="example@email.com" /></TextField><TextField label="비밀번호" description="영문, 숫자, 특수문자를 포함해 8자 이상"><TextFieldInput type="password" /></TextField><TextField label="이름"><TextFieldInput /></TextField><TextField label="연락처"><TextFieldInput placeholder="010-0000-0000" /></TextField><Checkbox inputProps={{ defaultChecked: true }} label="서비스 이용약관과 개인정보 처리방침에 동의합니다." /><ActionButton variant="brandSolid" onClick={() => navigate("/auth/role")}>가입하기</ActionButton></div></>}{kind === "role" && <><p className="eyebrow">마지막 단계예요</p><h1>어떻게 이용하시나요?</h1><p>역할은 처음 한 번만 선택할 수 있어요.</p><RadioGroup aria-label="사용자 역할" value={selectedRole} onValueChange={(value) => setSelectedRole(value as Role)}><div className="role-cards"><RadioGroupItem value="manager" label={<span className="role-card-content"><IconBuilding2Line /><strong>관리자</strong><span>건물과 호실, 민원을 관리해요</span></span>} /><RadioGroupItem value="resident" label={<span className="role-card-content"><IconPersonLine /><strong>입주민</strong><span>AI 문의와 민원 접수를 이용해요</span></span>} /></div></RadioGroup><ActionButton variant="brandSolid" onClick={() => navigate(selectedRole === "manager" ? "/manager" : "/resident/connect")}>선택 완료</ActionButton></>}</main></div>;
+
+  return (
+    <div className="auth-page">
+      <div className="auth-visual">
+        <div className="auth-visual-content">
+          <span className="brand-mark brand-mark--large">집</span>
+          <h1>건물 생활을 더 가깝고 편하게</h1>
+          <p>입주부터 문의, 민원 처리까지 집사이에서 연결하세요.</p>
+        </div>
+      </div>
+      <main className="auth-form">
+        <Link className="brand brand--mobile" to="/auth/login"><span className="brand-mark">집</span><span>집사이</span></Link>
+        {kind === "signup" ? <SignupForm /> : (
+          <>
+            <p className="eyebrow">마지막 단계예요</p>
+            <h1>어떻게 이용하시나요?</h1>
+            <p>역할은 처음 한 번만 선택할 수 있어요.</p>
+            <RadioGroup aria-label="사용자 역할" value={selectedRole} onValueChange={(value) => setSelectedRole(value as Role)}>
+              <div className="role-cards">
+                <RadioGroupItem value="manager" label={<span className="role-card-content"><IconBuilding2Line /><strong>관리자</strong><span>건물과 호실, 민원을 관리해요</span></span>} />
+                <RadioGroupItem value="resident" label={<span className="role-card-content"><IconPersonLine /><strong>입주민</strong><span>AI 문의와 민원 접수를 이용해요</span></span>} />
+              </div>
+            </RadioGroup>
+            <ActionButton variant="brandSolid" onClick={() => navigate(selectedRole === "manager" ? "/manager" : "/resident/connect")}>선택 완료</ActionButton>
+          </>
+        )}
+      </main>
+    </div>
+  );
 }
 
 function ConversationReadonly() { return <><PageTitle eyebrow="민원 #77" title="AI 대화 원본" description="입주민이 민원을 접수한 당시의 대화예요. 관리자는 읽기만 할 수 있어요." /><section className="panel readonly-chat"><div className="message assistant"><span className="message-name">집사이 AI</span><p>불편한 점이나 궁금한 점을 편하게 말씀해 주세요.</p></div><div className="message resident"><span className="message-name">박입주 · 302호</span><p>천장에서 물이 새요. 안방 천장 가운데예요.</p></div><div className="message assistant"><span className="message-name">집사이 AI</span><p>언제부터 물이 떨어졌나요?</p></div><div className="message resident"><span className="message-name">박입주 · 302호</span><p>어제 저녁부터요. 오늘 아침에 더 심해졌어요.</p></div><div className="readonly-notice">관리자 화면에서는 원본 대화에 메시지를 보낼 수 없어요.</div></section></>; }
