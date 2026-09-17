@@ -7,3 +7,4 @@ export {
 } from "./formatDateTime";
 export { formatRoomNo } from "./formatRoomNo";
 export { useRetryCountdown } from "./useRetryCountdown";
+export { useMediaQuery } from "./useMediaQuery";
