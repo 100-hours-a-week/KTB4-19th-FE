@@ -7,7 +7,7 @@ import { useAuth } from "@/entities/session";
 import { PreviewStateToolbar } from "@/features/switch-preview-state";
 import { ViewModeToggle } from "@/features/switch-view-mode";
 import type { RouteRole } from "@/shared/config";
-import type { ViewState } from "@/shared/ui";
+import { Logo, type ViewState } from "@/shared/ui";
 import { managerNav, residentNav } from "../model/navigation";
 
 type Props = {
@@ -25,7 +25,7 @@ export function AppShell({ role, state, onStateChange, children }: Props) {
     <div className="app-shell">
       <aside className="sidebar">
         <Link className="brand" to={role === "manager" ? "/manager" : "/resident"} aria-label="집사이 홈">
-          <span className="brand-mark">집</span><span>집사이</span>
+          <Logo />
         </Link>
         <div className="role-switch">
           <SegmentedControl aria-label="프로토타입 사용자 역할" value={role} onValueChange={(value) => navigate(value === "manager" ? "/manager" : "/resident")}>
