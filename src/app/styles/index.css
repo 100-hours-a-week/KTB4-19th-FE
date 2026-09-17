@@ -31,11 +31,8 @@ button { cursor: pointer; }
 .app-shell { min-height: var(--app-vh); display: grid; grid-template-columns: 248px minmax(0, 1fr); }
 .sidebar { position: fixed; inset: 0 auto 0 0; width: 248px; padding: 28px 20px 20px; background: var(--seed-color-bg-layer-default); border-right: 1px solid var(--seed-color-stroke-neutral-muted); display: flex; flex-direction: column; z-index: 20; }
 .brand { display: inline-flex; align-items: center; gap: var(--seed-dimension-x2); font-size: var(--seed-font-size-t8); font-weight: 700; width: fit-content; }
-.logo-symbol { display: block; flex: 0 0 auto; width: 38px; height: 38px; }
+.logo-symbol { display: block; flex: 0 0 auto; width: 38px; height: 38px; object-fit: contain; }
 .logo-symbol--large { width: 56px; height: 56px; }
-.logo-symbol__bg { fill: var(--seed-color-bg-brand-solid); }
-.logo-symbol__fg { fill: var(--seed-color-palette-static-white); }
-.logo-symbol__roof { stroke: var(--seed-color-palette-static-white); }
 .logo-wordmark { font-weight: 800; letter-spacing: -.03em; line-height: 1; }
 .role-switch { margin-top: var(--seed-dimension-x6); }
 .role-switch > div { width: 100%; }
