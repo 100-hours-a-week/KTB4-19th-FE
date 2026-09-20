@@ -1,6 +1,6 @@
 import { IconCheckmarkCircleFill } from "@karrotmarket/react-monochrome-icon";
 import { useMemo, useState, type FormEvent } from "react";
-import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { ActionButton } from "seed-design/ui/action-button";
 import { Callout } from "seed-design/ui/callout";
 import { TextField, TextFieldInput } from "seed-design/ui/text-field";
@@ -61,7 +61,7 @@ export function BulkRoomRegisterPage() {
     }
   };
 
-  if (createdRooms) return <div className="flow-card flow-card--center room-created-result"><IconCheckmarkCircleFill className="success-icon" /><p className="eyebrow">등록 완료</p><h1>호실 {createdRooms.length}개를 만들었어요</h1><p>등록된 호실 번호: {createdRooms.join(", ")}</p><ActionButton variant="brandSolid" onClick={() => navigate("/manager", { replace: true })}>관리자 홈으로</ActionButton><Link to="/manager/building/new">다른 건물 등록</Link></div>;
+  if (createdRooms) return <div className="flow-card flow-card--center room-created-result"><IconCheckmarkCircleFill className="success-icon" /><p className="eyebrow">등록 완료</p><h1>호실 {createdRooms.length}개를 만들었어요</h1><p>등록된 호실 번호: {createdRooms.join(", ")}</p><ActionButton variant="brandSolid" onClick={() => navigate("/manager", { replace: true })}>관리자 홈으로</ActionButton></div>;
 
   return <>
     <PageTitle eyebrow="관리자 가입 · 호실" title="층별 호실을 등록해 주세요" description="층수와 층별 호실 수를 입력하면 호실 번호를 미리 만들어요. 필요한 호실만 선택해 등록할 수 있어요." />

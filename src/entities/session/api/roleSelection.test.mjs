@@ -7,7 +7,7 @@ test("maps the selected frontend role to the backend userRole contract", () => {
   assert.deepEqual(roleSelectionRequest("resident"), { userRole: "RESIDENT" });
 });
 
-test("keeps the existing role-specific landing paths after selection", () => {
-  assert.equal(roleSelectionSuccessPath("manager"), "/manager/onboarding/profile");
+test("sends managers to building registration after role selection", () => {
+  assert.equal(roleSelectionSuccessPath("manager"), "/manager/building/new");
   assert.equal(roleSelectionSuccessPath("resident"), "/resident/connect");
 });

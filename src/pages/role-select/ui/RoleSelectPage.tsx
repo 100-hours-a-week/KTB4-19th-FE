@@ -19,7 +19,9 @@ export function RoleSelectPage() {
 
   if (auth.status === "loading") return <FullPageLoading />;
   if (auth.status === "anonymous") return <Navigate to="/auth/login" replace />;
-  if (auth.user.userRole !== "NONE") return <Navigate to={auth.user.userRole === "MANAGER" ? "/manager" : "/resident"} replace />;
+  if (auth.user.userRole !== "NONE") {
+    return <Navigate to={auth.user.userRole === "MANAGER" ? "/manager/building/new" : "/resident"} replace />;
+  }
 
   const submit = async () => {
     if (pending) return;
