@@ -24,6 +24,8 @@ export type UserAgreement = {
 export type AuthUser = {
   userId: number;
   userRole: UserRole;
+  buildingId?: number | null;
+  roomId?: number | null;
   email: string;
   userName: string | null;
   phone?: string | null;

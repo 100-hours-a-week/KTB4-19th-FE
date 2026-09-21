@@ -3,11 +3,16 @@ import { Badge } from "@seed-design/react";
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { ActionButton } from "seed-design/ui/action-button";
+import { useAuth } from "@/entities/session";
 import { ComplaintStatusBadge, complaints } from "@/entities/complaint";
 import type { RouteRole } from "@/shared/config";
 import { MetricCard, PageTitle, StateBoundary, type ViewState } from "@/shared/ui";
 
 export function ManagerHomePage({ state }: { state: ViewState }) {
+  const auth = useAuth();
+  if (auth.user && auth.user.buildingId == null) {
+    return <><PageTitle eyebrow="관리자 시작하기" title="관리할 건물을 등록해 주세요" description="건물을 등록하면 호실과 운영규칙을 관리할 수 있어요." /><section className="panel onboarding-empty"><h2>아직 관리 중인 건물이 없어요</h2><p>건물 등록을 완료하면 관리자 기능을 사용할 수 있습니다.</p><Link to="/manager/building/new"><ActionButton variant="brandSolid">건물 등록하기</ActionButton></Link></section></>;
+  }
   return <><PageTitle eyebrow="오늘의 건물 운영" title="안녕하세요, 김관리 님" description="A타워의 중요한 변화를 한눈에 확인하세요." />
     <StateBoundary state={state} emptyTitle="아직 운영 데이터가 없어요">
       <section className="metrics-grid"><MetricCard label="입주 세대" value="5 / 14" helper="입주율 36%" tone="brand" /><MetricCard label="초대 중" value={2} helper="7일 안에 만료" /><MetricCard label="처리 전 민원" value={5} helper="긴급 2건" /><MetricCard label="이번 주 완료" value={12} helper="지난주보다 3건 많아요" /></section>
