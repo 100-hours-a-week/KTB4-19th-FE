@@ -1,11 +1,11 @@
-export { conversationApi } from "./api/conversationApi";
+export { conversationApi } from './api/conversationApi';
 export {
   conversationKeys,
   conversationMessagesQuery,
   useConversationList,
   useConversationMessages,
   type MessagesData,
-} from "./api/conversationQueries";
+} from './api/conversationQueries';
 export type {
   Attachment,
   ContentRequest,
@@ -14,11 +14,15 @@ export type {
   ConversationListResponse,
   ConversationMessagesResponse,
   ConversationStatus,
+  ConversationStatusUpdateResponse,
   ConversationType,
   Message,
   MessageSendResponse,
   MessageType,
   SenderType,
   SummaryCard,
-} from "./model/types";
-export { ConversationMessage, PendingResidentMessage } from "./ui/ConversationMessage";
+} from './model/types';
+export {
+  ConversationMessage,
+  PendingResidentMessage,
+} from './ui/ConversationMessage';

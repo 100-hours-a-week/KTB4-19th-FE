@@ -10,9 +10,9 @@ export function buildSignupRequest(form) {
     userName: form.userName.trim() || null,
     phone: form.phone.trim() || null,
     agreements: [
-      { termsType: "SERVICE", isAgreed: agreed },
-      { termsType: "PRIVACY", isAgreed: agreed },
-      { termsType: "MARKETING", isAgreed: false },
+      { termsType: 'SERVICE', isAgreed: agreed },
+      { termsType: 'PRIVACY', isAgreed: agreed },
+      { termsType: 'MARKETING', isAgreed: false },
     ],
   };
 }

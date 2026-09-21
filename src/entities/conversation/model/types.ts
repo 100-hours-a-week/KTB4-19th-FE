@@ -1,8 +1,15 @@
-export type SenderType = "RESIDENT" | "MANAGER" | "ASSISTANT";
+export type SenderType = 'RESIDENT' | 'MANAGER' | 'ASSISTANT';
 // ERD Messages.message_type과 동일하다. SUMMARY_CARD 메시지에만 접수 확인 카드(summaryCard)가 붙는다.
-export type MessageType = "TEXT" | "IMAGE" | "SUMMARY_CARD";
-export type ConversationType = "INQUIRY" | "COMPLAINT";
-export type ConversationStatus = "ACTIVE" | "RESOLVED" | "COMPLAINT_CREATED";
+export type MessageType = 'TEXT' | 'IMAGE' | 'SUMMARY_CARD';
+export type ConversationType = 'INQUIRY' | 'COMPLAINT';
+export type ConversationStatus = 'ACTIVE' | 'RESOLVED' | 'COMPLAINT_CREATED';
+
+export type ConversationStatusUpdateResponse = {
+  conversationId: number;
+  conversationStatus: ConversationStatus;
+  conversationStatusLabel: string;
+  updatedAt: string;
+};
 
 export type Attachment = {
   attachmentId: number;
@@ -47,8 +54,14 @@ export type ConversationCreateResponse = {
   assistantMessage: Message;
 };
 
-export type MessageSendResponse = Message & {
+export type MessageSendResponse = {
+  messageId: number;
   conversationId: number;
+  senderType: SenderType;
+  messageType: MessageType;
+  content: string;
+  attachments: Attachment[];
+  createdAt: string;
   assistantMessage: Message;
 };
 

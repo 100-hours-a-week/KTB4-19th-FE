@@ -1,1 +1,1 @@
-export { ResidentHomePage } from "./ui/ResidentHomePage";
+export { ResidentHomePage } from './ui/ResidentHomePage';

@@ -1,1 +1,1 @@
-export { ResidentConnectPage } from "./ui/ResidentConnectPage";
+export { ResidentConnectPage } from './ui/ResidentConnectPage';

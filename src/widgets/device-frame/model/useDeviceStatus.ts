@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 type BatteryManagerLike = EventTarget & { level: number; charging: boolean };
-type NavigatorWithBattery = Navigator & { getBattery?: () => Promise<BatteryManagerLike> };
+type NavigatorWithBattery = Navigator & {
+  getBattery?: () => Promise<BatteryManagerLike>;
+};
 
 export type BatteryStatus = { level: number; charging: boolean } | null;
 
@@ -13,7 +15,10 @@ export function useClock() {
     const schedule = () => {
       const current = new Date();
       setNow(current);
-      timer = window.setTimeout(schedule, 60_000 - (current.getSeconds() * 1000 + current.getMilliseconds()));
+      timer = window.setTimeout(
+        schedule,
+        60_000 - (current.getSeconds() * 1000 + current.getMilliseconds()),
+      );
     };
     schedule();
     return () => window.clearTimeout(timer);
@@ -30,18 +35,22 @@ export function useBattery(): BatteryStatus {
     let manager: BatteryManagerLike | null = null;
     let cancelled = false;
     const update = () => {
-      if (manager && !cancelled) setBattery({ level: manager.level, charging: manager.charging });
+      if (manager && !cancelled)
+        setBattery({ level: manager.level, charging: manager.charging });
     };
-    getBattery.call(navigator).then((result) => {
-      manager = result;
-      update();
-      manager.addEventListener("levelchange", update);
-      manager.addEventListener("chargingchange", update);
-    }).catch(() => undefined);
+    getBattery
+      .call(navigator)
+      .then((result) => {
+        manager = result;
+        update();
+        manager.addEventListener('levelchange', update);
+        manager.addEventListener('chargingchange', update);
+      })
+      .catch(() => undefined);
     return () => {
       cancelled = true;
-      manager?.removeEventListener("levelchange", update);
-      manager?.removeEventListener("chargingchange", update);
+      manager?.removeEventListener('levelchange', update);
+      manager?.removeEventListener('chargingchange', update);
     };
   }, []);
   return battery;
@@ -52,11 +61,11 @@ export function useOnline() {
   useEffect(() => {
     const on = () => setOnline(true);
     const off = () => setOnline(false);
-    window.addEventListener("online", on);
-    window.addEventListener("offline", off);
+    window.addEventListener('online', on);
+    window.addEventListener('offline', off);
     return () => {
-      window.removeEventListener("online", on);
-      window.removeEventListener("offline", off);
+      window.removeEventListener('online', on);
+      window.removeEventListener('offline', off);
     };
   }, []);
   return online;

@@ -1,7 +1,7 @@
-import type { UserRole } from "../api/authApi";
+import type { UserRole } from '../api/authApi';
 
 export function roleHome(role: UserRole) {
-  if (role === "MANAGER") return "/manager";
-  if (role === "RESIDENT") return "/resident";
-  return "/auth/role";
+  if (role === 'MANAGER') return '/manager';
+  if (role === 'RESIDENT') return '/resident';
+  return '/auth/role';
 }

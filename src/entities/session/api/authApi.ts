@@ -1,7 +1,10 @@
-import { apiRequest } from "@/shared/api";
+import { apiRequest } from '@/shared/api';
 
-export type UserRole = "NONE" | "MANAGER" | "RESIDENT";
-export type SelectedUserRole = Exclude<UserRole, "NONE">;
+const authBase = '/auth';
+const usersBase = '/users';
+
+export type UserRole = 'NONE' | 'MANAGER' | 'RESIDENT';
+export type SelectedUserRole = Exclude<UserRole, 'NONE'>;
 
 export type RoleSelectionRequest = {
   userRole: SelectedUserRole;
@@ -11,12 +14,12 @@ export type RoleSelectionResponse = {
   userId: number;
   userRole: SelectedUserRole;
   accessToken: string;
-  tokenType: "Bearer";
+  tokenType: 'Bearer';
 };
 
 export type UserAgreement = {
   agreementId: number;
-  termsType: "SERVICE" | "PRIVACY" | "MARKETING";
+  termsType: 'SERVICE' | 'PRIVACY' | 'MARKETING';
   isAgreed: boolean;
   agreedAt?: string | null;
 };
@@ -34,7 +37,7 @@ export type ManagerProfileRequest = {
   userName: string;
   phone: string;
   agreements: Array<{
-    termsType: "SERVICE" | "PRIVACY" | "MARKETING";
+    termsType: 'SERVICE' | 'PRIVACY' | 'MARKETING';
     isAgreed: boolean;
   }>;
 };
@@ -53,7 +56,7 @@ export type LoginRequest = {
 
 export type LoginResponse = {
   accessToken: string;
-  tokenType: "Bearer";
+  tokenType: 'Bearer';
   user: AuthUser;
 };
 
@@ -69,7 +72,7 @@ export type SignupRequest = {
   userName: string | null;
   phone: string | null;
   agreements: Array<{
-    termsType: "SERVICE" | "PRIVACY" | "MARKETING";
+    termsType: 'SERVICE' | 'PRIVACY' | 'MARKETING';
     isAgreed: boolean;
   }>;
 };
@@ -78,18 +81,32 @@ export type SignupResponse = { userId: number };
 
 export const authApi = {
   signup: (request: SignupRequest) =>
-    apiRequest<SignupResponse>("/auth/signup", { method: "POST", body: request, auth: false }),
+    apiRequest<SignupResponse>(`${authBase}/signup`, {
+      method: 'POST',
+      body: request,
+      auth: false,
+    }),
   checkEmailAvailability: (email: string) =>
-    apiRequest<EmailAvailabilityResponse>("/users/email-availability", {
+    apiRequest<EmailAvailabilityResponse>(`${usersBase}/email-availability`, {
       query: { email },
       auth: false,
     }),
   login: (request: LoginRequest) =>
-    apiRequest<LoginResponse>("/auth/login", { method: "POST", body: request, auth: false }),
-  logout: () => apiRequest<null>("/auth/logout", { method: "POST" }),
+    apiRequest<LoginResponse>(`${authBase}/login`, {
+      method: 'POST',
+      body: request,
+      auth: false,
+    }),
+  logout: () => apiRequest<null>(`${authBase}/logout`, { method: 'POST' }),
   selectRole: (request: RoleSelectionRequest) =>
-    apiRequest<RoleSelectionResponse>("/users/me", { method: "PATCH", body: request }),
+    apiRequest<RoleSelectionResponse>(`${usersBase}/me`, {
+      method: 'PATCH',
+      body: request,
+    }),
   updateManagerProfile: (request: ManagerProfileRequest) =>
-    apiRequest<ManagerProfileResponse>("/users/me", { method: "PATCH", body: request }),
-  me: () => apiRequest<AuthUser>("/users/me"),
+    apiRequest<ManagerProfileResponse>(`${usersBase}/me`, {
+      method: 'PATCH',
+      body: request,
+    }),
+  me: () => apiRequest<AuthUser>(`${usersBase}/me`),
 };

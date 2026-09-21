@@ -1,15 +1,25 @@
-import type { ReactNode } from "react";
-import { formatMessageTime } from "@/shared/lib";
-import type { Message } from "../model/types";
+import type { ReactNode } from 'react';
+import { formatMessageTime } from '@/shared/lib';
+import type { Message } from '../model/types';
 
-export function ConversationMessage({ message, children }: { message: Pick<Message, "senderType" | "content" | "createdAt">; children?: ReactNode }) {
-  const isResident = message.senderType === "RESIDENT";
+export function ConversationMessage({
+  message,
+  children,
+}: {
+  message: Pick<Message, 'senderType' | 'content' | 'createdAt'>;
+  children?: ReactNode;
+}) {
+  const isResident = message.senderType === 'RESIDENT';
   return (
-    <div className={`message ${isResident ? "resident" : "assistant"}`}>
+    <div className={`message ${isResident ? 'resident' : 'assistant'}`}>
       {!isResident && <span className="message-name">집사이 AI</span>}
       <p>{message.content}</p>
       {children}
-      {message.createdAt && <time className="message-time" dateTime={message.createdAt}>{formatMessageTime(message.createdAt)}</time>}
+      {message.createdAt && (
+        <time className="message-time" dateTime={message.createdAt}>
+          {formatMessageTime(message.createdAt)}
+        </time>
+      )}
     </div>
   );
 }

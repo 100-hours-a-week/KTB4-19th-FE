@@ -1,1 +1,1 @@
-export type RoomStatus = "EMPTY" | "INVITED" | "LIVING";
+export type RoomStatus = 'EMPTY' | 'INVITED' | 'LIVING';

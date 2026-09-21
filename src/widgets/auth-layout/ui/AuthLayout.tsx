@@ -1,6 +1,6 @@
-import type { ReactNode } from "react";
-import { Link } from "react-router-dom";
-import { Logo, LogoSymbol } from "@/shared/ui";
+import type { ReactNode } from 'react';
+import { Link } from 'react-router-dom';
+import { Logo, LogoSymbol } from '@/shared/ui';
 
 /** 로그인·회원가입·역할 선택이 공유하는 좌측 비주얼 + 우측 폼 레이아웃 */
 export function AuthLayout({ children }: { children: ReactNode }) {
@@ -14,7 +14,9 @@ export function AuthLayout({ children }: { children: ReactNode }) {
         </div>
       </div>
       <main className="auth-form">
-        <Link className="brand brand--mobile" to="/auth/login"><Logo /></Link>
+        <Link className="brand brand--mobile" to="/auth/login">
+          <Logo />
+        </Link>
         {children}
       </main>
     </div>
