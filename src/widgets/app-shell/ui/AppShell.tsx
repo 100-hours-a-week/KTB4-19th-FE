@@ -44,8 +44,7 @@ export function AppShell({ role, state, onStateChange, children }: Props) {
           <span>공통 화면</span>
           <Link to="/auth/login">로그인</Link>
           <Link to="/auth/signup">회원가입</Link>
-          <Link to="/auth/role">역할 선택</Link>
-          {role === "manager" ? <Link to="/manager/building/new">건물 등록</Link> : <Link to="/resident/connect">입주 연결</Link>}
+          {role === "resident" && <Link to="/resident/connect">입주 연결</Link>}
         </div>
         <SidebarProfile role={role} />
       </aside>

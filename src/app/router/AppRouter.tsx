@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { Route, Routes } from "react-router-dom";
+import { Link, Route, Routes } from "react-router-dom";
 import { BuildingRegisterPage } from "@/pages/building-register";
 import { BulkRoomRegisterPage } from "@/pages/bulk-room-register";
 import { ComplaintDetailPage } from "@/pages/complaint-detail";
@@ -24,6 +24,7 @@ import { SignupPage } from "@/pages/signup";
 import { TermsPage } from "@/pages/terms";
 import type { RouteRole } from "@/shared/config";
 import type { ViewState } from "@/shared/ui";
+import { Logo } from "@/shared/ui";
 import { AppShell } from "@/widgets/app-shell";
 import { HomeRedirect, RequireRole } from "./guards";
 
@@ -33,6 +34,14 @@ export function AppRouter() {
   // 입주민 화면은 실제 로그인·역할(RESIDENT)이 필요하다. 관리자 화면은 아직 mock 프로토타입이다.
   const residentShell = (content: ReactNode) => <RequireRole role="RESIDENT">{shell(content, "resident")}</RequireRole>;
   const managerShell = (content: ReactNode) => <RequireRole role="MANAGER">{shell(content, "manager")}</RequireRole>;
+  const managerOnboardingShell = (content: ReactNode) => (
+    <RequireRole role="MANAGER">
+      <main className="focused-flow manager-onboarding-flow">
+        <Link className="focused-brand" to="/manager" aria-label="집사이"><Logo /></Link>
+        {content}
+      </main>
+    </RequireRole>
+  );
   return <Routes>
     <Route path="/" element={<HomeRedirect />} />
     <Route path="/auth/login" element={<LoginPage />} />
@@ -41,8 +50,8 @@ export function AppRouter() {
     <Route path="/terms/:termsType" element={<TermsPage />} />
     <Route path="/manager" element={shell(<ManagerHomePage state={viewState} />, "manager")} />
     <Route path="/manager/onboarding/profile" element={<ManagerProfilePage />} />
-    <Route path="/manager/building/new" element={managerShell(<BuildingRegisterPage />)} />
-    <Route path="/manager/buildings/:buildingId/rooms/bulk" element={managerShell(<BulkRoomRegisterPage />)} />
+    <Route path="/manager/building/new" element={managerOnboardingShell(<BuildingRegisterPage />)} />
+    <Route path="/manager/buildings/:buildingId/rooms/bulk" element={managerOnboardingShell(<BulkRoomRegisterPage />)} />
     <Route path="/manager/rooms" element={shell(<RoomsPage state={viewState} />, "manager")} />
     <Route path="/manager/rooms/:roomId" element={shell(<RoomDetailPage state={viewState} />, "manager")} />
     <Route path="/manager/complaints" element={shell(<ComplaintsPage state={viewState} role="manager" />, "manager")} />

@@ -4,7 +4,7 @@ const BACKEND_ROLE = {
 };
 
 const SUCCESS_PATH = {
-  manager: "/manager/onboarding/profile",
+  manager: "/manager/building/new",
   resident: "/resident/connect",
 };
 

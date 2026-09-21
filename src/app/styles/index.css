@@ -107,6 +107,8 @@ button { cursor: pointer; }
 .form-page-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(280px, .65fr); gap: var(--seed-dimension-x5); max-width: 980px; }
 .form-panel { display: grid; gap: var(--seed-dimension-x5); }
 .address-preview, .upload-field, .upload-file { display: flex; align-items: center; gap: var(--seed-dimension-x3); padding: var(--seed-dimension-x4); border: 1px solid var(--seed-color-stroke-neutral-muted); border-radius: var(--seed-radius-r3); }
+.address-search-row { display: flex; gap: var(--seed-dimension-x2); align-items: center; }
+.address-search-row > input { flex: 1; }
 .address-preview > svg, .upload-file > svg { width: 26px; color: var(--seed-color-fg-brand); }
 .address-preview > div, .upload-field > div, .upload-file > div { flex: 1; }
 .address-preview p, .upload-field p, .upload-file p, .aside-copy { color: var(--seed-color-fg-neutral-subtle); margin-top: var(--seed-dimension-x1); line-height: 1.55; }
@@ -235,6 +237,12 @@ button { cursor: pointer; }
 .readonly-notice { margin-top: auto; text-align: center; padding: var(--seed-dimension-x3); border-radius: var(--seed-radius-r2); color: var(--seed-color-fg-neutral-subtle); background: var(--seed-color-bg-layer-fill); }
 
 .focused-flow { min-height: var(--app-vh); padding: var(--seed-dimension-x6); display: flex; flex-direction: column; align-items: center; background: var(--seed-color-bg-layer-fill); }
+.manager-onboarding-flow > .page-title,
+.manager-onboarding-flow > .form-page-grid,
+.manager-onboarding-flow > .bulk-room-panel { width: min(980px, 100%); }
+.manager-onboarding-flow > .page-title { margin-top: var(--seed-dimension-x6); }
+.manager-onboarding-flow > .form-page-grid { max-width: 980px; }
+.building-flow-progress { width: min(980px, 100%); justify-content: flex-start; margin: 0 0 var(--seed-dimension-x6); }
 .focused-brand { display: flex; align-items: center; gap: var(--seed-dimension-x2); align-self: flex-start; font-size: var(--seed-font-size-t7); }
 .flow-progress { display: flex; gap: var(--seed-dimension-x2); margin: calc(var(--app-vh) * .07) 0 var(--seed-dimension-x6); }
 .flow-progress span { width: 36px; height: 4px; border-radius: var(--seed-radius-full); background: var(--seed-color-bg-neutral-weak); }
