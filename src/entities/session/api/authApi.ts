@@ -30,6 +30,15 @@ export type AuthUser = {
   userName: string | null;
   phone?: string | null;
   agreements?: UserAgreement[];
+  onboarding?: OnboardingStatus;
+};
+
+export type OnboardingStatus = {
+  userRole: UserRole;
+  buildingId: number | null;
+  hasRooms: boolean;
+  residentConnected: boolean;
+  nextStep: "ROLE_SELECTION" | "BUILDING_REGISTRATION" | "ROOM_REGISTRATION" | "INVITATION_CODE" | "HOME";
 };
 
 export type ManagerProfileRequest = {
@@ -94,4 +103,5 @@ export const authApi = {
   updateManagerProfile: (request: ManagerProfileRequest) =>
     apiRequest<ManagerProfileResponse>("/users/me", { method: "PATCH", body: request }),
   me: () => apiRequest<AuthUser>("/users/me"),
+  onboardingStatus: () => apiRequest<OnboardingStatus>("/users/me/onboarding-status"),
 };

@@ -23,7 +23,11 @@ let restorePromise: Promise<AuthUser | null> | null = null;
 function restoreSession() {
   if (!restorePromise) {
     restorePromise = reissueAccessToken()
-      .then((token) => (token ? authApi.me() : null))
+      .then(async (token) => {
+        if (!token) return null;
+        const [user, onboarding] = await Promise.all([authApi.me(), authApi.onboardingStatus()]);
+        return { ...user, onboarding };
+      })
       .catch(() => null)
       .finally(() => {
         restorePromise = null;
@@ -61,7 +65,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(async (request: LoginRequest) => {
     const result = await authApi.login(request);
     tokenStore.set(result.accessToken);
-    setState({ status: "authenticated", user: result.user });
+    const onboarding = await authApi.onboardingStatus();
+    setState({ status: "authenticated", user: { ...result.user, onboarding } });
     return result.user;
   }, []);
 
