@@ -13,6 +13,7 @@ type AuthContextValue = AuthState & {
   logout: () => Promise<void>;
   selectRole: (role: SelectedUserRole) => Promise<SelectedUserRole>;
   updateManagerProfile: (request: ManagerProfileRequest) => Promise<void>;
+  refresh: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -106,7 +107,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [queryClient]);
 
-  const value = useMemo(() => ({ ...state, login, logout, selectRole, updateManagerProfile }), [state, login, logout, selectRole, updateManagerProfile]);
+  const refresh = useCallback(async () => {
+    const user = await authApi.me();
+    setState({ status: "authenticated", user });
+  }, []);
+
+  const value = useMemo(() => ({ ...state, login, logout, selectRole, updateManagerProfile, refresh }), [state, login, logout, selectRole, updateManagerProfile, refresh]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 

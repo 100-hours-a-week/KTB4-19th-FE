@@ -26,7 +26,7 @@ import type { RouteRole } from "@/shared/config";
 import type { ViewState } from "@/shared/ui";
 import { Logo } from "@/shared/ui";
 import { AppShell } from "@/widgets/app-shell";
-import { HomeRedirect, RequireRole } from "./guards";
+import { HomeRedirect, RequireAuth, RequireRole } from "./guards";
 
 export function AppRouter() {
   const [viewState, setViewState] = useState<ViewState>("default");
@@ -35,12 +35,12 @@ export function AppRouter() {
   const residentShell = (content: ReactNode) => <RequireRole role="RESIDENT">{shell(content, "resident")}</RequireRole>;
   const managerShell = (content: ReactNode) => <RequireRole role="MANAGER">{shell(content, "manager")}</RequireRole>;
   const managerOnboardingShell = (content: ReactNode) => (
-    <RequireRole role="MANAGER">
+    <RequireAuth>
       <main className="focused-flow manager-onboarding-flow">
         <Link className="focused-brand" to="/manager" aria-label="집사이"><Logo /></Link>
         {content}
       </main>
-    </RequireRole>
+    </RequireAuth>
   );
   return <Routes>
     <Route path="/" element={<HomeRedirect />} />
@@ -63,7 +63,7 @@ export function AppRouter() {
     <Route path="/manager/mypage" element={shell(<MyPage role="manager" />, "manager")} />
     <Route path="/manager/notifications" element={shell(<NotificationsPage state={viewState} role="manager" />, "manager")} />
     <Route path="/resident" element={residentShell(<ResidentHomePage state={viewState} />)} />
-    <Route path="/resident/connect" element={<ResidentConnectPage />} />
+    <Route path="/resident/connect" element={<RequireAuth><ResidentConnectPage /></RequireAuth>} />
     <Route path="/resident/conversations" element={residentShell(<ConversationsPage />)} />
     <Route path="/resident/conversations/new" element={residentShell(<NewChatPage />)} />
     <Route path="/resident/conversations/:conversationId" element={residentShell(<ChatPage />)} />

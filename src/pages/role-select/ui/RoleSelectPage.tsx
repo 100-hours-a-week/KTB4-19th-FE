@@ -4,7 +4,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { ActionButton } from "seed-design/ui/action-button";
 import { Callout } from "seed-design/ui/callout";
 import { RadioGroup, RadioGroupItem } from "seed-design/ui/radio-group";
-import { useAuth, roleSelectionRequest, roleSelectionSuccessPath } from "@/entities/session";
+import { useAuth } from "@/entities/session";
 import { isApiError } from "@/shared/api";
 import { FullPageLoading } from "@/shared/ui";
 import type { RouteRole } from "@/shared/config";
@@ -28,9 +28,7 @@ export function RoleSelectPage() {
     setPending(true);
     setErrorMessage(null);
     try {
-      const request = roleSelectionRequest(selectedRole);
-      await auth.selectRole(request.userRole);
-      navigate(roleSelectionSuccessPath(selectedRole), { replace: true });
+      navigate(selectedRole === "manager" ? "/manager/building/new" : "/resident/connect", { replace: true });
     } catch (error) {
       setErrorMessage(roleSelectionErrorMessage(error));
     } finally {
