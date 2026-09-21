@@ -5,7 +5,6 @@ import { ActionButton } from "seed-design/ui/action-button";
 import { Callout } from "seed-design/ui/callout";
 import { TextField, TextFieldInput } from "seed-design/ui/text-field";
 import { buildingApi } from "@/entities/building";
-import { tokenStore } from "@/shared/api";
 import { isApiError } from "@/shared/api";
 import { InfoRow, PageTitle } from "@/shared/ui";
 
@@ -26,7 +25,6 @@ export function BuildingRegisterPage() {
     setErrorMessage(null);
     try {
       const building = await buildingApi.register({ buildingName: buildingName.trim() || null, roadAddress: roadAddress.trim() });
-      if (building.accessToken) tokenStore.set(building.accessToken);
       setSaved(true);
       navigate(`/manager/buildings/${building.buildingId}/rooms/bulk`);
     } catch (error) {

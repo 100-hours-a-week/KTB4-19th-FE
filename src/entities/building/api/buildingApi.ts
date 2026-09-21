@@ -9,8 +9,6 @@ export type BuildingResponse = {
   buildingId: number;
   buildingName: string | null;
   roadAddress: string;
-  accessToken?: string | null;
-  tokenType?: "Bearer" | null;
 };
 
 export const buildingApi = {

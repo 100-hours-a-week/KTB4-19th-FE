@@ -14,14 +14,6 @@ export function RequireRole({ role, children }: { role: UserRole; children: Reac
   return children;
 }
 
-export function RequireAuth({ children }: { children: ReactNode }) {
-  const auth = useAuth();
-  const location = useLocation();
-  if (auth.status === "loading") return <FullPageLoading />;
-  if (auth.status === "anonymous") return <Navigate to="/auth/login" replace state={{ from: location.pathname }} />;
-  return children;
-}
-
 export function HomeRedirect() {
   const auth = useAuth();
   if (auth.status === "loading") return <FullPageLoading />;
