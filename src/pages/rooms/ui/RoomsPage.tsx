@@ -1,7 +1,7 @@
 import { IconPlusLine } from '@karrotmarket/react-monochrome-icon';
 import { PrefixIcon } from '@seed-design/react';
 import { useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { ActionButton } from 'seed-design/ui/action-button';
 import {
   SegmentedControl,
@@ -13,33 +13,30 @@ import {
   useManagerRoomSummary,
   type RoomStatus,
 } from '@/entities/room';
+import { isApiError } from '@/shared/api';
 import { formatRoomNo } from '@/shared/lib';
 import { MetricCard, PageTitle, StateBoundary } from '@/shared/ui';
 
 export function RoomsPage() {
-  const [searchParams] = useSearchParams();
-  const buildingId = Number(searchParams.get('buildingId'));
-  const hasBuildingId = Number.isInteger(buildingId) && buildingId > 0;
-  const roomsQuery = useManagerRooms(buildingId);
-  const summaryQuery = useManagerRoomSummary(buildingId);
+  const roomsQuery = useManagerRooms();
+  const summaryQuery = useManagerRoomSummary();
   const [status, setStatus] = useState<'ALL' | RoomStatus>('ALL');
   const rooms = roomsQuery.data?.rooms ?? [];
   const filtered =
     status === 'ALL'
       ? rooms
       : rooms.filter((room) => room.roomStatus === status);
-  const viewState = !hasBuildingId
-    ? 'error'
-    : roomsQuery.isPending
-      ? 'loading'
-      : roomsQuery.isError
-        ? 'error'
-        : filtered.length
-          ? 'default'
-          : 'empty';
+  const viewState = roomsQuery.isPending
+    ? 'loading'
+    : roomsQuery.isError
+      ? 'error'
+      : filtered.length
+        ? 'default'
+        : 'empty';
   const summary = summaryQuery.data;
 
-  if (!hasBuildingId) return <BuildingIdRequired />;
+  if (isApiError(roomsQuery.error) && roomsQuery.error.status === 404)
+    return <BuildingRequired />;
 
   return (
     <>
@@ -80,7 +77,7 @@ export function RoomsPage() {
           {filtered.map((room) => (
             <Link
               className="room-card"
-              to={`/manager/rooms/${room.roomId}?buildingId=${buildingId}`}
+              to={`/manager/rooms/${room.roomId}`}
               key={room.roomId}
             >
               <div>
@@ -101,11 +98,11 @@ export function RoomsPage() {
   );
 }
 
-function BuildingIdRequired() {
+function BuildingRequired() {
   return (
     <div className="result-state">
       <h2>건물 정보가 필요해요</h2>
-      <p>관리할 건물의 buildingId가 포함된 화면에서 다시 들어와 주세요.</p>
+      <p>등록된 건물이 없어요. 건물을 먼저 등록해 주세요.</p>
       <Link className="text-link" to="/manager/building/new">
         건물 등록으로 이동
       </Link>

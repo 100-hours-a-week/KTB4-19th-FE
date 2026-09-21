@@ -1,6 +1,6 @@
 import { IconCheckmarkCircleFill } from '@karrotmarket/react-monochrome-icon';
 import { useMemo, useState, type FormEvent } from 'react';
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { ActionButton } from 'seed-design/ui/action-button';
 import { Callout } from 'seed-design/ui/callout';
 import { TextField, TextFieldInput } from 'seed-design/ui/text-field';
@@ -18,8 +18,6 @@ import { FullPageLoading, PageTitle } from '@/shared/ui';
 export function BulkRoomRegisterPage() {
   const auth = useAuth();
   const navigate = useNavigate();
-  const { buildingId: rawBuildingId } = useParams();
-  const buildingId = Number(rawBuildingId);
   const [floorCount, setFloorCount] = useState('1');
   const [roomsPerFloor, setRoomsPerFloor] = useState('5');
   const [selected, setSelected] = useState<Set<string> | null>(null);
@@ -46,8 +44,6 @@ export function BulkRoomRegisterPage() {
         replace
       />
     );
-  if (!Number.isInteger(buildingId) || buildingId < 1)
-    return <Navigate to="/manager/building/new" replace />;
 
   const updateCounts =
     (setValue: (value: string) => void) =>
@@ -77,7 +73,7 @@ export function BulkRoomRegisterPage() {
     setPending(true);
     setErrorMessage(null);
     try {
-      const result = await roomApi.createMany(buildingId, selectedList);
+      const result = await roomApi.createMany(selectedList);
       setCreatedRooms(result.rooms.map((room) => room.roomNo));
     } catch (error) {
       setErrorMessage(roomErrorMessage(error));
@@ -95,9 +91,7 @@ export function BulkRoomRegisterPage() {
         <p>등록된 호실 번호: {createdRooms.join(', ')}</p>
         <ActionButton
           variant="brandSolid"
-          onClick={() =>
-            navigate(`/manager?buildingId=${buildingId}`, { replace: true })
-          }
+          onClick={() => navigate('/manager', { replace: true })}
         >
           관리자 홈으로
         </ActionButton>
