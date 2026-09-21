@@ -1,11 +1,11 @@
-import { useRef, type CSSProperties, type ReactNode } from "react";
-import type { PreviewDevice } from "@/features/switch-view-mode";
-import { useFitScale } from "../model/useFitScale";
-import { AndroidNavBar } from "./AndroidNavBar";
-import { StatusBar } from "./StatusBar";
+import { useRef, type CSSProperties, type ReactNode } from 'react';
+import type { PreviewDevice } from '@/features/switch-view-mode';
+import { useFitScale } from '../model/useFitScale';
+import { AndroidNavBar } from './AndroidNavBar';
+import { StatusBar } from './StatusBar';
 
 // 목업 바깥 여백(px). 축소 배율 계산에만 쓴다.
-const STAGE_GUTTER = 32;
+const stageGutter = 32;
 
 type Props = {
   /** false면 기기 크롬 없이 children만 브라우저 폭으로 렌더링한다. */
@@ -20,12 +20,14 @@ type Props = {
  */
 export function DeviceFrame({ framed, device, children }: Props) {
   const frameRef = useRef<HTMLDivElement>(null);
-  const scale = useFitScale(frameRef, { enabled: framed, gutter: STAGE_GUTTER });
+  const scale = useFitScale(frameRef, { enabled: framed, gutter: stageGutter });
   return (
     <div
-      className={framed ? "device-slot device-slot--framed" : "device-slot"}
+      className={framed ? 'device-slot device-slot--framed' : 'device-slot'}
       data-device={device}
-      style={framed ? ({ "--device-scale": scale } as CSSProperties) : undefined}
+      style={
+        framed ? ({ '--device-scale': scale } as CSSProperties) : undefined
+      }
     >
       <div className="device-frame" ref={frameRef}>
         <div className="device-screen">
@@ -33,8 +35,10 @@ export function DeviceFrame({ framed, device, children }: Props) {
           <div className="device-app">
             <div className="app-viewport">{children}</div>
           </div>
-          {framed && device === "android" && <AndroidNavBar />}
-          {framed && device === "iphone" && <span className="device-home-indicator" aria-hidden="true" />}
+          {framed && device === 'android' && <AndroidNavBar />}
+          {framed && device === 'iphone' && (
+            <span className="device-home-indicator" aria-hidden="true" />
+          )}
         </div>
       </div>
     </div>

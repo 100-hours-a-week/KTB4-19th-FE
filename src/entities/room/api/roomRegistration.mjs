@@ -1,5 +1,10 @@
 export function isRoomCountValid(floorCount, roomsPerFloor) {
-  return [floorCount, roomsPerFloor].every((count) => Number.isInteger(Number(count)) && Number(count) >= 1 && Number(count) <= 20);
+  return [floorCount, roomsPerFloor].every(
+    (count) =>
+      Number.isInteger(Number(count)) &&
+      Number(count) >= 1 &&
+      Number(count) <= 20,
+  );
 }
 
 export function generateRoomNumbers(floorCount, roomsPerFloor) {
@@ -7,8 +12,15 @@ export function generateRoomNumbers(floorCount, roomsPerFloor) {
   const rooms = Number(roomsPerFloor);
   if (!isRoomCountValid(floors, rooms)) return [];
 
-  return Array.from({ length: floors }, (_, floorIndex) => floorIndex + 1)
-    .flatMap((floor) => Array.from({ length: rooms }, (_, roomIndex) => `${floor}${String(roomIndex + 1).padStart(2, "0")}`));
+  return Array.from(
+    { length: floors },
+    (_, floorIndex) => floorIndex + 1,
+  ).flatMap((floor) =>
+    Array.from(
+      { length: rooms },
+      (_, roomIndex) => `${floor}${String(roomIndex + 1).padStart(2, '0')}`,
+    ),
+  );
 }
 
 export function selectedRoomNumbers(roomNumbers, selectedNumbers) {
@@ -25,5 +37,7 @@ export function groupRoomNumbersByFloor(roomNumbers) {
     floorRooms.push(roomNo);
     floors.set(floor, floorRooms);
   }
-  return [...floors].sort(([left], [right]) => left - right).map(([floor, floorRooms]) => ({ floor, roomNumbers: floorRooms }));
+  return [...floors]
+    .sort(([left], [right]) => left - right)
+    .map(([floor, floorRooms]) => ({ floor, roomNumbers: floorRooms }));
 }

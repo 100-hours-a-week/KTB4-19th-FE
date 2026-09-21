@@ -1,2 +1,6 @@
-export { useSendMessage, useStartConversation } from "./api/sendMessage";
-export { ChatComposer } from "./ui/ChatComposer";
+export {
+  useResolveConversation,
+  useSendMessage,
+  useStartConversation,
+} from './api/sendMessage';
+export { ChatComposer } from './ui/ChatComposer';

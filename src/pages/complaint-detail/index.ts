@@ -1,1 +1,1 @@
-export { ComplaintDetailPage } from "./ui/ComplaintDetailPage";
+export { ComplaintDetailPage } from './ui/ComplaintDetailPage';

@@ -1,7 +1,11 @@
-import type { ReactNode } from "react";
-import { DeviceToggle, useViewMode, ViewModeToggle } from "@/features/switch-view-mode";
-import { useMediaQuery } from "@/shared/lib";
-import { DeviceFrame } from "@/widgets/device-frame";
+import type { ReactNode } from 'react';
+import {
+  DeviceToggle,
+  useViewMode,
+  ViewModeToggle,
+} from '@/features/switch-view-mode';
+import { useMediaQuery } from '@/shared/lib';
+import { DeviceFrame } from '@/widgets/device-frame';
 
 /**
  * 화면 모드에 따라 앱을 브라우저 전체 폭(web) 또는 휴대폰 목업(mobile)에 담는다.
@@ -10,11 +14,15 @@ import { DeviceFrame } from "@/widgets/device-frame";
  */
 export function ViewModeFrame({ children }: { children: ReactNode }) {
   const { mode, device } = useViewMode();
-  const isPhoneViewport = useMediaQuery("(max-width: 760px)");
-  const framed = mode === "mobile" && !isPhoneViewport;
+  const isPhoneViewport = useMediaQuery('(max-width: 760px)');
+  const framed = mode === 'mobile' && !isPhoneViewport;
   return (
-    <div className={`view-mode view-mode--${mode}${framed ? " view-mode--framed" : ""}`}>
-      <DeviceFrame framed={framed} device={device}>{children}</DeviceFrame>
+    <div
+      className={`view-mode view-mode--${mode}${framed ? ' view-mode--framed' : ''}`}
+    >
+      <DeviceFrame framed={framed} device={device}>
+        {children}
+      </DeviceFrame>
       {!isPhoneViewport && (
         <div className="preview-toolbar">
           <ViewModeToggle />

@@ -1,1 +1,1 @@
-export { RoleSelectPage } from "./ui/RoleSelectPage";
+export { RoleSelectPage } from './ui/RoleSelectPage';

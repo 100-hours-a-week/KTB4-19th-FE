@@ -1,1 +1,1 @@
-export { BulkRoomRegisterPage } from "./ui/BulkRoomRegisterPage";
+export { BulkRoomRegisterPage } from './ui/BulkRoomRegisterPage';

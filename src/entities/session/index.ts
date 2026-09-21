@@ -13,10 +13,13 @@ export {
   type SignupResponse,
   type UserRole,
   type UserAgreement,
-} from "./api/authApi";
-export { roleHome } from "./lib/roleHome";
-export { AuthProvider, useAuth } from "./model/AuthProvider";
-export { emailAvailabilityFeedback } from "./api/emailAvailability.mjs";
-export { buildSignupRequest } from "./api/signupRequest.mjs";
-export { roleSelectionRequest, roleSelectionSuccessPath } from "./api/roleSelection.mjs";
-export { buildManagerProfileRequest } from "./api/managerProfile.mjs";
+} from './api/authApi';
+export { roleHome } from './lib/roleHome';
+export { AuthProvider, useAuth } from './model/AuthProvider';
+export { emailAvailabilityFeedback } from './api/emailAvailability.mjs';
+export { buildSignupRequest } from './api/signupRequest.mjs';
+export {
+  roleSelectionRequest,
+  roleSelectionSuccessPath,
+} from './api/roleSelection.mjs';
+export { buildManagerProfileRequest } from './api/managerProfile.mjs';

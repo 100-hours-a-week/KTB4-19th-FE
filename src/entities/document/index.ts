@@ -1,1 +1,1 @@
-export { documents } from "./model/mock";
+export { documents } from './model/mock';

@@ -1,3 +1,34 @@
-import { PageTitle } from "@/shared/ui";
+import { PageTitle } from '@/shared/ui';
 
-export function ManagerConversationPage() { return <><PageTitle eyebrow="민원 #77" title="AI 대화 원본" description="입주민이 민원을 접수한 당시의 대화예요. 관리자는 읽기만 할 수 있어요." /><section className="panel readonly-chat"><div className="message assistant"><span className="message-name">집사이 AI</span><p>불편한 점이나 궁금한 점을 편하게 말씀해 주세요.</p></div><div className="message resident"><span className="message-name">박입주 · 302호</span><p>천장에서 물이 새요. 안방 천장 가운데예요.</p></div><div className="message assistant"><span className="message-name">집사이 AI</span><p>언제부터 물이 떨어졌나요?</p></div><div className="message resident"><span className="message-name">박입주 · 302호</span><p>어제 저녁부터요. 오늘 아침에 더 심해졌어요.</p></div><div className="readonly-notice">관리자 화면에서는 원본 대화에 메시지를 보낼 수 없어요.</div></section></>; }
+export function ManagerConversationPage() {
+  return (
+    <>
+      <PageTitle
+        eyebrow="민원 #77"
+        title="AI 대화 원본"
+        description="입주민이 민원을 접수한 당시의 대화예요. 관리자는 읽기만 할 수 있어요."
+      />
+      <section className="panel readonly-chat">
+        <div className="message assistant">
+          <span className="message-name">집사이 AI</span>
+          <p>불편한 점이나 궁금한 점을 편하게 말씀해 주세요.</p>
+        </div>
+        <div className="message resident">
+          <span className="message-name">박입주 · 302호</span>
+          <p>천장에서 물이 새요. 안방 천장 가운데예요.</p>
+        </div>
+        <div className="message assistant">
+          <span className="message-name">집사이 AI</span>
+          <p>언제부터 물이 떨어졌나요?</p>
+        </div>
+        <div className="message resident">
+          <span className="message-name">박입주 · 302호</span>
+          <p>어제 저녁부터요. 오늘 아침에 더 심해졌어요.</p>
+        </div>
+        <div className="readonly-notice">
+          관리자 화면에서는 원본 대화에 메시지를 보낼 수 없어요.
+        </div>
+      </section>
+    </>
+  );
+}

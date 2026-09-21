@@ -1,5 +1,5 @@
-import { AuthLayout } from "@/widgets/auth-layout";
-import { SignupForm } from "./SignupForm";
+import { AuthLayout } from '@/widgets/auth-layout';
+import { SignupForm } from './SignupForm';
 
 export function SignupPage() {
   return (

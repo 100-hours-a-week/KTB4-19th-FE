@@ -3,8 +3,8 @@
  * @param {{ isAvailable?: boolean, error?: string }} result
  */
 export function emailAvailabilityFeedback(result) {
-  if (result.error) return { message: result.error, tone: "critical" };
+  if (result.error) return { message: result.error, tone: 'critical' };
   return result.isAvailable
-    ? { message: "사용 가능한 이메일입니다.", tone: "positive" }
-    : { message: "이미 사용 중인 이메일입니다.", tone: "critical" };
+    ? { message: '사용 가능한 이메일입니다.', tone: 'positive' }
+    : { message: '이미 사용 중인 이메일입니다.', tone: 'critical' };
 }

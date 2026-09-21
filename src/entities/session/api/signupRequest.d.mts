@@ -14,9 +14,11 @@ export type SignupRequestPayload = {
   userName: string | null;
   phone: string | null;
   agreements: Array<{
-    termsType: "SERVICE" | "PRIVACY" | "MARKETING";
+    termsType: 'SERVICE' | 'PRIVACY' | 'MARKETING';
     isAgreed: boolean;
   }>;
 };
 
-export function buildSignupRequest(form: SignupRequestForm): SignupRequestPayload;
+export function buildSignupRequest(
+  form: SignupRequestForm,
+): SignupRequestPayload;

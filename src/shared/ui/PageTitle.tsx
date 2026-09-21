@@ -1,6 +1,16 @@
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react';
 
-export function PageTitle({ eyebrow, title, description, action }: { eyebrow?: string; title: string; description?: string; action?: ReactNode }) {
+export function PageTitle({
+  eyebrow,
+  title,
+  description,
+  action,
+}: {
+  eyebrow?: string;
+  title: string;
+  description?: string;
+  action?: ReactNode;
+}) {
   return (
     <header className="page-title">
       <div>

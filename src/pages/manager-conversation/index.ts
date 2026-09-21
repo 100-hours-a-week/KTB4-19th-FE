@@ -1,1 +1,1 @@
-export { ManagerConversationPage } from "./ui/ManagerConversationPage";
+export { ManagerConversationPage } from './ui/ManagerConversationPage';

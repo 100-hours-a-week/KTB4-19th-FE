@@ -1,1 +1,1 @@
-export { TermsPage } from "./ui/TermsPage";
+export { TermsPage } from './ui/TermsPage';
