@@ -33,7 +33,6 @@ export function AppRouter() {
   const shell = (content: ReactNode, routeRole: RouteRole) => <AppShell role={routeRole} state={viewState} onStateChange={setViewState}>{content}</AppShell>;
   // 입주민 화면은 실제 로그인·역할(RESIDENT)이 필요하다. 관리자 화면은 아직 mock 프로토타입이다.
   const residentShell = (content: ReactNode) => <RequireRole role="RESIDENT">{shell(content, "resident")}</RequireRole>;
-  const managerShell = (content: ReactNode) => <RequireRole role="MANAGER">{shell(content, "manager")}</RequireRole>;
   const managerOnboardingShell = (content: ReactNode) => (
     <RequireRole role="MANAGER">
       <main className="focused-flow manager-onboarding-flow">

@@ -1,0 +1,132 @@
+name: Frontend CD
+
+# 배포할 main Commit SHA를 운영자가 선택한다.
+on:
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: Production S3에 배포할 main Commit SHA
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+  id-token: write
+
+env:
+  AWS_REGION: ap-northeast-2
+  FRONTEND_BUCKET: zipsai-prod-frontend
+  CURRENT_SHA_PARAMETER: /zipsai/prod/deploy/frontend/current-sha
+  PRODUCTION_URL: https://zipsai.co.kr/
+
+jobs:
+  deploy:
+    name: Frontend Artifact 배포
+    # 수동 실행 화면에서 다른 브랜치를 선택해도 운영 배포는 main에서만 허용한다.
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout main history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify selected commit
+        env:
+          DEPLOY_SHA: ${{ inputs.commit_sha }}
+        run: |
+          DEPLOY_SHA="$(git rev-parse "${DEPLOY_SHA}^{commit}")"
+          git merge-base --is-ancestor "$DEPLOY_SHA" origin/main
+          echo "deploy_sha=$DEPLOY_SHA" >> "$GITHUB_ENV"
+
+      # IAM 신뢰 정책과 비교할 OIDC 식별 정보만 출력한다. 토큰 자체는 출력하지 않는다.
+      - name: Show OIDC claims
+        run: |
+          OIDC_TOKEN="$(
+            curl -sS \
+              -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+              "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=sts.amazonaws.com" \
+              | jq -r '.value'
+          )"
+
+          OIDC_TOKEN="$OIDC_TOKEN" node -e '
+            const claim = JSON.parse(
+              Buffer.from(process.env.OIDC_TOKEN.split(".")[1], "base64url").toString()
+            );
+            console.log({
+              sub: claim.sub,
+              aud: claim.aud,
+              repository: claim.repository,
+              ref: claim.ref
+            });
+          '
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          # Frontend GitHub Actions 전용 OIDC 배포 Role ARN을 Repository Variable에 등록한다.
+          role-to-assume: ${{ vars.AWS_FRONTEND_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy selected Artifact and verify production
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          # 지정한 SHA 이름의 GitHub Actions Artifact를 내려받아, 정적 파일 위치를 반환한다.
+          download_artifact() {
+            local sha="$1"
+            local target_dir="$2"
+            local artifact_id
+
+            mkdir -p "$target_dir"
+            artifact_id="$(gh api \
+              "/repos/$GITHUB_REPOSITORY/actions/artifacts?name=frontend-$sha&per_page=100" \
+              --jq '[.artifacts[] | select(.expired == false)] | sort_by(.created_at) | last | .id // empty')"
+            test -n "$artifact_id"
+
+            gh api "/repos/$GITHUB_REPOSITORY/actions/artifacts/$artifact_id/zip" > "$target_dir/artifact.zip"
+            unzip -q "$target_dir/artifact.zip" -d "$target_dir/files"
+            test -f "$target_dir/files/index.html"
+            printf '%s\n' "$target_dir/files"
+          }
+
+          deploy_to_s3() {
+            aws s3 sync "$1/" "s3://$FRONTEND_BUCKET/" --delete --only-show-errors
+          }
+
+          check_production() {
+            curl --fail --silent --show-error \
+              --retry 6 --retry-all-errors --retry-delay 5 \
+              "$PRODUCTION_URL" > /dev/null
+          }
+
+          # 마지막으로 정상 확인된 SHA가 있으면, 새 배포 실패 시 그 Artifact로 되돌린다.
+          PREVIOUS_SHA="$(aws ssm get-parameter \
+            --name "$CURRENT_SHA_PARAMETER" \
+            --query 'Parameter.Value' \
+            --output text 2>/dev/null || true)"
+          TARGET_DIST="$(download_artifact "$deploy_sha" "$RUNNER_TEMP/frontend-target")"
+
+          if ! deploy_to_s3 "$TARGET_DIST" || ! check_production; then
+            if [ -z "$PREVIOUS_SHA" ]; then
+              echo "이전 정상 Frontend SHA가 없어 자동 복구할 수 없습니다." >&2
+              exit 1
+            fi
+
+            echo "배포 확인에 실패했습니다. 이전 정상 SHA로 복구합니다: $PREVIOUS_SHA" >&2
+            ROLLBACK_DIST="$(download_artifact "$PREVIOUS_SHA" "$RUNNER_TEMP/frontend-rollback")"
+            deploy_to_s3 "$ROLLBACK_DIST"
+            check_production
+            exit 1
+          fi
+
+          # 운영 URL 확인을 통과한 경우에만 다음 배포의 복구 기준 SHA를 갱신한다.
+          aws ssm put-parameter \
+            --name "$CURRENT_SHA_PARAMETER" \
+            --type String \
+            --value "$deploy_sha" \
+            --overwrite > /dev/null
