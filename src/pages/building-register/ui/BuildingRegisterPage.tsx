@@ -28,12 +28,12 @@ export function BuildingRegisterPage() {
     setPending(true);
     setErrorMessage(null);
     try {
-      const building = await buildingApi.register({
+      await buildingApi.register({
         buildingName: buildingName.trim() || null,
         roadAddress: roadAddress.trim(),
       });
       setSaved(true);
-      navigate(`/manager/buildings/${building.buildingId}/rooms/bulk`);
+      navigate('/manager/building/rooms/bulk');
     } catch (error) {
       setErrorMessage(buildingErrorMessage(error));
     } finally {

@@ -71,7 +71,7 @@ export function AppRouter() {
         element={managerOnboardingShell(<BuildingRegisterPage />)}
       />
       <Route
-        path="/manager/buildings/:buildingId/rooms/bulk"
+        path="/manager/building/rooms/bulk"
         element={managerOnboardingShell(<BulkRoomRegisterPage />)}
       />
       <Route path="/manager/rooms" element={managerShell(<RoomsPage />)} />

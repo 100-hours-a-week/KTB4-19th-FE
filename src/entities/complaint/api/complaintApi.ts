@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/shared/api';
 import type { ComplaintStatus } from '../model/types';
 
-const managerBuildingsBase = '/managers/me/buildings';
+const managerBuildingBase = '/managers/me/building';
 const managerComplaintsBase = '/managers/me/complaints';
 const residentComplaintsBase = '/residents/me/complaints';
 
@@ -201,9 +201,9 @@ export const complaintApi = {
         body: { statusCode },
       },
     ),
-  managerSummary: (buildingId: number) =>
+  managerSummary: () =>
     apiRequest<ManagerComplaintSummaryResponse>(
-      `${managerBuildingsBase}/${buildingId}/complaints/summary`,
+      `${managerBuildingBase}/complaints/summary`,
     ),
   create: (request: ComplaintCreateRequest) =>
     apiRequest<ComplaintCreateResponse>(residentComplaintsBase, {

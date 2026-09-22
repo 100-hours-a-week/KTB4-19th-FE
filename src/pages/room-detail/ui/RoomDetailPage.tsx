@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { ActionButton } from 'seed-design/ui/action-button';
 import { Callout } from 'seed-design/ui/callout';
 import {
@@ -19,21 +19,13 @@ import { InfoRow, PageTitle, StateBoundary } from '@/shared/ui';
 
 export function RoomDetailPage() {
   const { roomId: rawRoomId } = useParams();
-  const [searchParams] = useSearchParams();
-  const buildingId = Number(searchParams.get('buildingId'));
   const roomId = Number(rawRoomId);
-  const roomsQuery = useManagerRooms(buildingId);
+  const roomsQuery = useManagerRooms();
   const room = roomsQuery.data?.rooms.find(
     (candidate) => candidate.roomId === roomId,
   );
-  const hasValidParams =
-    Number.isInteger(buildingId) &&
-    buildingId > 0 &&
-    Number.isInteger(roomId) &&
-    roomId > 0;
 
-  if (!hasValidParams)
-    return <RoomUnavailable buildingId={buildingId} reason="building" />;
+  if (!Number.isInteger(roomId) || roomId < 1) return <RoomUnavailable />;
   if (roomsQuery.isPending)
     return (
       <StateBoundary state="loading">
@@ -46,11 +38,10 @@ export function RoomDetailPage() {
         <></>
       </StateBoundary>
     );
-  if (!room) return <RoomUnavailable buildingId={buildingId} reason="room" />;
+  if (!room) return <RoomUnavailable />;
   return (
     <RoomDetail
       key={room.roomId}
-      buildingId={buildingId}
       buildingName={roomsQuery.data.buildingName}
       room={room}
     />
@@ -58,11 +49,9 @@ export function RoomDetailPage() {
 }
 
 function RoomDetail({
-  buildingId,
   buildingName,
   room,
 }: {
-  buildingId: number;
   buildingName: string | null;
   room: RoomListItem;
 }) {
@@ -77,8 +66,8 @@ function RoomDetail({
 
   const refreshRoomQueries = () =>
     Promise.all([
-      queryClient.invalidateQueries({ queryKey: roomKeys.list(buildingId) }),
-      queryClient.invalidateQueries({ queryKey: roomKeys.summary(buildingId) }),
+      queryClient.invalidateQueries({ queryKey: roomKeys.list() }),
+      queryClient.invalidateQueries({ queryKey: roomKeys.summary() }),
     ]);
 
   const issueInvitation = async () => {
@@ -251,33 +240,13 @@ function RoomDetail({
   );
 }
 
-function RoomUnavailable({
-  buildingId,
-  reason,
-}: {
-  buildingId: number;
-  reason: 'building' | 'room';
-}) {
-  const roomsPath =
-    Number.isInteger(buildingId) && buildingId > 0
-      ? `/manager/rooms?buildingId=${buildingId}`
-      : '/manager/building/new';
+function RoomUnavailable() {
   return (
     <div className="result-state">
-      <h2>
-        {reason === 'building'
-          ? '건물 정보가 필요해요'
-          : '호실을 찾을 수 없어요'}
-      </h2>
-      <p>
-        {reason === 'building'
-          ? '관리할 건물의 buildingId가 포함된 화면에서 다시 들어와 주세요.'
-          : '호실 목록에서 다시 선택해 주세요.'}
-      </p>
-      <Link className="text-link" to={roomsPath}>
-        {reason === 'building'
-          ? '건물 등록으로 이동'
-          : '호실 목록으로 돌아가기'}
+      <h2>호실을 찾을 수 없어요</h2>
+      <p>호실 목록에서 다시 선택해 주세요.</p>
+      <Link className="text-link" to="/manager/rooms">
+        호실 목록으로 돌아가기
       </Link>
     </div>
   );

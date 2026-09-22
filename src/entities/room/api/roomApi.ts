@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/shared/api';
 import type { RoomStatus } from '../model/types';
 
-const managerBuildingsBase = '/managers/me/buildings';
+const managerBuildingBase = '/managers/me/building';
 const managerRoomsBase = '/managers/me/rooms';
 const residentBase = '/residents/me';
 
@@ -63,20 +63,14 @@ export type RoomConnectionResponse = {
 };
 
 export const roomApi = {
-  createMany: (buildingId: number, roomNos: string[]) =>
-    apiRequest<RoomBulkCreateResponse>(
-      `${managerBuildingsBase}/${buildingId}/rooms`,
-      {
-        method: 'POST',
-        body: { roomNos },
-      },
-    ),
-  summary: (buildingId: number) =>
-    apiRequest<RoomSummaryResponse>(
-      `${managerBuildingsBase}/${buildingId}/rooms/summary`,
-    ),
-  list: (buildingId: number) =>
-    apiRequest<RoomListResponse>(`${managerBuildingsBase}/${buildingId}/rooms`),
+  createMany: (roomNos: string[]) =>
+    apiRequest<RoomBulkCreateResponse>(`${managerBuildingBase}/rooms`, {
+      method: 'POST',
+      body: { roomNos },
+    }),
+  summary: () =>
+    apiRequest<RoomSummaryResponse>(`${managerBuildingBase}/rooms/summary`),
+  list: () => apiRequest<RoomListResponse>(`${managerBuildingBase}/rooms`),
   moveOutResident: (roomId: number) =>
     apiRequest<null>(`${managerRoomsBase}/${roomId}/resident`, {
       method: 'DELETE',
@@ -103,24 +97,20 @@ export const roomApi = {
 };
 
 export const roomKeys = {
-  list: (buildingId: number) =>
-    ['rooms', 'manager', 'list', buildingId] as const,
-  summary: (buildingId: number) =>
-    ['rooms', 'manager', 'summary', buildingId] as const,
+  list: () => ['rooms', 'manager', 'list'] as const,
+  summary: () => ['rooms', 'manager', 'summary'] as const,
 };
 
-export function useManagerRooms(buildingId: number) {
+export function useManagerRooms() {
   return useQuery({
-    queryKey: roomKeys.list(buildingId),
-    queryFn: () => roomApi.list(buildingId),
-    enabled: Number.isInteger(buildingId) && buildingId > 0,
+    queryKey: roomKeys.list(),
+    queryFn: () => roomApi.list(),
   });
 }
 
-export function useManagerRoomSummary(buildingId: number) {
+export function useManagerRoomSummary() {
   return useQuery({
-    queryKey: roomKeys.summary(buildingId),
-    queryFn: () => roomApi.summary(buildingId),
-    enabled: Number.isInteger(buildingId) && buildingId > 0,
+    queryKey: roomKeys.summary(),
+    queryFn: () => roomApi.summary(),
   });
 }
