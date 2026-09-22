@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from 'react';
 
 /**
  * 429 응답의 retryAfterSeconds 동안 남은 초를 제공한다. 0이면 다시 요청할 수 있다.
@@ -19,6 +19,9 @@ export function useRetryCountdown() {
     return () => window.clearInterval(timer);
   }, [until]);
 
-  const start = useCallback((seconds: number) => setUntil(Date.now() + seconds * 1000), []);
+  const start = useCallback(
+    (seconds: number) => setUntil(Date.now() + seconds * 1000),
+    [],
+  );
   return { remaining, start };
 }

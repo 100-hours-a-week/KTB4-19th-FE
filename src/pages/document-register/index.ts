@@ -1,1 +1,1 @@
-export { DocumentRegisterPage } from "./ui/DocumentRegisterPage";
+export { DocumentRegisterPage } from './ui/DocumentRegisterPage';

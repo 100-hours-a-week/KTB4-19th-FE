@@ -1,21 +1,21 @@
-const BACKEND_ROLE = {
-  manager: "MANAGER",
-  resident: "RESIDENT",
+const backendRole = {
+  manager: 'MANAGER',
+  resident: 'RESIDENT',
 };
 
-const SUCCESS_PATH = {
-  manager: "/manager/building/new",
-  resident: "/resident/connect",
+const successPath = {
+  manager: '/manager/building/new',
+  resident: '/resident/connect',
 };
 
 export function roleSelectionRequest(selectedRole) {
-  const userRole = BACKEND_ROLE[selectedRole];
-  if (!userRole) throw new TypeError("Unsupported role selection");
+  const userRole = backendRole[selectedRole];
+  if (!userRole) throw new TypeError('Unsupported role selection');
   return { userRole };
 }
 
 export function roleSelectionSuccessPath(selectedRole) {
-  const path = SUCCESS_PATH[selectedRole];
-  if (!path) throw new TypeError("Unsupported role selection");
+  const path = successPath[selectedRole];
+  if (!path) throw new TypeError('Unsupported role selection');
   return path;
 }

@@ -24,10 +24,78 @@ export function ManagerHomePage({ state }: { state: ViewState }) {
     </StateBoundary></>;
 }
 
-function QuickLink({ to, icon, title, text }: { to: string; icon: ReactNode; title: string; text: string }) {
-  return <Link className="quick-link" to={to}><span>{icon}</span><div><strong>{title}</strong><small>{text}</small></div><IconChevronRightLine /></Link>;
+function QuickLink({
+  to,
+  icon,
+  title,
+  text,
+}: {
+  to: string;
+  icon: ReactNode;
+  title: string;
+  text: string;
+}) {
+  return (
+    <Link className="quick-link" to={to}>
+      <span>{icon}</span>
+      <div>
+        <strong>{title}</strong>
+        <small>{text}</small>
+      </div>
+      <IconChevronRightLine />
+    </Link>
+  );
 }
 
-function ComplaintRows({ compact = false, role = "manager" }: { compact?: boolean; role?: RouteRole }) {
-  return <div className="list-stack">{complaints.slice(0, compact ? 2 : undefined).map((item) => <Link className="list-row" to={`/${role}/complaints/${item.id}`} key={item.id}><div className="list-leading"><span className={`urgency-dot ${item.urgency >= 8 ? "urgent" : ""}`} /><div><div className="row-title"><strong>{item.title}</strong><ComplaintStatusBadge status={item.status} /></div><p>{role === "manager" ? `${item.roomNo} · ` : ""}{item.date}</p></div></div>{role === "manager" && <span className="urgency-label">긴급도 {item.urgency}</span>}<IconChevronRightLine /></Link>)}</div>;
+function ComplaintRows({ compact = false }: { compact?: boolean }) {
+  const query = useManagerComplaints({ size: compact ? 2 : 20 });
+  if (query.isPending)
+    return (
+      <div className="skeleton-stack" aria-label="불러오는 중">
+        <div className="skeleton-row" />
+        <div className="skeleton-row" />
+      </div>
+    );
+  if (query.isError)
+    return (
+      <div className="result-state result-state--compact">
+        <h2>최근 민원을 불러오지 못했어요</h2>
+        <ActionButton variant="neutralOutline" onClick={() => query.refetch()}>
+          다시 시도
+        </ActionButton>
+      </div>
+    );
+  if (query.data.complaints.length === 0)
+    return (
+      <div className="result-state result-state--compact">
+        <h2>최근 민원이 없어요</h2>
+        <p>새 민원이 접수되면 이곳에서 확인할 수 있어요.</p>
+      </div>
+    );
+  return (
+    <div className="list-stack">
+      {query.data.complaints.map((item) => (
+        <Link
+          className="list-row"
+          to={`/manager/complaints/${item.complaintId}`}
+          key={item.complaintId}
+        >
+          <div className="list-leading">
+            <span className={`urgency-dot ${item.isUrgent ? 'urgent' : ''}`} />
+            <div>
+              <div className="row-title">
+                <strong>{item.title}</strong>
+                <ComplaintStatusBadge status={item.statusCode} />
+              </div>
+              <p>
+                {formatRoomNo(item.roomNo)} · {formatListTime(item.createdAt)}
+              </p>
+            </div>
+          </div>
+          <span className="urgency-label">긴급도 {item.urgency}</span>
+          <IconChevronRightLine />
+        </Link>
+      ))}
+    </div>
+  );
 }

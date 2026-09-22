@@ -1,4 +1,6 @@
-import { apiRequest } from "@/shared/api";
+import { apiRequest } from '@/shared/api';
+
+const managerBuildingBase = '/managers/me/building';
 
 export type BuildingRegistrationRequest = {
   buildingName: string | null;
@@ -11,7 +13,16 @@ export type BuildingResponse = {
   roadAddress: string;
 };
 
+export type BuildingDetailResponse = BuildingResponse & {
+  totalRoomCount: number;
+  updatedAt: string;
+};
+
 export const buildingApi = {
   register: (request: BuildingRegistrationRequest) =>
-    apiRequest<BuildingResponse>("/managers/me/buildings", { method: "POST", body: request }),
+    apiRequest<BuildingResponse>(managerBuildingBase, {
+      method: 'POST',
+      body: request,
+    }),
+  detail: () => apiRequest<BuildingDetailResponse>(managerBuildingBase),
 };

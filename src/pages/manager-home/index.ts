@@ -1,1 +1,1 @@
-export { ManagerHomePage } from "./ui/ManagerHomePage";
+export { ManagerHomePage } from './ui/ManagerHomePage';

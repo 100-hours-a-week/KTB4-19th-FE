@@ -1,20 +1,24 @@
-import { useRef, useState, type FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
-import { ActionButton } from "seed-design/ui/action-button";
-import { Callout } from "seed-design/ui/callout";
-import { Checkbox } from "seed-design/ui/checkbox";
-import { TextField, TextFieldInput } from "seed-design/ui/text-field";
-import { authApi, buildSignupRequest, emailAvailabilityFeedback } from "@/entities/session";
-import { isApiError, type ApiError } from "@/shared/api";
-import { useRetryCountdown } from "@/shared/lib";
+import { useRef, useState, type FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ActionButton } from 'seed-design/ui/action-button';
+import { Callout } from 'seed-design/ui/callout';
+import { Checkbox } from 'seed-design/ui/checkbox';
+import { TextField, TextFieldInput } from 'seed-design/ui/text-field';
+import {
+  authApi,
+  buildSignupRequest,
+  emailAvailabilityFeedback,
+} from '@/entities/session';
+import { isApiError, type ApiError } from '@/shared/api';
+import { useRetryCountdown } from '@/shared/lib';
 
 export function SignupForm() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [passwordConfirm, setPasswordConfirm] = useState("");
-  const [userName, setUserName] = useState("");
-  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [passwordConfirm, setPasswordConfirm] = useState('');
+  const [userName, setUserName] = useState('');
+  const [phone, setPhone] = useState('');
   const [acceptedRequiredTerms, setAcceptedRequiredTerms] = useState(false);
   const [checkingEmail, setCheckingEmail] = useState(false);
   const [emailAvailable, setEmailAvailable] = useState<boolean | null>(null);
@@ -29,7 +33,7 @@ export function SignupForm() {
     if (checkingEmail || pending || countdown.remaining > 0) return;
     if (!email.trim()) {
       setEmailAvailable(null);
-      setEmailCheckError("이메일을 입력해 주세요.");
+      setEmailCheckError('이메일을 입력해 주세요.');
       return;
     }
 
@@ -39,14 +43,25 @@ export function SignupForm() {
     setEmailCheckError(null);
     try {
       const result = await authApi.checkEmailAvailability(email.trim());
-      if (emailCheckId.current === requestId) setEmailAvailable(result.isAvailable);
+      if (emailCheckId.current === requestId)
+        setEmailAvailable(result.isAvailable);
     } catch (caught) {
       if (emailCheckId.current !== requestId) return;
       const message = isApiError(caught)
-        ? caught.violationFor("email") ?? (caught.status === 429 ? retryMessage(countdown.remaining) : caught.status === 0 ? caught.message : "이메일을 확인하지 못했어요.")
-        : "이메일을 확인하지 못했어요.";
+        ? (caught.violationFor('email') ??
+          (caught.status === 429
+            ? retryMessage(countdown.remaining)
+            : caught.status === 0
+              ? caught.message
+              : '이메일을 확인하지 못했어요.'))
+        : '이메일을 확인하지 못했어요.';
       setEmailCheckError(message);
-      if (isApiError(caught) && caught.status === 429 && caught.retryAfterSeconds) countdown.start(caught.retryAfterSeconds);
+      if (
+        isApiError(caught) &&
+        caught.status === 429 &&
+        caught.retryAfterSeconds
+      )
+        countdown.start(caught.retryAfterSeconds);
     } finally {
       if (emailCheckId.current === requestId) setCheckingEmail(false);
     }
@@ -69,43 +84,48 @@ export function SignupForm() {
     setFormMessage(null);
 
     if (emailAvailable !== true) {
-      setFormMessage("이메일 중복 확인을 먼저 완료해 주세요.");
+      setFormMessage('이메일 중복 확인을 먼저 완료해 주세요.');
       return;
     }
     if (password !== passwordConfirm) {
-      setFormMessage("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
+      setFormMessage('비밀번호와 비밀번호 확인이 일치하지 않습니다.');
       return;
     }
     if (!acceptedRequiredTerms) {
-      setFormMessage("서비스 이용약관과 개인정보 처리방침에 동의해 주세요.");
+      setFormMessage('서비스 이용약관과 개인정보 처리방침에 동의해 주세요.');
       return;
     }
 
     setPending(true);
     try {
-      await authApi.signup(buildSignupRequest({
-        email,
-        password,
-        passwordConfirm,
-        userName,
-        phone,
-        acceptedRequiredTerms,
-      }));
-      navigate("/auth/login", {
+      await authApi.signup(
+        buildSignupRequest({
+          email,
+          password,
+          passwordConfirm,
+          userName,
+          phone,
+          acceptedRequiredTerms,
+        }),
+      );
+      navigate('/auth/login', {
         replace: true,
         state: { signupComplete: true, email: email.trim() },
       });
     } catch (caught) {
       if (!isApiError(caught)) {
-        setFormMessage("회원가입 중 오류가 발생했어요. 잠시 후 다시 시도해 주세요.");
+        setFormMessage(
+          '회원가입 중 오류가 발생했어요. 잠시 후 다시 시도해 주세요.',
+        );
         return;
       }
       setError(caught);
-      if (caught.status === 409 || caught.code === "EMAIL_ALREADY_EXISTS") {
+      if (caught.status === 409 || caught.code === 'EMAIL_ALREADY_EXISTS') {
         setEmailAvailable(false);
-        setEmailCheckError("이미 사용 중인 이메일입니다.");
+        setEmailCheckError('이미 사용 중인 이메일입니다.');
       }
-      if (caught.status === 429 && caught.retryAfterSeconds) countdown.start(caught.retryAfterSeconds);
+      if (caught.status === 429 && caught.retryAfterSeconds)
+        countdown.start(caught.retryAfterSeconds);
     } finally {
       setPending(false);
     }
@@ -116,12 +136,15 @@ export function SignupForm() {
     : emailAvailable === null
       ? null
       : emailAvailabilityFeedback({ isAvailable: emailAvailable });
-  const emailError = error?.violationFor("email");
-  const passwordError = error?.violationFor("password");
-  const passwordConfirmError = error?.violationFor("passwordConfirm");
-  const nameError = error?.violationFor("userName");
-  const phoneError = error?.violationFor("phone");
-  const generalError = error && error.violations.length === 0 ? signupErrorMessage(error, countdown.remaining) : null;
+  const emailError = error?.violationFor('email');
+  const passwordError = error?.violationFor('password');
+  const passwordConfirmError = error?.violationFor('passwordConfirm');
+  const nameError = error?.violationFor('userName');
+  const phoneError = error?.violationFor('phone');
+  const generalError =
+    error && error.violations.length === 0
+      ? signupErrorMessage(error, countdown.remaining)
+      : null;
 
   return (
     <>
@@ -137,27 +160,93 @@ export function SignupForm() {
             invalid={!!emailError}
             errorMessage={emailError}
             disabled={pending}
-            suffix={(
-              <ActionButton type="button" variant="ghost" size="small" loading={checkingEmail} disabled={pending || checkingEmail || countdown.remaining > 0} onClick={checkEmail}>
-                {checkingEmail ? "확인 중" : countdown.remaining > 0 ? `${countdown.remaining}초 후 확인` : "중복 확인"}
+            suffix={
+              <ActionButton
+                type="button"
+                variant="ghost"
+                size="small"
+                loading={checkingEmail}
+                disabled={pending || checkingEmail || countdown.remaining > 0}
+                onClick={checkEmail}
+              >
+                {checkingEmail
+                  ? '확인 중'
+                  : countdown.remaining > 0
+                    ? `${countdown.remaining}초 후 확인`
+                    : '중복 확인'}
               </ActionButton>
-            )}
+            }
           >
-            <TextFieldInput type="email" autoComplete="email" placeholder="example@email.com" />
+            <TextFieldInput
+              type="email"
+              autoComplete="email"
+              placeholder="example@email.com"
+            />
           </TextField>
-          {feedback && <p className={`email-check-feedback email-check-feedback--${feedback.tone}`} role="status" aria-live="polite">{feedback.message}</p>}
+          {feedback && (
+            <p
+              className={`email-check-feedback email-check-feedback--${feedback.tone}`}
+              role="status"
+              aria-live="polite"
+            >
+              {feedback.message}
+            </p>
+          )}
         </div>
-        <TextField label="비밀번호" description="영문, 숫자, 특수문자를 포함해 8자 이상" invalid={!!passwordError} errorMessage={passwordError} disabled={pending}>
-          <TextFieldInput type="password" autoComplete="new-password" value={password} onChange={(event) => setPassword(event.currentTarget.value)} />
+        <TextField
+          label="비밀번호"
+          description="영문, 숫자, 특수문자를 포함해 8자 이상"
+          invalid={!!passwordError}
+          errorMessage={passwordError}
+          disabled={pending}
+        >
+          <TextFieldInput
+            type="password"
+            autoComplete="new-password"
+            value={password}
+            onChange={(event) => setPassword(event.currentTarget.value)}
+          />
         </TextField>
-        <TextField label="비밀번호 확인" invalid={!!passwordConfirmError} errorMessage={passwordConfirmError} disabled={pending}>
-          <TextFieldInput type="password" autoComplete="new-password" value={passwordConfirm} onChange={(event) => setPasswordConfirm(event.currentTarget.value)} />
+        <TextField
+          label="비밀번호 확인"
+          invalid={!!passwordConfirmError}
+          errorMessage={passwordConfirmError}
+          disabled={pending}
+        >
+          <TextFieldInput
+            type="password"
+            autoComplete="new-password"
+            value={passwordConfirm}
+            onChange={(event) => setPasswordConfirm(event.currentTarget.value)}
+          />
         </TextField>
-        <TextField label="이름" description="선택 입력 · 7자 이하" invalid={!!nameError} errorMessage={nameError} disabled={pending}>
-          <TextFieldInput autoComplete="name" value={userName} onChange={(event) => setUserName(event.currentTarget.value)} />
+        <TextField
+          label="이름"
+          description="선택 입력 · 7자 이하"
+          invalid={!!nameError}
+          errorMessage={nameError}
+          disabled={pending}
+        >
+          <TextFieldInput
+            autoComplete="name"
+            value={userName}
+            onChange={(event) => setUserName(event.currentTarget.value)}
+          />
         </TextField>
-        <TextField label="연락처" description="선택 입력" invalid={!!phoneError} errorMessage={phoneError} disabled={pending}>
-          <TextFieldInput type="tel" autoComplete="tel" placeholder="010-0000-0000" value={phone} onChange={(event) => setPhone(event.currentTarget.value)} />
+        <TextField
+          label="연락처"
+          description="선택 입력"
+          invalid={!!phoneError}
+          errorMessage={phoneError}
+          disabled={pending}
+        >
+          <TextFieldInput
+            type="tel"
+            autoComplete="tel"
+            placeholder="010-0000-0000"
+            value={phone}
+            onChange={(event) => setPhone(event.currentTarget.value)}
+          />
         </TextField>
         <Checkbox
           checked={acceptedRequiredTerms}
@@ -170,8 +259,15 @@ export function SignupForm() {
         />
         {formMessage && <Callout tone="critical" description={formMessage} />}
         {generalError && <Callout tone="critical" description={generalError} />}
-        <ActionButton type="submit" variant="brandSolid" loading={pending} disabled={pending || countdown.remaining > 0}>
-          {countdown.remaining > 0 ? `${countdown.remaining}초 후 다시 시도` : "가입하기"}
+        <ActionButton
+          type="submit"
+          variant="brandSolid"
+          loading={pending}
+          disabled={pending || countdown.remaining > 0}
+        >
+          {countdown.remaining > 0
+            ? `${countdown.remaining}초 후 다시 시도`
+            : '가입하기'}
         </ActionButton>
       </form>
     </>
@@ -179,13 +275,15 @@ export function SignupForm() {
 }
 
 function retryMessage(remainingSeconds: number) {
-  return `요청이 너무 많아요. ${remainingSeconds > 0 ? `${remainingSeconds}초 후` : "잠시 후"} 다시 시도해 주세요.`;
+  return `요청이 너무 많아요. ${remainingSeconds > 0 ? `${remainingSeconds}초 후` : '잠시 후'} 다시 시도해 주세요.`;
 }
 
 function signupErrorMessage(error: ApiError, remainingSeconds: number) {
-  if (error.code === "EMAIL_ALREADY_EXISTS") return "이미 가입된 이메일입니다. 다른 이메일을 사용해 주세요.";
+  if (error.code === 'EMAIL_ALREADY_EXISTS')
+    return '이미 가입된 이메일입니다. 다른 이메일을 사용해 주세요.';
   if (error.status === 429) return retryMessage(remainingSeconds);
   if (error.status === 0) return error.message;
-  if (error.status === 400 || error.status === 422) return "입력한 정보를 확인해 주세요.";
-  return "회원가입에 실패했어요. 잠시 후 다시 시도해 주세요.";
+  if (error.status === 400 || error.status === 422)
+    return '입력한 정보를 확인해 주세요.';
+  return '회원가입에 실패했어요. 잠시 후 다시 시도해 주세요.';
 }

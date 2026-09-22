@@ -1,0 +1,84 @@
+name: Frontend CI
+
+# Pull Request에서는 코드 검증만 한다.
+# main 병합으로 발생한 push에서는 검증을 통과한 dist/를 SHA Artifact로 보관한다.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# 같은 Pull Request에 새 Commit이 올라오면 이전 검증은 더 이상 의미가 없으므로 취소한다.
+# main 병합 후 Artifact 생성 작업은 취소하지 않는다.
+concurrency:
+  group: frontend-ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  validate:
+    name: Test, Lint, Build
+    # 최신 main 상태를 반영한 Pull Request에서만 병합 전 검증을 한다.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Vite 8은 Node.js 22.12 이상을 요구한다.
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      # package-lock.json 기준으로 의존성을 재현 가능하게 설치한다.
+      - name: Install dependencies
+        run: npm ci
+
+      # 가장 빠른 정적 검사를 먼저 실행해 불필요한 테스트·빌드를 줄인다.
+      - name: Run lint
+        run: npm run lint
+
+      # package.json의 test 스크립트가 node --test를 실행한다.
+      - name: Run tests
+        run: npm test
+
+      - name: Build frontend
+        run: npm run build
+
+  build-artifact:
+    name: Main Artifact Build
+    # PR 검증을 통과해 main에 병합된 최종 Commit으로만 배포 Artifact를 만든다.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      # main 병합 후에는 동일한 Test·Lint를 반복하지 않고 최종 dist/만 생성한다.
+      - name: Build frontend
+        run: npm run build
+
+      - name: Upload production artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-${{ github.sha }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 90

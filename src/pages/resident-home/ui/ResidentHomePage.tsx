@@ -1,11 +1,14 @@
-import { IconChevronRightLine, IconSparkle2Line } from "@karrotmarket/react-monochrome-icon";
-import { Link } from "react-router-dom";
-import { ActionButton } from "seed-design/ui/action-button";
-import { useAuth } from "@/entities/session";
-import { PageTitle, StateBoundary, type ViewState } from "@/shared/ui";
-import { ConversationList } from "@/widgets/conversation-list";
+import {
+  IconChevronRightLine,
+  IconSparkle2Line,
+} from '@karrotmarket/react-monochrome-icon';
+import { Link } from 'react-router-dom';
+import { ActionButton } from 'seed-design/ui/action-button';
+import { useAuth } from '@/entities/session';
+import { PageTitle } from '@/shared/ui';
+import { ConversationList } from '@/widgets/conversation-list';
 
-export function ResidentHomePage({ state }: { state: ViewState }) {
+export function ResidentHomePage() {
   const auth = useAuth();
   if (auth.user && auth.user.roomId == null) {
     return <><PageTitle eyebrow="입주민 시작하기" title="초대코드를 입력해 주세요" description="관리자에게 받은 초대코드로 건물과 호실을 연결할 수 있어요." /><section className="panel onboarding-empty"><h2>아직 연결된 호실이 없어요</h2><p>호실을 연결하면 AI 문의와 민원 기능을 이용할 수 있습니다.</p><Link to="/resident/connect"><ActionButton variant="brandSolid">초대코드 입력하기</ActionButton></Link></section></>;

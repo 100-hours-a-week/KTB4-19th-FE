@@ -8,9 +8,11 @@ export type ManagerProfileRequest = {
   userName: string;
   phone: string;
   agreements: Array<{
-    termsType: "SERVICE" | "PRIVACY" | "MARKETING";
+    termsType: 'SERVICE' | 'PRIVACY' | 'MARKETING';
     isAgreed: boolean;
   }>;
 };
 
-export function buildManagerProfileRequest(form: ManagerProfileForm): ManagerProfileRequest;
+export function buildManagerProfileRequest(
+  form: ManagerProfileForm,
+): ManagerProfileRequest;

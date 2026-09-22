@@ -1,4 +1,4 @@
-import type { ErrorResponseBody, FieldViolation } from "./types";
+import type { ErrorResponseBody, FieldViolation } from './types';
 
 export class ApiError extends Error {
   readonly status: number;
@@ -14,7 +14,7 @@ export class ApiError extends Error {
     retryAfterSeconds?: number;
   }) {
     super(params.message);
-    this.name = "ApiError";
+    this.name = 'ApiError';
     this.status = params.status;
     this.code = params.code;
     this.violations = params.violations ?? [];
@@ -26,26 +26,38 @@ export class ApiError extends Error {
   }
 
   violationFor(field: string) {
-    return this.violations.find((violation) => violation.field === field)?.reason;
+    return this.violations.find((violation) => violation.field === field)
+      ?.reason;
   }
 }
 
-const FALLBACK_MESSAGE = "요청을 처리하지 못했어요. 잠시 후 다시 시도해 주세요.";
+const fallbackMessage = '요청을 처리하지 못했어요. 잠시 후 다시 시도해 주세요.';
 
-export function toApiError(status: number, body: ErrorResponseBody | null): ApiError {
+export function toApiError(
+  status: number,
+  body: ErrorResponseBody | null,
+): ApiError {
   const details = body?.error?.details;
-  const violations = details?.violations ?? (details?.field && details.reason ? [{ field: details.field, reason: details.reason }] : []);
+  const violations =
+    details?.violations ??
+    (details?.field && details.reason
+      ? [{ field: details.field, reason: details.reason }]
+      : []);
   return new ApiError({
     status,
     code: body?.error?.code,
-    message: body?.message ?? FALLBACK_MESSAGE,
+    message: body?.message ?? fallbackMessage,
     violations,
     retryAfterSeconds: details?.retryAfterSeconds,
   });
 }
 
 export function networkError() {
-  return new ApiError({ status: 0, code: "NETWORK_ERROR", message: "네트워크 연결을 확인해 주세요." });
+  return new ApiError({
+    status: 0,
+    code: 'NETWORK_ERROR',
+    message: '네트워크 연결을 확인해 주세요.',
+  });
 }
 
 export function isApiError(error: unknown): error is ApiError {

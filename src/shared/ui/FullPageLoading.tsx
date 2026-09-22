@@ -1,4 +1,4 @@
-import { ProgressCircle } from "seed-design/ui/progress-circle";
+import { ProgressCircle } from 'seed-design/ui/progress-circle';
 
 export function FullPageLoading() {
   return (

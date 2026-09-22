@@ -1,1 +1,1 @@
-export { DeviceFrame } from "./ui/DeviceFrame";
+export { DeviceFrame } from './ui/DeviceFrame';

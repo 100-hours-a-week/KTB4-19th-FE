@@ -1,1 +1,6 @@
-export { buildingApi, type BuildingRegistrationRequest, type BuildingResponse } from "./api/buildingApi";
+export {
+  buildingApi,
+  type BuildingDetailResponse,
+  type BuildingRegistrationRequest,
+  type BuildingResponse,
+} from './api/buildingApi';

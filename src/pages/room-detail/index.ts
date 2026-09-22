@@ -1,1 +1,1 @@
-export { RoomDetailPage } from "./ui/RoomDetailPage";
+export { RoomDetailPage } from './ui/RoomDetailPage';
