@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/shared/api';
 
 const managerBuildingBase = '/managers/me/building';
@@ -26,3 +27,15 @@ export const buildingApi = {
     }),
   detail: () => apiRequest<BuildingDetailResponse>(managerBuildingBase),
 };
+
+export const buildingKeys = {
+  detail: () => ['buildings', 'manager', 'detail'] as const,
+};
+
+export function useManagerBuilding(enabled = true) {
+  return useQuery({
+    queryKey: buildingKeys.detail(),
+    queryFn: () => buildingApi.detail(),
+    enabled,
+  });
+}
