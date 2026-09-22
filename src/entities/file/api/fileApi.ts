@@ -31,6 +31,8 @@ export type RuleDocumentResponse = {
   title: string;
   version: number;
   updatedAt: string;
+  fileUrl?: string;
+  originalName?: string;
 };
 
 const extensionOf = (file: File) => {
@@ -73,6 +75,9 @@ export const fileApi = {
 
   listDocuments: () =>
     apiRequest<RuleDocumentResponse[]>("/managers/me/documents"),
+
+  getDocument: (documentId: number) =>
+    apiRequest<RuleDocumentResponse>(`/managers/me/documents/${documentId}`),
 
   updateDocument: (documentId: number, title: string) =>
     apiRequest<RuleDocumentResponse>(`/managers/me/documents/${documentId}`, {

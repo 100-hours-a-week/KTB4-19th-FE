@@ -13,9 +13,8 @@ export function DocumentDetailPage() {
   const [state, setState] = useState<'loading' | 'default' | 'error'>('loading');
 
   useEffect(() => {
-    void fileApi.listDocuments().then((items) => {
-      const found = items.find((item) => String(item.documentId) === documentId);
-      if (!found) { setState('error'); return; }
+    if (!documentId) return;
+    void fileApi.getDocument(Number(documentId)).then((found) => {
       setDocument(found); setTitle(found.title); setState('default');
     }).catch(() => setState('error'));
   }, [documentId]);
@@ -33,6 +32,7 @@ export function DocumentDetailPage() {
         {document && <>
           <TextField label="문서 제목"><TextFieldInput value={title} disabled={!editing} onChange={(event) => setTitle(event.target.value)} /></TextField>
           <p>버전 {document.version} · 첨부파일 {document.attachmentId}</p>
+          {document.fileUrl && <p><a href={document.fileUrl} target="_blank" rel="noreferrer">첨부 문서 열기</a></p>}
           <p>수정 {new Date(document.updatedAt).toLocaleDateString('ko-KR')}</p>
           <div className="button-row form-actions">
             <Link to="/manager/documents"><ActionButton variant="neutralOutline">목록</ActionButton></Link>
