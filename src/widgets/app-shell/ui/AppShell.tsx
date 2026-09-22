@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
+import { useManagerBuilding } from '@/entities/building';
 import { useAuth } from '@/entities/session';
 import { ViewModeToggle } from '@/features/switch-view-mode';
 import type { RouteRole } from '@/shared/config';
@@ -13,6 +14,7 @@ type Props = {
 
 export function AppShell({ role, children }: Props) {
   const location = useLocation();
+  const managerBuildingQuery = useManagerBuilding(role === 'manager');
   const items = role === 'manager' ? managerNav : residentNav;
   const withRouteContext = (to: string) =>
     role === 'manager' && location.search ? `${to}${location.search}` : to;
@@ -75,14 +77,14 @@ export function AppShell({ role, children }: Props) {
 
 function SidebarProfile({ role }: { role: RouteRole }) {
   const auth = useAuth();
-  const fallbackName = role === 'manager' ? '김관리' : '박입주';
+  const fallbackName = role === 'manager' ? '관리자' : '입주민';
   const name = auth.user?.userName ?? fallbackName;
   return (
     <div className="sidebar-profile">
       <span className="avatar">{name.slice(0, 1)}</span>
       <div>
         <strong>{name}</strong>
-        <small>{auth.user?.email ?? 'A타워'}</small>
+        <small>{auth.user?.email}</small>
       </div>
     </div>
   );

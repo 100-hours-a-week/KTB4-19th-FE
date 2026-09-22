@@ -6,51 +6,94 @@ import {
 } from '@karrotmarket/react-monochrome-icon';
 import type { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '@/entities/session';
 import { ActionButton } from 'seed-design/ui/action-button';
+import { useManagerBuilding } from '@/entities/building';
 import {
   ComplaintStatusBadge,
+  useManagerComplaintSummary,
   useManagerComplaints,
 } from '@/entities/complaint';
+import { useAuth } from '@/entities/session';
+import { useManagerRoomSummary } from '@/entities/room';
+import { isApiError } from '@/shared/api';
 import { formatListTime, formatRoomNo } from '@/shared/lib';
-import { MetricCard, PageTitle } from '@/shared/ui';
+import {
+  FullPageLoading,
+  MetricCard,
+  PageTitle,
+  StateBoundary,
+} from '@/shared/ui';
 
 export function ManagerHomePage() {
   const auth = useAuth();
   const location = useLocation();
-  if (auth.user?.buildingId == null) {
+  const buildingQuery = useManagerBuilding();
+  const roomSummaryQuery = useManagerRoomSummary();
+  const complaintSummaryQuery = useManagerComplaintSummary();
+
+  if (isApiError(buildingQuery.error) && buildingQuery.error.status === 404)
+    return <BuildingRequired />;
+
+  const requiredQueries = [
+    buildingQuery,
+    roomSummaryQuery,
+    complaintSummaryQuery,
+  ];
+  if (requiredQueries.some((query) => query.isPending))
+    return <FullPageLoading />;
+  if (requiredQueries.some((query) => query.isError)) {
     return (
-      <>
-        <PageTitle eyebrow="관리자 시작하기" title="관리할 건물을 등록해 주세요" description="건물을 등록하면 호실과 운영규칙을 관리할 수 있어요." />
-        <section className="panel onboarding-empty">
-          <h2>아직 관리 중인 건물이 없어요</h2>
-          <p>건물 등록을 완료하면 관리자 기능을 사용할 수 있습니다.</p>
-          <Link to="/manager/building/new"><ActionButton variant="brandSolid">건물 등록하기</ActionButton></Link>
-        </section>
-      </>
+      <StateBoundary
+        state="error"
+        onRetry={() => {
+          void Promise.all(requiredQueries.map((query) => query.refetch()));
+        }}
+      >
+        {null}
+      </StateBoundary>
     );
   }
+
+  const building = buildingQuery.data;
+  const roomSummary = roomSummaryQuery.data;
+  const complaintSummary = complaintSummaryQuery.data;
+  if (!building || !roomSummary || !complaintSummary)
+    return <FullPageLoading />;
+
+  const occupancyRate = roomSummary.totalCount
+    ? Math.round((roomSummary.livingCount / roomSummary.totalCount) * 100)
+    : 0;
+  const activeComplaintCount =
+    complaintSummary.pendingCount + complaintSummary.inProgressCount;
   const roomsPath = `/manager/rooms${location.search}`;
   return (
     <>
       <PageTitle
         eyebrow="오늘의 건물 운영"
-        title="안녕하세요, 김관리 님"
-        description="A타워의 중요한 변화를 한눈에 확인하세요."
+        title={`안녕하세요, ${auth.user?.userName ?? '관리자'} 님`}
+        description={`${building.buildingName ?? '관리 중인 건물'}의 중요한 변화를 한눈에 확인하세요.`}
       />
       <section className="metrics-grid">
         <MetricCard
           label="입주 세대"
-          value="5 / 14"
-          helper="입주율 36%"
+          value={`${roomSummary.livingCount} / ${roomSummary.totalCount}`}
+          helper={`입주율 ${occupancyRate}%`}
           tone="brand"
         />
-        <MetricCard label="초대 중" value={2} helper="7일 안에 만료" />
-        <MetricCard label="처리 전 민원" value={5} helper="긴급 2건" />
+        <MetricCard
+          label="초대 중"
+          value={roomSummary.invitedCount}
+          helper="입주 연결 대기 중"
+        />
+        <MetricCard
+          label="처리 전 민원"
+          value={activeComplaintCount}
+          helper={`접수 ${complaintSummary.pendingCount}건 · 처리 중 ${complaintSummary.inProgressCount}건`}
+        />
         <MetricCard
           label="이번 주 완료"
-          value={12}
-          helper="지난주보다 3건 많아요"
+          value={complaintSummary.weeklyDoneCount}
+          helper="이번 주 처리 완료"
         />
       </section>
       <section className="panel">
@@ -75,17 +118,29 @@ export function ManagerHomePage() {
             to="/manager/documents"
             icon={<IconDocumentPlusLine />}
             title="운영규칙"
-            text="등록 문서 3개"
+            text="운영규칙 관리"
           />
           <QuickLink
             to="/manager/complaints"
             icon={<IconDocumentLine />}
             title="민원 관리"
-            text="처리 전 5건"
+            text={`처리 전 ${activeComplaintCount}건`}
           />
         </div>
       </section>
     </>
+  );
+}
+
+function BuildingRequired() {
+  return (
+    <div className="result-state">
+      <h2>건물 정보가 필요해요</h2>
+      <p>등록된 건물이 없어요. 건물을 먼저 등록해 주세요.</p>
+      <Link className="text-link" to="/manager/building/new">
+        건물 등록으로 이동
+      </Link>
+    </div>
   );
 }
 
