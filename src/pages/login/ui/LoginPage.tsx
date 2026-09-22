@@ -1,12 +1,12 @@
-import { useState, type FormEvent } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ActionButton } from 'seed-design/ui/action-button';
-import { Callout } from 'seed-design/ui/callout';
-import { TextField, TextFieldInput } from 'seed-design/ui/text-field';
-import { roleHome, useAuth } from '@/entities/session';
-import { isApiError, type ApiError } from '@/shared/api';
-import { useRetryCountdown } from '@/shared/lib';
-import { AuthLayout } from '@/widgets/auth-layout';
+import { useState, type FormEvent } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { ActionButton } from "seed-design/ui/action-button";
+import { Callout } from "seed-design/ui/callout";
+import { TextField, TextFieldInput } from "seed-design/ui/text-field";
+import { useAuth } from "@/entities/session";
+import { isApiError, type ApiError } from "@/shared/api";
+import { useRetryCountdown } from "@/shared/lib";
+import { AuthLayout } from "@/widgets/auth-layout";
 
 export function LoginPage() {
   const auth = useAuth();
@@ -32,12 +32,10 @@ export function LoginPage() {
     setPending(true);
     setError(null);
     try {
-      const user = await auth.login({ email, password });
-      const from = signupState?.from;
-      navigate(
-        from && user.userRole !== 'NONE' ? from : roleHome(user.userRole),
-        { replace: true },
-      );
+      await auth.login({ email, password });
+      // 로그인 직후에는 온보딩 상태를 확인하는 HomeRedirect를 거친다.
+      // 역할만 보고 /manager로 이동하면 건물·호실 미등록 사용자가 온보딩을 건너뛸 수 있다.
+      navigate("/", { replace: true });
     } catch (caught) {
       if (!isApiError(caught)) throw caught;
       setError(caught);

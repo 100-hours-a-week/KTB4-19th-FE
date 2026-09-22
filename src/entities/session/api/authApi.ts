@@ -27,10 +27,21 @@ export type UserAgreement = {
 export type AuthUser = {
   userId: number;
   userRole: UserRole;
+  buildingId?: number | null;
+  roomId?: number | null;
   email: string;
   userName: string | null;
   phone?: string | null;
   agreements?: UserAgreement[];
+  onboarding?: OnboardingStatus;
+};
+
+export type OnboardingStatus = {
+  userRole: UserRole;
+  buildingId: number | null;
+  hasRooms: boolean;
+  residentConnected: boolean;
+  nextStep: "ROLE_SELECTION" | "BUILDING_REGISTRATION" | "ROOM_REGISTRATION" | "INVITATION_CODE" | "HOME";
 };
 
 export type ManagerProfileRequest = {
@@ -104,9 +115,7 @@ export const authApi = {
       body: request,
     }),
   updateManagerProfile: (request: ManagerProfileRequest) =>
-    apiRequest<ManagerProfileResponse>(`${usersBase}/me`, {
-      method: 'PATCH',
-      body: request,
-    }),
-  me: () => apiRequest<AuthUser>(`${usersBase}/me`),
+    apiRequest<ManagerProfileResponse>("/users/me", { method: "PATCH", body: request }),
+  me: () => apiRequest<AuthUser>("/users/me"),
+  onboardingStatus: () => apiRequest<OnboardingStatus>("/users/me/onboarding-status"),
 };
