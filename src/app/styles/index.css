@@ -297,6 +297,7 @@ button { cursor: pointer; }
 .terms-page h1 { font-size: var(--seed-font-size-t12); }
 .terms-date { color: var(--seed-color-fg-neutral-subtle); margin-top: var(--seed-dimension-x2); }
 .terms-page h2 { margin-top: var(--seed-dimension-x8); font-size: var(--seed-font-size-t7); }
+.terms-content { color: var(--seed-color-fg-neutral-muted); margin-top: var(--seed-dimension-x5); line-height: 1.8; white-space: pre-wrap; }
 .terms-page article > p:not(.eyebrow):not(.terms-date) { color: var(--seed-color-fg-neutral-muted); margin-top: var(--seed-dimension-x3); line-height: 1.8; }
 
 .bottom-nav { display: none; }

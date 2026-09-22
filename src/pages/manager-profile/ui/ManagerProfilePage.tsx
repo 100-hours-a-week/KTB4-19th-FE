@@ -9,6 +9,7 @@ import {
   buildManagerProfileRequest,
   useAuth,
 } from '@/entities/session';
+import { useTerms } from '@/entities/terms';
 import { isApiError } from '@/shared/api';
 import { FullPageLoading, Logo } from '@/shared/ui';
 
@@ -25,6 +26,14 @@ export function ManagerProfilePage() {
   const [pending, setPending] = useState(false);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const termsQuery = useTerms();
+  const terms = termsQuery.data?.terms ?? [];
+  const serviceTitle =
+    terms.find((item) => item.termsType === 'SERVICE')?.title ?? '약관';
+  const privacyTitle =
+    terms.find((item) => item.termsType === 'PRIVACY')?.title ?? '약관';
+  const marketingTitle =
+    terms.find((item) => item.termsType === 'MARKETING')?.title ?? '약관';
 
   useEffect(() => {
     if (auth.status !== 'authenticated') return;
@@ -140,14 +149,14 @@ export function ManagerProfilePage() {
         <div className="manager-terms">
           <label>
             <input type="checkbox" checked readOnly />{' '}
-            <Link to="/terms/service" target="_blank">
-              (필수) 서비스 이용약관 동의
+            <Link to="/terms/SERVICE" target="_blank">
+              (필수) {serviceTitle} 동의
             </Link>
           </label>
           <label>
             <input type="checkbox" checked readOnly />{' '}
-            <Link to="/terms/privacy" target="_blank">
-              (필수) 개인정보 수집·이용 동의
+            <Link to="/terms/PRIVACY" target="_blank">
+              (필수) {privacyTitle} 동의
             </Link>
           </label>
           <label>
@@ -156,7 +165,7 @@ export function ManagerProfilePage() {
               checked={marketingAgreed}
               onChange={(event) => setMarketingAgreed(event.target.checked)}
             />{' '}
-            (선택) 마케팅 정보 수신
+            (선택) {marketingTitle}
           </label>
         </div>
         {errorMessage && <Callout tone="critical" description={errorMessage} />}
