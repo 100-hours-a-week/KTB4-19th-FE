@@ -1,7 +1,7 @@
 name: Frontend CI
 
 # Pull Request에서는 코드 검증만 한다.
-# main 병합으로 발생한 push에서는 검증을 통과한 dist/를 SHA Artifact로 보관한다.
+# main 병합으로 발생한 push에서는 검증을 통과한 dist/를 Commit SHA 앞 7자리 Artifact로 보관한다.
 on:
   pull_request:
     branches: [main]
@@ -75,10 +75,15 @@ jobs:
       - name: Build frontend
         run: npm run build
 
+      # GitHub 화면에 표시되는 짧은 Commit SHA와 같은 앞 7자리를 Artifact 이름에 사용한다.
+      - name: Set short Artifact tag
+        id: artifact-tag
+        run: echo "value=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
       - name: Upload production artifact
         uses: actions/upload-artifact@v4
         with:
-          name: frontend-${{ github.sha }}
+          name: frontend-${{ steps.artifact-tag.outputs.value }}
           path: dist/
           if-no-files-found: error
           retention-days: 90
