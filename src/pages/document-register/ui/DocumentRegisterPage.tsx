@@ -2,13 +2,14 @@ import { IconCheckmarkCircleFill, IconDocumentLine, IconDocumentPlusLine } from 
 import { Badge } from "@seed-design/react";
 import heic2any from "heic2any";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ActionButton } from "seed-design/ui/action-button";
 import { TextField, TextFieldInput } from "seed-design/ui/text-field";
 import { PageTitle } from "@/shared/ui";
 import { fileApi } from "@/entities/file";
 
 export function DocumentRegisterPage() {
+  const navigate = useNavigate();
   const [saved, setSaved] = useState(false);
   const [title, setTitle] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -46,6 +47,7 @@ export function DocumentRegisterPage() {
       await fileApi.complete(uploadInfo.attachmentId);
       await fileApi.createDocument(uploadInfo.attachmentId, title.trim());
       setSaved(true);
+      navigate('/manager/documents');
     } catch (exception) {
       setError(exception instanceof Error ? exception.message : "문서 업로드에 실패했습니다.");
     } finally {

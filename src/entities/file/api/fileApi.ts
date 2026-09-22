@@ -73,4 +73,10 @@ export const fileApi = {
 
   listDocuments: () =>
     apiRequest<RuleDocumentResponse[]>("/managers/me/documents"),
+
+  updateDocument: (documentId: number, title: string) =>
+    apiRequest<RuleDocumentResponse>(`/managers/me/documents/${documentId}`, {
+      method: "PATCH",
+      body: { title },
+    }),
 };

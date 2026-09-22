@@ -76,10 +76,8 @@ export function DocumentsPage() {
                   <small>수정 {new Date(doc.updatedAt).toLocaleDateString('ko-KR')}</small>
                 </div>
                 <div className="button-row">
-                  <ActionButton variant="neutralOutline">
-                    상세 보기
-                  </ActionButton>
-                  <ActionButton variant="ghost">수정</ActionButton>
+                  <Link to={`/manager/documents/${doc.documentId}`}><ActionButton variant="neutralOutline">상세 보기</ActionButton></Link>
+                  <Link to={`/manager/documents/${doc.documentId}`}><ActionButton variant="ghost">수정</ActionButton></Link>
                 </div>
               </article>
             ))}
