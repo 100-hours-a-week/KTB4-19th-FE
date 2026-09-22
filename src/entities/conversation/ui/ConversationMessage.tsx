@@ -24,11 +24,19 @@ export function ConversationMessage({
   );
 }
 
-export function PendingResidentMessage({ content }: { content: string }) {
+export function PendingResidentMessage({
+  content,
+  imageCount = 0,
+}: {
+  content: string;
+  imageCount?: number;
+}) {
   return (
     <div className="message resident message--pending" aria-live="polite">
-      <p>{content}</p>
-      <span className="message-time">전송 중</span>
+      {content && <p>{content}</p>}
+      <span className="message-time">
+        {imageCount > 0 ? `사진 ${imageCount}장과 함께 전송 중` : '전송 중'}
+      </span>
     </div>
   );
 }
