@@ -164,6 +164,8 @@ button { cursor: pointer; }
 .document-card h2 { font-size: var(--seed-font-size-t6); line-height: 1.4; margin-top: var(--seed-dimension-x4); }
 .document-card p, .document-card small { color: var(--seed-color-fg-neutral-subtle); margin-top: var(--seed-dimension-x2); }
 .document-card .button-row { margin-top: var(--seed-dimension-x5); }
+.document-preview { display: grid; gap: var(--seed-dimension-x3); margin-top: var(--seed-dimension-x4); }
+.document-preview__frame { width: 100%; min-height: 620px; border: 1px solid var(--seed-color-stroke-neutral-muted); border-radius: var(--seed-radius-r3); background: #f7f7f7; }
 .notification-row { padding: var(--seed-dimension-x4); border-radius: var(--seed-radius-r3); }
 .notification-row.unread { background: var(--seed-color-bg-brand-weak); }
 .notification-icon, .conversation-icon { width: 42px; height: 42px; display: grid; place-items: center; border-radius: var(--seed-radius-full); color: var(--seed-color-fg-brand); background: var(--seed-color-bg-layer-default); flex: 0 0 auto; }

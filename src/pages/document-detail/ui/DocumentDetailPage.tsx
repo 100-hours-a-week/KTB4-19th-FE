@@ -32,7 +32,14 @@ export function DocumentDetailPage() {
         {document && <>
           <TextField label="문서 제목"><TextFieldInput value={title} disabled={!editing} onChange={(event) => setTitle(event.target.value)} /></TextField>
           <p>버전 {document.version} · 첨부파일 {document.attachmentId}</p>
-          {document.fileUrl && <p><a href={document.fileUrl} target="_blank" rel="noreferrer">첨부 문서 열기</a></p>}
+          {document.fileUrl && <div className="document-preview">
+            <iframe
+              title={`${document.title} 미리보기`}
+              src={document.fileUrl}
+              className="document-preview__frame"
+            />
+            <a href={document.fileUrl} target="_blank" rel="noreferrer">새 탭에서 열기</a>
+          </div>}
           <p>수정 {new Date(document.updatedAt).toLocaleDateString('ko-KR')}</p>
           <div className="button-row form-actions">
             <Link to="/manager/documents"><ActionButton variant="neutralOutline">목록</ActionButton></Link>
