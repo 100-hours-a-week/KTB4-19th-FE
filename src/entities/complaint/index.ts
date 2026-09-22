@@ -2,6 +2,7 @@ export {
   complaintApi,
   complaintKeys,
   useManagerComplaint,
+  useManagerComplaintSummary,
   useManagerComplaints,
   useResidentComplaint,
   useResidentConnection,

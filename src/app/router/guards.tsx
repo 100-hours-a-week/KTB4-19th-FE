@@ -32,8 +32,8 @@ export function HomeRedirect() {
   const nextStep = auth.user.onboarding?.nextStep;
   if (nextStep === "ROLE_SELECTION") return <Navigate to="/auth/role" replace />;
   if (nextStep === "BUILDING_REGISTRATION") return <Navigate to="/manager/building/new" replace />;
-  if (nextStep === "ROOM_REGISTRATION" && auth.user.onboarding?.buildingId) {
-    return <Navigate to={`/manager/buildings/${auth.user.onboarding.buildingId}/rooms/bulk`} replace />;
+  if (nextStep === "ROOM_REGISTRATION") {
+    return <Navigate to="/manager/building/rooms/bulk" replace />;
   }
   if (nextStep === "INVITATION_CODE") return <Navigate to="/resident/connect" replace />;
   return <Navigate to={roleHome(auth.user.userRole)} replace />;

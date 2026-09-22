@@ -1,7 +1,7 @@
 import { IconBellLine } from '@karrotmarket/react-monochrome-icon';
-import { NotificationBadge } from '@seed-design/react';
 import type { ReactNode } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
+import { useManagerBuilding } from '@/entities/building';
 import { useAuth } from '@/entities/session';
 import { ViewModeToggle } from '@/features/switch-view-mode';
 import type { RouteRole } from '@/shared/config';
@@ -15,6 +15,7 @@ type Props = {
 
 export function AppShell({ role, children }: Props) {
   const location = useLocation();
+  const managerBuildingQuery = useManagerBuilding(role === 'manager');
   const items = role === 'manager' ? managerNav : residentNav;
   const withRouteContext = (to: string) =>
     role === 'manager' && location.search ? `${to}${location.search}` : to;
@@ -51,18 +52,20 @@ export function AppShell({ role, children }: Props) {
       <div className="app-main">
         <header className="topbar">
           <div>
-            <span className="topbar-building">A타워</span>
-            <span className="prototype-badge">MOCK PROTOTYPE</span>
+            <span className="topbar-building">
+              {role === 'manager'
+                ? (managerBuildingQuery.data?.buildingName ?? '관리 건물')
+                : 'A타워'}
+            </span>
           </div>
           <div className="topbar-actions">
             <ViewModeToggle className="view-mode-toggle--topbar" />
             <Link
               className="notification-link"
               to={withRouteContext(`/${role}/notifications`)}
-              aria-label="알림 2개"
+              aria-label="알림"
             >
               <IconBellLine />
-              <NotificationBadge>2</NotificationBadge>
             </Link>
           </div>
         </header>
@@ -89,14 +92,14 @@ export function AppShell({ role, children }: Props) {
 
 function SidebarProfile({ role }: { role: RouteRole }) {
   const auth = useAuth();
-  const fallbackName = role === 'manager' ? '김관리' : '박입주';
+  const fallbackName = role === 'manager' ? '관리자' : '입주민';
   const name = auth.user?.userName ?? fallbackName;
   return (
     <div className="sidebar-profile">
       <span className="avatar">{name.slice(0, 1)}</span>
       <div>
         <strong>{name}</strong>
-        <small>{auth.user?.email ?? 'A타워'}</small>
+        <small>{auth.user?.email}</small>
       </div>
     </div>
   );

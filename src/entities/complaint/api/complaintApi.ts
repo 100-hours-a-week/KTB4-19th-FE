@@ -163,6 +163,7 @@ type NormalizedResidentComplaintListParams = Required<
 export const complaintKeys = {
   all: ['complaints'] as const,
   managerLists: () => [...complaintKeys.all, 'manager', 'list'] as const,
+  managerSummary: () => [...complaintKeys.all, 'manager', 'summary'] as const,
   managerList: (
     params: Required<Pick<ManagerComplaintListParams, 'page' | 'size'>> &
       Omit<ManagerComplaintListParams, 'page' | 'size'>,
@@ -236,6 +237,13 @@ export function useManagerComplaints(params: ManagerComplaintListParams = {}) {
   return useQuery({
     queryKey: complaintKeys.managerList(normalized),
     queryFn: () => complaintApi.managerList(normalized),
+  });
+}
+
+export function useManagerComplaintSummary() {
+  return useQuery({
+    queryKey: complaintKeys.managerSummary(),
+    queryFn: () => complaintApi.managerSummary(),
   });
 }
 
