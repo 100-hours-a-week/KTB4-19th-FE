@@ -3,7 +3,13 @@ import {
   IconXmarkFill,
 } from '@karrotmarket/react-monochrome-icon';
 import { PrefixIcon } from '@seed-design/react';
-import { useRef, useState, type ChangeEvent, type KeyboardEvent } from 'react';
+import {
+  useRef,
+  useState,
+  type ChangeEvent,
+  type DragEvent,
+  type KeyboardEvent,
+} from 'react';
 import { ActionButton } from 'seed-design/ui/action-button';
 import { TextField, TextFieldTextarea } from 'seed-design/ui/text-field';
 import {
@@ -47,6 +53,8 @@ export function ChatComposer({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [preparingImages, setPreparingImages] = useState(false);
   const [imageError, setImageError] = useState<string | null>(null);
+  const [draggingFiles, setDraggingFiles] = useState(false);
+  const canAddImages = !sending && !preparingImages;
   const canSend =
     (value.trim().length > 0 || images.length > 0) &&
     !sending &&
@@ -68,6 +76,26 @@ export function ChatComposer({
     const files = Array.from(event.target.files ?? []);
     event.target.value = '';
     addImages(files);
+  };
+
+  const dragImages = (event: DragEvent<HTMLFormElement>) => {
+    if (!event.dataTransfer.types.includes('Files')) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = canAddImages ? 'copy' : 'none';
+    setDraggingFiles(canAddImages);
+  };
+
+  const leaveImages = (event: DragEvent<HTMLFormElement>) => {
+    if (event.currentTarget.contains(event.relatedTarget as Node | null))
+      return;
+    setDraggingFiles(false);
+  };
+
+  const dropImages = (event: DragEvent<HTMLFormElement>) => {
+    if (!event.dataTransfer.types.includes('Files')) return;
+    event.preventDefault();
+    setDraggingFiles(false);
+    if (canAddImages) addImages(Array.from(event.dataTransfer.files));
   };
 
   const addImages = async (files: File[]) => {
@@ -100,7 +128,10 @@ export function ChatComposer({
 
   return (
     <form
-      className="composer"
+      className={draggingFiles ? 'composer composer--dragging' : 'composer'}
+      onDragOver={dragImages}
+      onDragLeave={leaveImages}
+      onDrop={dropImages}
       onSubmit={(event) => {
         event.preventDefault();
         if (canSend) onSubmit();
