@@ -70,4 +70,7 @@ export const fileApi = {
       method: "POST",
       body: { attachmentId, title },
     }),
+
+  listDocuments: () =>
+    apiRequest<RuleDocumentResponse[]>("/managers/me/documents"),
 };
