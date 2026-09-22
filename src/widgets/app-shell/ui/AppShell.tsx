@@ -1,4 +1,3 @@
-import { IconBellLine } from '@karrotmarket/react-monochrome-icon';
 import type { ReactNode } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useManagerBuilding } from '@/entities/building';
@@ -51,22 +50,8 @@ export function AppShell({ role, children }: Props) {
       </aside>
       <div className="app-main">
         <header className="topbar">
-          <div>
-            <span className="topbar-building">
-              {role === 'manager'
-                ? (managerBuildingQuery.data?.buildingName ?? '관리 건물')
-                : 'A타워'}
-            </span>
-          </div>
           <div className="topbar-actions">
             <ViewModeToggle className="view-mode-toggle--topbar" />
-            <Link
-              className="notification-link"
-              to={withRouteContext(`/${role}/notifications`)}
-              aria-label="알림"
-            >
-              <IconBellLine />
-            </Link>
           </div>
         </header>
         <main className="content" key={location.pathname}>

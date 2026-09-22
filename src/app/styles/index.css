@@ -48,12 +48,6 @@ button { cursor: pointer; }
 .app-main { grid-column: 2; min-width: 0; }
 .topbar { height: 68px; display: flex; align-items: center; justify-content: space-between; padding: 0 40px; background: var(--seed-color-bg-layer-default); border-bottom: 1px solid var(--seed-color-stroke-neutral-muted); position: sticky; top: 0; z-index: 10; }
 .topbar > div { display: flex; align-items: center; gap: var(--seed-dimension-x3); }
-.topbar-building { font-weight: 700; }
-.prototype-badge { font-size: var(--seed-font-size-t1); color: var(--seed-color-fg-brand); background: var(--seed-color-bg-brand-weak); border-radius: var(--seed-radius-full); padding: 5px 8px; letter-spacing: .04em; font-weight: 700; }
-.notification-link { position: relative; display: grid; place-items: center; width: 44px; height: 44px; border-radius: var(--seed-radius-full); }
-.notification-link:hover { background: var(--seed-color-bg-layer-default-pressed); }
-.notification-link > svg { width: 24px; height: 24px; }
-.notification-link > span { position: absolute; top: 4px; right: 2px; }
 .content { max-width: 1240px; margin: 0 auto; padding: 48px 40px 132px; }
 .page-title { display: flex; justify-content: space-between; align-items: end; gap: var(--seed-dimension-x6); margin-bottom: var(--seed-dimension-x8); }
 .eyebrow { color: var(--seed-color-fg-brand); font-size: var(--seed-font-size-t3); font-weight: 700; margin-bottom: var(--seed-dimension-x2); }
@@ -385,7 +379,6 @@ button { cursor: pointer; }
   .metrics-grid, .metrics-grid--three { grid-template-columns: 1fr 1fr; }
   .metric-card { min-height: 104px; }
   .metric-card strong { font-size: var(--seed-font-size-t7); }
-  .prototype-badge { display: none; }
   .invitation-card > strong { font-size: var(--seed-font-size-t10); }
   .page-title h1, .chat-header h1, .auth-form h1, .flow-card h1, .terms-page h1 { font-size: var(--seed-font-size-t8); }
   .row-title strong, .notification-row strong { font-size: var(--seed-font-size-t4); }
