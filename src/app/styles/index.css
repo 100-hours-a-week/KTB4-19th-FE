@@ -283,6 +283,7 @@ button { cursor: pointer; }
 .auth-form { width: min(520px, 100%); margin: auto; padding: var(--seed-dimension-x10); }
 .brand--mobile { display: none; margin-bottom: var(--seed-dimension-x10); }
 .form-stack { display: grid; gap: var(--seed-dimension-x4); margin-top: var(--seed-dimension-x7); }
+.signup-terms { display: grid; gap: var(--seed-dimension-x3); }
 .auth-footer { text-align: center; color: var(--seed-color-fg-neutral-subtle); margin-top: var(--seed-dimension-x5); }
 .auth-footer a { color: var(--seed-color-fg-brand); font-weight: 700; }
 .role-cards { display: grid; grid-template-columns: 1fr 1fr; gap: var(--seed-dimension-x3); margin: var(--seed-dimension-x7) 0 var(--seed-dimension-x5); }

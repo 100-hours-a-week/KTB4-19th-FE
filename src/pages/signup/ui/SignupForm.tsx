@@ -20,7 +20,8 @@ export function SignupForm() {
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [userName, setUserName] = useState('');
   const [phone, setPhone] = useState('');
-  const [acceptedRequiredTerms, setAcceptedRequiredTerms] = useState(false);
+  const [acceptedServiceTerms, setAcceptedServiceTerms] = useState(false);
+  const [acceptedPrivacyTerms, setAcceptedPrivacyTerms] = useState(false);
   const [checkingEmail, setCheckingEmail] = useState(false);
   const [emailAvailable, setEmailAvailable] = useState<boolean | null>(null);
   const [emailCheckError, setEmailCheckError] = useState<string | null>(null);
@@ -98,8 +99,8 @@ export function SignupForm() {
       setFormMessage('비밀번호와 비밀번호 확인이 일치하지 않습니다.');
       return;
     }
-    if (!acceptedRequiredTerms) {
-      setFormMessage('서비스 이용약관과 개인정보 처리방침에 동의해 주세요.');
+    if (!acceptedServiceTerms || !acceptedPrivacyTerms) {
+      setFormMessage('필수 약관에 모두 동의해 주세요.');
       return;
     }
 
@@ -112,7 +113,7 @@ export function SignupForm() {
           passwordConfirm,
           userName,
           phone,
-          acceptedRequiredTerms,
+          acceptedRequiredTerms: acceptedServiceTerms && acceptedPrivacyTerms,
         }),
       );
       navigate('/auth/login', {
@@ -255,21 +256,36 @@ export function SignupForm() {
             onChange={(event) => setPhone(event.currentTarget.value)}
           />
         </TextField>
-        <Checkbox
-          checked={acceptedRequiredTerms}
-          onCheckedChange={(checked) => {
-            setAcceptedRequiredTerms(checked === true);
-            setFormMessage(null);
-          }}
-          disabled={pending}
-          label={
-            <>
-              <Link to="/terms/SERVICE">{serviceTitle}</Link>과{' '}
-              <Link to="/terms/PRIVACY">{privacyTitle}</Link>에 동의합니다.
-              (필수)
-            </>
-          }
-        />
+        <div className="signup-terms">
+          <Checkbox
+            checked={acceptedServiceTerms}
+            onCheckedChange={(checked) => {
+              setAcceptedServiceTerms(checked === true);
+              setFormMessage(null);
+            }}
+            disabled={pending}
+            label={
+              <>
+                <Link to="/terms/SERVICE">{serviceTitle}</Link>에 동의합니다.
+                (필수)
+              </>
+            }
+          />
+          <Checkbox
+            checked={acceptedPrivacyTerms}
+            onCheckedChange={(checked) => {
+              setAcceptedPrivacyTerms(checked === true);
+              setFormMessage(null);
+            }}
+            disabled={pending}
+            label={
+              <>
+                <Link to="/terms/PRIVACY">{privacyTitle}</Link>에 동의합니다.
+                (필수)
+              </>
+            }
+          />
+        </div>
         {formMessage && <Callout tone="critical" description={formMessage} />}
         {generalError && <Callout tone="critical" description={generalError} />}
         <ActionButton
