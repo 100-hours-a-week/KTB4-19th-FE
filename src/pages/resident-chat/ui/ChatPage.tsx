@@ -17,15 +17,20 @@ import {
 } from '@/features/create-complaint';
 import {
   ChatComposer,
+  ImageUploadError,
+  releaseImages,
   useResolveConversation,
   useSendMessage,
   useStartConversation,
+  type SelectedImage,
 } from '@/features/send-message';
 import { isApiError, type ApiError } from '@/shared/api';
 import { formatRoomNo, useRetryCountdown } from '@/shared/lib';
 
 // 대화 시작 인사는 서버가 저장하지 않는 클라이언트 고정 문구다.
 const greeting = '불편한 점이나 궁금한 점을 편하게 말씀해 주세요.';
+
+type SendError = ApiError | ImageUploadError;
 
 // 받으면 화면의 대화 상태가 서버와 어긋났다는 뜻이라 상세를 다시 받아온다.
 const conversationStateCodes = [
@@ -37,19 +42,25 @@ export function NewChatPage() {
   const navigate = useNavigate();
   const startConversation = useStartConversation();
   const [input, setInput] = useState('');
+  const [images, setImages] = useState<SelectedImage[]>([]);
   const countdown = useRetryCountdown();
-  const [error, setError] = useState<ApiError | null>(null);
+  const [error, setError] = useState<SendError | null>(null);
+  const noRoom = isApiError(error) && error.status === 403;
 
   const submit = () => {
-    const content = input.trim();
     setError(null);
-    startConversation.mutate(content, {
-      onSuccess: (created) =>
-        navigate(`/resident/conversations/${created.conversationId}`, {
-          replace: true,
-        }),
-      onError: (caught) => handleSendError(caught, setError, countdown.start),
-    });
+    startConversation.mutate(
+      { content: input.trim(), images },
+      {
+        onSuccess: (created) => {
+          releaseImages(images);
+          navigate(`/resident/conversations/${created.conversationId}`, {
+            replace: true,
+          });
+        },
+        onError: (caught) => handleSendError(caught, setError, countdown.start),
+      },
+    );
   };
 
   return (
@@ -63,9 +74,12 @@ export function NewChatPage() {
           }}
         />
         {startConversation.isPending && (
-          <PendingResidentMessage content={startConversation.variables ?? ''} />
+          <PendingResidentMessage
+            content={startConversation.variables?.content ?? ''}
+            imageCount={startConversation.variables?.images.length}
+          />
         )}
-        {error?.status === 403 && (
+        {noRoom && (
           <Callout
             tone="warning"
             description="호실에 연결된 입주민만 AI 도우미와 대화할 수 있어요. 관리자에게 받은 초대코드로 먼저 입주 연결을 해 주세요."
@@ -75,12 +89,12 @@ export function NewChatPage() {
       <ChatComposer
         value={input}
         onChange={setInput}
+        images={images}
+        onImagesChange={setImages}
         onSubmit={submit}
         sending={startConversation.isPending}
         lockedSeconds={countdown.remaining}
-        errorMessage={
-          error && error.status !== 403 ? sendErrorMessage(error) : undefined
-        }
+        errorMessage={error && !noRoom ? sendErrorMessage(error) : undefined}
       />
     </ChatLayout>
   );
@@ -102,7 +116,8 @@ function ConversationChat({ conversationId }: { conversationId: number }) {
   const createComplaint = useCreateComplaint();
   const countdown = useRetryCountdown();
   const [input, setInput] = useState('');
-  const [sendError, setSendError] = useState<ApiError | null>(null);
+  const [images, setImages] = useState<SelectedImage[]>([]);
+  const [sendError, setSendError] = useState<SendError | null>(null);
   const [createdComplaint, setCreatedComplaint] =
     useState<ComplaintCreateResponse | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -155,17 +170,24 @@ function ConversationChat({ conversationId }: { conversationId: number }) {
 
   const submitMessage = () => {
     setSendError(null);
-    sendMessage.mutate(input.trim(), {
-      onSuccess: () => setInput(''),
-      onError: (caught) => {
-        handleSendError(caught, setSendError, countdown.start);
-        if (
-          isApiError(caught) &&
-          conversationStateCodes.includes(caught.code ?? '')
-        )
-          messagesQuery.refetch();
+    sendMessage.mutate(
+      { content: input.trim(), images },
+      {
+        onSuccess: () => {
+          setInput('');
+          releaseImages(images);
+          setImages([]);
+        },
+        onError: (caught) => {
+          handleSendError(caught, setSendError, countdown.start);
+          if (
+            isApiError(caught) &&
+            conversationStateCodes.includes(caught.code ?? '')
+          )
+            messagesQuery.refetch();
+        },
       },
-    });
+    );
   };
 
   const submitComplaint = (draft: ComplaintDraft) => {
@@ -221,7 +243,10 @@ function ConversationChat({ conversationId }: { conversationId: number }) {
           />
         )}
         {sendMessage.isPending && (
-          <PendingResidentMessage content={sendMessage.variables ?? ''} />
+          <PendingResidentMessage
+            content={sendMessage.variables?.content ?? ''}
+            imageCount={sendMessage.variables?.images.length}
+          />
         )}
         <div ref={bottomRef} />
       </div>
@@ -243,6 +268,8 @@ function ConversationChat({ conversationId }: { conversationId: number }) {
           <ChatComposer
             value={input}
             onChange={setInput}
+            images={images}
+            onImagesChange={setImages}
             onSubmit={submitMessage}
             sending={sendMessage.isPending}
             lockedSeconds={countdown.remaining}
@@ -380,16 +407,19 @@ function ChatUnavailable({
 
 function handleSendError(
   caught: unknown,
-  setError: (error: ApiError) => void,
+  setError: (error: SendError) => void,
   startCountdown: (seconds: number) => void,
 ) {
+  if (caught instanceof ImageUploadError) return setError(caught);
   if (!isApiError(caught)) throw caught;
   setError(caught);
   if (caught.status === 429 && caught.retryAfterSeconds)
     startCountdown(caught.retryAfterSeconds);
 }
 
-function sendErrorMessage(error: ApiError) {
+function sendErrorMessage(error: SendError) {
+  if (error instanceof ImageUploadError)
+    return '사진을 올리지 못했어요. 입력한 내용과 사진은 그대로 두었으니 다시 전송해 주세요.';
   if (error.status === 400 || error.status === 422)
     return error.violations[0]?.reason ?? '메시지를 확인해 주세요.';
   if (error.status === 429)
