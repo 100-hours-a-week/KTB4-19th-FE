@@ -10,22 +10,10 @@ import { ConversationList } from '@/widgets/conversation-list';
 
 export function ResidentHomePage() {
   const auth = useAuth();
-  if (auth.user?.roomId == null) {
-    return (
-      <>
-        <PageTitle eyebrow="입주민 시작하기" title="초대코드를 입력해 주세요" description="관리자에게 받은 초대코드로 건물과 호실을 연결할 수 있어요." />
-        <section className="panel onboarding-empty">
-          <h2>아직 연결된 호실이 없어요</h2>
-          <p>호실을 연결하면 AI 문의와 민원 기능을 이용할 수 있습니다.</p>
-          <Link to="/resident/connect"><ActionButton variant="brandSolid">초대코드 입력하기</ActionButton></Link>
-        </section>
-      </>
-    );
-  }
   return (
     <>
       <PageTitle
-        eyebrow="A타워 302호"
+        eyebrow="내 거주지"
         title={`안녕하세요, ${auth.user?.userName ?? '입주민'} 님`}
         description="생활 문의와 민원 접수를 AI 도우미에게 편하게 말씀해 주세요."
       />

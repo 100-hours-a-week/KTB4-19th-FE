@@ -1,5 +1,3 @@
-import { IconBellLine } from '@karrotmarket/react-monochrome-icon';
-import { NotificationBadge } from '@seed-design/react';
 import type { ReactNode } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '@/entities/session';
@@ -50,20 +48,8 @@ export function AppShell({ role, children }: Props) {
       </aside>
       <div className="app-main">
         <header className="topbar">
-          <div>
-            <span className="topbar-building">A타워</span>
-            <span className="prototype-badge">MOCK PROTOTYPE</span>
-          </div>
           <div className="topbar-actions">
             <ViewModeToggle className="view-mode-toggle--topbar" />
-            <Link
-              className="notification-link"
-              to={withRouteContext(`/${role}/notifications`)}
-              aria-label="알림 2개"
-            >
-              <IconBellLine />
-              <NotificationBadge>2</NotificationBadge>
-            </Link>
           </div>
         </header>
         <main className="content" key={location.pathname}>
