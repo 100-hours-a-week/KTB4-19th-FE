@@ -2,12 +2,19 @@ import { IconChevronRightLine } from '@karrotmarket/react-monochrome-icon';
 import { Link, useNavigate } from 'react-router-dom';
 import { ActionButton } from 'seed-design/ui/action-button';
 import { useAuth } from '@/entities/session';
+import { useTerms } from '@/entities/terms';
 import type { RouteRole } from '@/shared/config';
 import { InfoRow, PageTitle } from '@/shared/ui';
 
 export function MyPage({ role }: { role: RouteRole }) {
   const auth = useAuth();
   const navigate = useNavigate();
+  const termsQuery = useTerms();
+  const terms = termsQuery.data?.terms ?? [];
+  const serviceTitle =
+    terms.find((item) => item.termsType === 'SERVICE')?.title ?? '약관';
+  const privacyTitle =
+    terms.find((item) => item.termsType === 'PRIVACY')?.title ?? '약관';
   const logout = async () => {
     await auth.logout();
     navigate('/auth/login', { replace: true });
@@ -51,11 +58,11 @@ export function MyPage({ role }: { role: RouteRole }) {
             <InfoRow label="관리인" value="김관리 · 010-1234-5678" />
           )}
           <div className="settings-links">
-            <Link to="/terms/service">
-              서비스 이용약관 <IconChevronRightLine />
+            <Link to="/terms/SERVICE">
+              {serviceTitle} <IconChevronRightLine />
             </Link>
-            <Link to="/terms/privacy">
-              개인정보 처리방침 <IconChevronRightLine />
+            <Link to="/terms/PRIVACY">
+              {privacyTitle} <IconChevronRightLine />
             </Link>
             <ActionButton variant="ghost" color="fg.critical" onClick={logout}>
               로그아웃

@@ -1,5 +1,5 @@
 import { useRef, useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ActionButton } from 'seed-design/ui/action-button';
 import { Callout } from 'seed-design/ui/callout';
 import { Checkbox } from 'seed-design/ui/checkbox';
@@ -9,6 +9,7 @@ import {
   buildSignupRequest,
   emailAvailabilityFeedback,
 } from '@/entities/session';
+import { useTerms } from '@/entities/terms';
 import { isApiError, type ApiError } from '@/shared/api';
 import { useRetryCountdown } from '@/shared/lib';
 
@@ -19,7 +20,8 @@ export function SignupForm() {
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [userName, setUserName] = useState('');
   const [phone, setPhone] = useState('');
-  const [acceptedRequiredTerms, setAcceptedRequiredTerms] = useState(false);
+  const [acceptedServiceTerms, setAcceptedServiceTerms] = useState(false);
+  const [acceptedPrivacyTerms, setAcceptedPrivacyTerms] = useState(false);
   const [checkingEmail, setCheckingEmail] = useState(false);
   const [emailAvailable, setEmailAvailable] = useState<boolean | null>(null);
   const [emailCheckError, setEmailCheckError] = useState<string | null>(null);
@@ -28,6 +30,12 @@ export function SignupForm() {
   const [formMessage, setFormMessage] = useState<string | null>(null);
   const emailCheckId = useRef(0);
   const countdown = useRetryCountdown();
+  const termsQuery = useTerms();
+  const terms = termsQuery.data?.terms ?? [];
+  const serviceTitle =
+    terms.find((item) => item.termsType === 'SERVICE')?.title ?? '약관';
+  const privacyTitle =
+    terms.find((item) => item.termsType === 'PRIVACY')?.title ?? '약관';
 
   const checkEmail = async () => {
     if (checkingEmail || pending || countdown.remaining > 0) return;
@@ -91,8 +99,8 @@ export function SignupForm() {
       setFormMessage('비밀번호와 비밀번호 확인이 일치하지 않습니다.');
       return;
     }
-    if (!acceptedRequiredTerms) {
-      setFormMessage('서비스 이용약관과 개인정보 처리방침에 동의해 주세요.');
+    if (!acceptedServiceTerms || !acceptedPrivacyTerms) {
+      setFormMessage('필수 약관에 모두 동의해 주세요.');
       return;
     }
 
@@ -105,7 +113,7 @@ export function SignupForm() {
           passwordConfirm,
           userName,
           phone,
-          acceptedRequiredTerms,
+          acceptedRequiredTerms: acceptedServiceTerms && acceptedPrivacyTerms,
         }),
       );
       navigate('/auth/login', {
@@ -248,15 +256,36 @@ export function SignupForm() {
             onChange={(event) => setPhone(event.currentTarget.value)}
           />
         </TextField>
-        <Checkbox
-          checked={acceptedRequiredTerms}
-          onCheckedChange={(checked) => {
-            setAcceptedRequiredTerms(checked === true);
-            setFormMessage(null);
-          }}
-          disabled={pending}
-          label="서비스 이용약관과 개인정보 처리방침에 동의합니다. (필수)"
-        />
+        <div className="signup-terms">
+          <Checkbox
+            checked={acceptedServiceTerms}
+            onCheckedChange={(checked) => {
+              setAcceptedServiceTerms(checked === true);
+              setFormMessage(null);
+            }}
+            disabled={pending}
+            label={
+              <>
+                <Link to="/terms/SERVICE">{serviceTitle}</Link>에 동의합니다.
+                (필수)
+              </>
+            }
+          />
+          <Checkbox
+            checked={acceptedPrivacyTerms}
+            onCheckedChange={(checked) => {
+              setAcceptedPrivacyTerms(checked === true);
+              setFormMessage(null);
+            }}
+            disabled={pending}
+            label={
+              <>
+                <Link to="/terms/PRIVACY">{privacyTitle}</Link>에 동의합니다.
+                (필수)
+              </>
+            }
+          />
+        </div>
         {formMessage && <Callout tone="critical" description={formMessage} />}
         {generalError && <Callout tone="critical" description={generalError} />}
         <ActionButton
