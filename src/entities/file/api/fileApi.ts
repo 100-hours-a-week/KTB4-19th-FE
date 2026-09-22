@@ -25,6 +25,14 @@ export type FileCompleteResponse = {
   fileStatus: "UPLOADED";
 };
 
+export type RuleDocumentResponse = {
+  documentId: number;
+  attachmentId: number;
+  title: string;
+  version: number;
+  updatedAt: string;
+};
+
 const extensionOf = (file: File) => {
   const extension = file.name.split(".").pop()?.toLowerCase();
   return extension === "jpeg" ? "jpg" : extension ?? "";
@@ -55,5 +63,11 @@ export const fileApi = {
     apiRequest<FileCompleteResponse>(`/files/${attachmentId}`, {
       method: "PATCH",
       body: { fileStatus: "UPLOADED" },
+    }),
+
+  createDocument: (attachmentId: number, title: string) =>
+    apiRequest<RuleDocumentResponse>("/managers/me/documents", {
+      method: "POST",
+      body: { attachmentId, title },
     }),
 };
