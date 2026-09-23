@@ -1,7 +1,9 @@
 import { IconChevronRightLine } from '@karrotmarket/react-monochrome-icon';
 import { Link, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { ActionButton } from 'seed-design/ui/action-button';
 import {
+  authApi,
   useAuth,
   useManagerMyPage,
   useResidentMyPage,
@@ -147,6 +149,19 @@ function MyPageLayout({
   privacyTitle: string;
   onLogout: () => Promise<void>;
 }) {
+  const [editing, setEditing] = useState(false);
+  const [emailInput, setEmailInput] = useState(email);
+  const [phoneInput, setPhoneInput] = useState(phone ?? '');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const saveProfile = async () => {
+    setSaving(true); setError(null);
+    try {
+      await authApi.updateProfile({ email: emailInput.trim(), phone: phoneInput.trim() });
+      setEditing(false);
+      window.location.reload();
+    } catch { setError('프로필을 저장하지 못했어요.'); } finally { setSaving(false); }
+  };
   return (
     <div className="detail-grid">
       <section className="panel profile-panel">
@@ -156,10 +171,9 @@ function MyPageLayout({
             <h2>{name ?? '이름 없음'}</h2>
             <p>{roleLabel}</p>
           </div>
-          <ActionButton variant="neutralOutline">프로필 수정</ActionButton>
+          {editing ? <><ActionButton variant="brandSolid" disabled={saving} onClick={() => void saveProfile()}>{saving ? '저장 중...' : '저장'}</ActionButton><ActionButton variant="neutralOutline" onClick={() => setEditing(false)}>취소</ActionButton></> : <ActionButton variant="neutralOutline" onClick={() => setEditing(true)}>프로필 수정</ActionButton>}
         </div>
-        <InfoRow label="이메일" value={email} />
-        <InfoRow label="연락처" value={phone ?? '등록된 연락처가 없어요.'} />
+        {editing ? <div className="profile-edit-fields"><label>이메일<input type="email" value={emailInput} onChange={(event) => setEmailInput(event.target.value)} /></label><label>연락처<input type="tel" value={phoneInput} onChange={(event) => setPhoneInput(event.target.value)} /></label>{error && <p className="inline-error">{error}</p>}</div> : <><InfoRow label="이메일" value={email} /><InfoRow label="연락처" value={phone ?? '등록된 연락처가 없어요.'} /></>}
       </section>
       <aside className="panel detail-aside">
         <h2>{sideTitle}</h2>

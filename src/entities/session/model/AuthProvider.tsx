@@ -96,6 +96,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const selectRole = useCallback(async (role: SelectedUserRole) => {
+    if (role === 'RESIDENT') {
+      setState((current) =>
+        current.status === 'authenticated'
+          ? { ...current, user: { ...current.user, userRole: 'RESIDENT' } }
+          : current,
+      );
+      return role;
+    }
     const result = await authApi.selectRole({ userRole: role });
     // 서버가 역할이 반영된 새 토큰을 돌려주므로 이후 요청은 새 권한으로 보낸다.
     tokenStore.set(result.accessToken);
