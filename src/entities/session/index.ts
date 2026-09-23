@@ -23,3 +23,10 @@ export {
   roleSelectionSuccessPath,
 } from './api/roleSelection.mjs';
 export { buildManagerProfileRequest } from './api/managerProfile.mjs';
+export {
+  myPageApi,
+  useManagerMyPage,
+  useResidentMyPage,
+  type ManagerMyPageResponse,
+  type ResidentMyPageResponse,
+} from './api/myPageApi';
