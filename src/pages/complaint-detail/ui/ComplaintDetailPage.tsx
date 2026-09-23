@@ -7,6 +7,7 @@ import { Link, useParams } from 'react-router-dom';
 import { ActionButton } from 'seed-design/ui/action-button';
 import { Callout } from 'seed-design/ui/callout';
 import {
+  ComplaintPhotoGrid,
   ComplaintStatusBadge,
   useManagerComplaint,
   useResidentComplaint,
@@ -124,23 +125,16 @@ function ManagerComplaintDetail({ complaintId }: { complaintId: number }) {
                   <InfoRow label="증상" value={complaint.symptom ?? '-'} />
                 </section>
                 <section>
-                  <h2>첨부 사진</h2>
-                  {complaint.attachments.length > 0 ? (
-                    complaint.attachments.map((attachment) => (
-                      <div
-                        className="photo-placeholder"
-                        key={attachment.attachmentId}
-                      >
-                        <span>{attachment.originalName}</span>
-                        <small>
-                          {attachment.fileType} ·{' '}
-                          {attachment.fileSize.toLocaleString()} bytes
-                        </small>
-                      </div>
-                    ))
-                  ) : (
-                    <p>첨부 사진이 없어요.</p>
-                  )}
+                  <h2>첨부 사진 ({complaint.attachmentCount})</h2>
+                  <ComplaintPhotoGrid
+                    photos={complaint.attachments}
+                    totalCount={complaint.attachmentCount}
+                    conversationHref={
+                      complaint.conversationAvailable
+                        ? `/manager/conversations/${complaint.conversationId}`
+                        : undefined
+                    }
+                  />
                 </section>
               </section>
               <aside className="panel detail-aside">
@@ -250,25 +244,15 @@ function ResidentComplaintDetail({ complaintId }: { complaintId: number }) {
               </section>
               <section>
                 <h2>첨부 사진 ({complaint.attachmentCount})</h2>
-                {complaint.attachments.length > 0 ? (
-                  complaint.attachments.map((attachment) => (
-                    <a
-                      className="photo-placeholder"
-                      href={attachment.fileUrl || undefined}
-                      key={attachment.attachmentId}
-                      rel="noreferrer"
-                      target="_blank"
-                    >
-                      <span>{attachment.originalName}</span>
-                      <small>
-                        {attachment.fileType || '-'} ·{' '}
-                        {attachment.fileSize.toLocaleString()} bytes
-                      </small>
-                    </a>
-                  ))
-                ) : (
-                  <p>첨부 사진이 없어요.</p>
-                )}
+                <ComplaintPhotoGrid
+                  photos={complaint.attachments}
+                  totalCount={complaint.attachmentCount}
+                  conversationHref={
+                    complaint.conversationAvailable
+                      ? `/resident/conversations/${complaint.conversationId}`
+                      : undefined
+                  }
+                />
               </section>
             </section>
             <aside className="panel detail-aside">
