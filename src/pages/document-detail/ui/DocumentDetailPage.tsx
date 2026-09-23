@@ -1,3 +1,4 @@
+import { IconDocumentLine } from '@karrotmarket/react-monochrome-icon';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ActionButton } from 'seed-design/ui/action-button';
@@ -31,8 +32,8 @@ export function DocumentDetailPage() {
     <section className="panel document-detail-card">
       <StateBoundary state={state} emptyTitle="문서를 찾을 수 없어요">
         {document && <>
-          {!editing && <span className="document-icon"><span aria-hidden="true">▤</span></span>}
-          <TextField label="문서 제목"><TextFieldInput value={title} disabled={!editing} onChange={(event) => setTitle(event.target.value)} /></TextField>
+          {!editing && <span className="document-icon"><IconDocumentLine /></span>}
+          <TextField label="문서 제목" showRequiredIndicator={false}><TextFieldInput value={title} disabled={!editing} onChange={(event) => setTitle(event.target.value)} /></TextField>
           <div className="document-detail-meta"><span>버전 {document.version}</span><span>첨부파일 {document.attachmentId}</span><span>수정 {new Date(document.updatedAt).toLocaleDateString('ko-KR')}</span></div>
           {document.fileUrl && <div className="document-preview">
             {isImage ? <img src={document.fileUrl} alt={document.title} className="document-preview__image" /> : <iframe
