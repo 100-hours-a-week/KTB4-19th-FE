@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { useManagerBuilding } from '@/entities/building';
 import { useAuth } from '@/entities/session';
 import { ViewModeToggle } from '@/features/switch-view-mode';
 import type { RouteRole } from '@/shared/config';
@@ -14,7 +13,6 @@ type Props = {
 
 export function AppShell({ role, children }: Props) {
   const location = useLocation();
-  const managerBuildingQuery = useManagerBuilding(role === 'manager');
   const items = role === 'manager' ? managerNav : residentNav;
   const withRouteContext = (to: string) =>
     role === 'manager' && location.search ? `${to}${location.search}` : to;

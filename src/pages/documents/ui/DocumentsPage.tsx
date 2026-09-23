@@ -26,7 +26,10 @@ export function DocumentsPage() {
     }
   }, []);
 
-  useEffect(() => { void loadDocuments(); }, [loadDocuments]);
+  useEffect(() => {
+    const timer = window.setTimeout(() => { void loadDocuments(); }, 0);
+    return () => window.clearTimeout(timer);
+  }, [loadDocuments]);
 
   const removeDocument = async (documentId: number) => {
     if (!window.confirm('이 문서를 삭제할까요?')) return;

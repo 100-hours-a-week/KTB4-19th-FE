@@ -1,5 +1,4 @@
 import { IconCheckmarkCircleFill, IconDocumentLine, IconDocumentPlusLine } from "@karrotmarket/react-monochrome-icon";
-import { Badge } from "@seed-design/react";
 import heic2any from "heic2any";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
