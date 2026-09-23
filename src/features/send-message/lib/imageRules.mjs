@@ -1,5 +1,8 @@
 export const maxImageCount = 3;
 export const maxImageBytes = 10 * 1024 * 1024;
+export const maxUploadBytes = 2 * 1024 * 1024;
+export const maxImageEdge = 1600;
+export const jpegQuality = 0.85;
 
 const extensionOf = (name) => name.split('.').pop()?.toLowerCase() ?? '';
 
@@ -34,4 +37,17 @@ export function imageSizeError(files) {
   return files.some((file) => file.size > maxImageBytes)
     ? '사진은 한 장에 10MB 이하만 첨부할 수 있어요.'
     : null;
+}
+
+export function needsCompression(file) {
+  return file.size > maxUploadBytes;
+}
+
+export function scaledSize(width, height, maxEdge = maxImageEdge) {
+  const longest = Math.max(width, height);
+  if (longest <= maxEdge) {
+    return { width, height };
+  }
+  const ratio = maxEdge / longest;
+  return { width: Math.round(width * ratio), height: Math.round(height * ratio) };
 }

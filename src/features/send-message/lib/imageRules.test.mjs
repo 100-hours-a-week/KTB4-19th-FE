@@ -5,6 +5,10 @@ import {
   imageSizeError,
   isHeicImage,
   maxImageBytes,
+  maxImageEdge,
+  maxUploadBytes,
+  needsCompression,
+  scaledSize,
   toJpgName,
 } from './imageRules.mjs';
 
@@ -70,4 +74,21 @@ test('서버가 받지 않는 gif와 webp는 거부한다', () => {
     imageSelectionError(0, [{ name: 'shot.webp', type: 'image/webp' }]),
     'JPG, PNG, HEIC 사진만 첨부할 수 있어요.',
   );
+});
+
+test('2MB를 넘는 사진만 줄인다', () => {
+  assert.equal(needsCompression({ size: maxUploadBytes + 1 }), true);
+  assert.equal(needsCompression({ size: maxUploadBytes }), false);
+});
+
+test('긴 변이 기준보다 크면 비율을 유지한 채 줄인다', () => {
+  assert.deepEqual(scaledSize(4000, 3000), { width: maxImageEdge, height: 1200 });
+});
+
+test('세로로 긴 사진은 높이를 기준으로 줄인다', () => {
+  assert.deepEqual(scaledSize(3000, 4000), { width: 1200, height: maxImageEdge });
+});
+
+test('기준보다 작은 사진은 그대로 둔다', () => {
+  assert.deepEqual(scaledSize(800, 600), { width: 800, height: 600 });
 });
