@@ -145,7 +145,8 @@ button { cursor: pointer; }
 .urgency-label { color: var(--seed-color-fg-neutral-subtle); font-size: var(--seed-font-size-t3); }
 .urgency-label.urgent { color: var(--seed-color-fg-critical); font-weight: 700; }
 .complaint-thumb { width: 52px; height: 52px; display: grid; place-items: center; border-radius: var(--seed-radius-r3); background: var(--seed-color-bg-layer-fill); color: var(--seed-color-fg-neutral-subtle); font-size: var(--seed-font-size-t2); flex: 0 0 auto; }
-.complaint-thumb.has-image { background: var(--seed-color-bg-informative-weak); color: var(--seed-color-fg-informative); }
+.complaint-thumb.has-image { background: var(--seed-color-bg-informative-weak); color: var(--seed-color-fg-informative); overflow: hidden; }
+.complaint-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .complaint-detail { display: grid; gap: var(--seed-dimension-x7); }
 .complaint-heading { display: flex; gap: var(--seed-dimension-x2); }
 .complaint-detail section > h2 { font-size: var(--seed-font-size-t6); margin-bottom: var(--seed-dimension-x3); }

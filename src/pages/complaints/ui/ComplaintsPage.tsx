@@ -11,6 +11,7 @@ import {
 import { TextField, TextFieldInput } from 'seed-design/ui/text-field';
 import {
   ComplaintStatusBadge,
+  ComplaintThumbnail,
   useManagerComplaints,
   useResidentComplaints,
   type ComplaintStatus,
@@ -95,11 +96,10 @@ function ManagerComplaintsPage() {
                 key={item.complaintId}
               >
                 <div className="list-leading">
-                  <span
-                    className={`complaint-thumb ${item.fileUrl ? 'has-image' : ''}`}
-                  >
-                    {item.fileUrl ? '사진' : formatRoomNo(item.roomNo)}
-                  </span>
+                  <ComplaintThumbnail
+                    fileUrl={item.fileUrl}
+                    fallback={formatRoomNo(item.roomNo)}
+                  />
                   <div>
                     <div className="row-title">
                       <strong>{item.title}</strong>
@@ -196,11 +196,7 @@ function ResidentComplaintsPage() {
                 key={item.complaintId}
               >
                 <div className="list-leading">
-                  <span
-                    className={`complaint-thumb ${item.fileUrl ? 'has-image' : ''}`}
-                  >
-                    {item.fileUrl ? '사진' : '민원'}
-                  </span>
+                  <ComplaintThumbnail fileUrl={item.fileUrl} fallback="민원" />
                   <div>
                     <div className="row-title">
                       <strong>{item.title}</strong>
