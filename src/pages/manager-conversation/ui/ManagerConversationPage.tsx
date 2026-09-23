@@ -1,32 +1,90 @@
-import { PageTitle } from '@/shared/ui';
+import { useParams } from 'react-router-dom';
+import {
+  ConversationMessage,
+  useManagerConversationMessages,
+} from '@/entities/conversation';
+import { isApiError } from '@/shared/api';
+import { PageTitle, StateBoundary, type ViewState } from '@/shared/ui';
 
 export function ManagerConversationPage() {
+  const { conversationId } = useParams();
+  const id = Number(conversationId);
+  if (!Number.isInteger(id) || id < 1) {
+    return <ConversationUnavailable title="대화를 찾을 수 없어요" />;
+  }
+  return <ManagerConversation key={id} conversationId={id} />;
+}
+
+function ManagerConversation({ conversationId }: { conversationId: number }) {
+  const messagesQuery = useManagerConversationMessages(conversationId);
+  const pages = messagesQuery.data?.pages;
+  const conversation = pages?.[0];
+  const messages = pages?.flatMap((page) => page.messages) ?? [];
+
+  if (messagesQuery.isError) {
+    const error = messagesQuery.error;
+    if (isApiError(error) && error.status === 403) {
+      return <ConversationUnavailable title="이 대화에 접근할 수 없어요" />;
+    }
+    if (isApiError(error) && error.status === 404) {
+      return <ConversationUnavailable title="원본 대화를 찾을 수 없어요" />;
+    }
+  }
+
+  const viewState: ViewState = messagesQuery.isPending
+    ? 'loading'
+    : messagesQuery.isError
+      ? 'error'
+      : messages.length === 0
+        ? 'empty'
+        : 'default';
+
   return (
     <>
       <PageTitle
-        eyebrow="민원 #77"
-        title="AI 대화 원본"
+        eyebrow={
+          conversation?.complaintId ? `민원 #${conversation.complaintId}` : '민원'
+        }
+        title={conversation?.conversationTitle ?? 'AI 대화 원본'}
         description="입주민이 민원을 접수한 당시의 대화예요. 관리자는 읽기만 할 수 있어요."
       />
       <section className="panel readonly-chat">
-        <div className="message assistant">
-          <span className="message-name">집사이 AI</span>
-          <p>불편한 점이나 궁금한 점을 편하게 말씀해 주세요.</p>
-        </div>
-        <div className="message resident">
-          <span className="message-name">박입주 · 302호</span>
-          <p>천장에서 물이 새요. 안방 천장 가운데예요.</p>
-        </div>
-        <div className="message assistant">
-          <span className="message-name">집사이 AI</span>
-          <p>언제부터 물이 떨어졌나요?</p>
-        </div>
-        <div className="message resident">
-          <span className="message-name">박입주 · 302호</span>
-          <p>어제 저녁부터요. 오늘 아침에 더 심해졌어요.</p>
-        </div>
+        <StateBoundary
+          state={viewState}
+          onRetry={() => messagesQuery.refetch()}
+          emptyTitle="대화 내용이 없어요"
+        >
+          {messagesQuery.hasNextPage && (
+            <button
+              className="text-link"
+              type="button"
+              onClick={() => messagesQuery.fetchNextPage()}
+              disabled={messagesQuery.isFetchingNextPage}
+            >
+              {messagesQuery.isFetchingNextPage
+                ? '불러오는 중'
+                : '이전 대화 더 보기'}
+            </button>
+          )}
+          {messages.map((message) => (
+            <ConversationMessage key={message.messageId} message={message} />
+          ))}
+          <div className="readonly-notice">
+            관리자 화면에서는 원본 대화에 메시지를 보낼 수 없어요.
+          </div>
+        </StateBoundary>
+      </section>
+    </>
+  );
+}
+
+function ConversationUnavailable({ title }: { title: string }) {
+  return (
+    <>
+      <PageTitle title={title} />
+      <section className="panel readonly-chat">
         <div className="readonly-notice">
-          관리자 화면에서는 원본 대화에 메시지를 보낼 수 없어요.
+          민원 상세에서 다시 들어와 주세요.
         </div>
       </section>
     </>

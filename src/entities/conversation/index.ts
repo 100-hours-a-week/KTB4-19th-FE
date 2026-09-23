@@ -4,6 +4,7 @@ export {
   conversationMessagesQuery,
   useConversationList,
   useConversationMessages,
+  useManagerConversationMessages,
   type MessagesData,
 } from './api/conversationQueries';
 export type {

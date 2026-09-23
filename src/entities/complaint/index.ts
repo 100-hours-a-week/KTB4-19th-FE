@@ -26,4 +26,5 @@ export {
 export { complaints } from './model/mock';
 export type { ComplaintStatus } from './model/types';
 export { ComplaintStatusBadge } from './ui/ComplaintStatusBadge';
+export { ComplaintPhotoGrid } from './ui/ComplaintPhotoGrid';
 export { ComplaintThumbnail } from './ui/ComplaintThumbnail';
