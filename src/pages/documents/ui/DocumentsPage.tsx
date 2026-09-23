@@ -77,7 +77,6 @@ export function DocumentsPage() {
                 </div>
                 <div className="button-row">
                   <Link to={`/manager/documents/${doc.documentId}`}><ActionButton variant="neutralOutline">상세 보기</ActionButton></Link>
-                  <Link to={`/manager/documents/${doc.documentId}`}><ActionButton variant="ghost">수정</ActionButton></Link>
                 </div>
               </article>
             ))}
