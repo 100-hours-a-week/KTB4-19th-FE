@@ -49,5 +49,8 @@ export function scaledSize(width, height, maxEdge = maxImageEdge) {
     return { width, height };
   }
   const ratio = maxEdge / longest;
-  return { width: Math.round(width * ratio), height: Math.round(height * ratio) };
+  return {
+    width: Math.round(width * ratio),
+    height: Math.round(height * ratio),
+  };
 }

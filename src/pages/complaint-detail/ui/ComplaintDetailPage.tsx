@@ -126,15 +126,7 @@ function ManagerComplaintDetail({ complaintId }: { complaintId: number }) {
                 </section>
                 <section>
                   <h2>첨부 사진 ({complaint.attachmentCount})</h2>
-                  <ComplaintPhotoGrid
-                    photos={complaint.attachments}
-                    totalCount={complaint.attachmentCount}
-                    conversationHref={
-                      complaint.conversationAvailable
-                        ? `/manager/conversations/${complaint.conversationId}`
-                        : undefined
-                    }
-                  />
+                  <ComplaintPhotoGrid photos={complaint.attachments} />
                 </section>
               </section>
               <aside className="panel detail-aside">
@@ -244,15 +236,7 @@ function ResidentComplaintDetail({ complaintId }: { complaintId: number }) {
               </section>
               <section>
                 <h2>첨부 사진 ({complaint.attachmentCount})</h2>
-                <ComplaintPhotoGrid
-                  photos={complaint.attachments}
-                  totalCount={complaint.attachmentCount}
-                  conversationHref={
-                    complaint.conversationAvailable
-                      ? `/resident/conversations/${complaint.conversationId}`
-                      : undefined
-                  }
-                />
+                <ComplaintPhotoGrid photos={complaint.attachments} />
               </section>
             </section>
             <aside className="panel detail-aside">
