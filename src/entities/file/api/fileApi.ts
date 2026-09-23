@@ -25,6 +25,16 @@ export type FileCompleteResponse = {
   fileStatus: "UPLOADED";
 };
 
+export type RuleDocumentResponse = {
+  documentId: number;
+  attachmentId: number;
+  title: string;
+  version: number;
+  updatedAt: string;
+  fileUrl?: string;
+  originalName?: string;
+};
+
 const extensionOf = (file: File) => {
   const extension = file.name.split(".").pop()?.toLowerCase();
   return extension === "jpeg" ? "jpg" : extension ?? "";
@@ -56,4 +66,25 @@ export const fileApi = {
       method: "PATCH",
       body: { fileStatus: "UPLOADED" },
     }),
+
+  createDocument: (attachmentId: number, title: string) =>
+    apiRequest<RuleDocumentResponse>("/managers/me/documents", {
+      method: "POST",
+      body: { attachmentId, title },
+    }),
+
+  listDocuments: () =>
+    apiRequest<RuleDocumentResponse[]>("/managers/me/documents"),
+
+  getDocument: (documentId: number) =>
+    apiRequest<RuleDocumentResponse>(`/managers/me/documents/${documentId}`),
+
+  updateDocument: (documentId: number, title: string, attachmentId?: number) =>
+    apiRequest<RuleDocumentResponse>(`/managers/me/documents/${documentId}`, {
+      method: "PATCH",
+      body: { title, ...(attachmentId ? { attachmentId } : {}) },
+    }),
+
+  deleteDocument: (documentId: number) =>
+    apiRequest<void>(`/managers/me/documents/${documentId}`, { method: "DELETE" }),
 };

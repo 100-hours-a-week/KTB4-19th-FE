@@ -5,6 +5,7 @@ import { BulkRoomRegisterPage } from '@/pages/bulk-room-register';
 import { ComplaintDetailPage } from '@/pages/complaint-detail';
 import { ComplaintsPage } from '@/pages/complaints';
 import { DocumentRegisterPage } from '@/pages/document-register';
+import { DocumentDetailPage } from '@/pages/document-detail';
 import { DocumentsPage } from '@/pages/documents';
 import { LoginPage } from '@/pages/login';
 import { ManagerConversationPage } from '@/pages/manager-conversation';
@@ -99,6 +100,7 @@ export function AppRouter() {
         path="/manager/documents/new"
         element={managerShell(<DocumentRegisterPage />)}
       />
+      <Route path="/manager/documents/:documentId" element={managerShell(<DocumentDetailPage />)} />
       <Route
         path="/manager/mypage"
         element={managerShell(<MyPage role="manager" />)}
