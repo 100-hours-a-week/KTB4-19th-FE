@@ -40,10 +40,10 @@ export function DocumentDetailPage() {
               src={document.fileUrl}
               className="document-preview__frame"
             />}
-            <a href={document.fileUrl} target="_blank" rel="noreferrer">새 탭에서 열기</a>
           </div>}
           <div className="button-row form-actions">
             <Link to="/manager/documents"><ActionButton variant="neutralOutline">목록</ActionButton></Link>
+            {document.fileUrl && <a href={document.fileUrl} target="_blank" rel="noreferrer"><ActionButton variant="ghost">새 탭에서 열기</ActionButton></a>}
             {editing ? <ActionButton variant="brandSolid" onClick={() => void save()}>저장</ActionButton> : <ActionButton variant="neutralOutline" onClick={() => setEditing(true)}>수정</ActionButton>}
           </div>
         </>}
