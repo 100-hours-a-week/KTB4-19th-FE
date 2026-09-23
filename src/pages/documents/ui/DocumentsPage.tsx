@@ -28,6 +28,12 @@ export function DocumentsPage() {
 
   useEffect(() => { void loadDocuments(); }, [loadDocuments]);
 
+  const removeDocument = async (documentId: number) => {
+    if (!window.confirm('이 문서를 삭제할까요?')) return;
+    await fileApi.deleteDocument(documentId);
+    await loadDocuments();
+  };
+
   const filteredDocuments = useMemo(
     () => documents.filter((document) => document.title.toLowerCase().includes(keyword.trim().toLowerCase())),
     [documents, keyword],
@@ -77,6 +83,7 @@ export function DocumentsPage() {
                 </div>
                 <div className="button-row">
                   <Link to={`/manager/documents/${doc.documentId}`}><ActionButton variant="neutralOutline">상세 보기</ActionButton></Link>
+                  <ActionButton variant="neutralOutline" onClick={() => void removeDocument(doc.documentId)}>삭제</ActionButton>
                 </div>
               </article>
             ))}

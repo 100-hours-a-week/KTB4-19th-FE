@@ -168,6 +168,7 @@ button { cursor: pointer; }
 .document-preview__frame { width: 100%; min-height: 620px; border: 1px solid var(--seed-color-stroke-neutral-muted); border-radius: var(--seed-radius-r3); background: #f7f7f7; }
 .document-preview__image { display: block; width: auto; max-width: 100%; max-height: 620px; height: auto; margin: 0 auto; object-fit: contain; border: 1px solid var(--seed-color-stroke-neutral-muted); border-radius: var(--seed-radius-r3); }
 .document-detail-card { display: grid; gap: var(--seed-dimension-x5); max-width: 920px; }
+.document-detail-actions { flex-wrap: nowrap; gap: var(--seed-dimension-x1); white-space: nowrap; }
 .document-detail-card > .document-icon { width: 64px; height: 64px; font-size: 30px; }
 .document-detail-meta { display: flex; flex-wrap: wrap; gap: var(--seed-dimension-x3); color: var(--seed-color-fg-neutral-subtle); font-size: var(--seed-font-size-t4); }
 .document-detail-meta span + span::before { content: '·'; margin-right: var(--seed-dimension-x3); }

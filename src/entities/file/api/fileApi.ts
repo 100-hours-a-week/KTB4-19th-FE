@@ -79,9 +79,12 @@ export const fileApi = {
   getDocument: (documentId: number) =>
     apiRequest<RuleDocumentResponse>(`/managers/me/documents/${documentId}`),
 
-  updateDocument: (documentId: number, title: string) =>
+  updateDocument: (documentId: number, title: string, attachmentId?: number) =>
     apiRequest<RuleDocumentResponse>(`/managers/me/documents/${documentId}`, {
       method: "PATCH",
-      body: { title },
+      body: { title, ...(attachmentId ? { attachmentId } : {}) },
     }),
+
+  deleteDocument: (documentId: number) =>
+    apiRequest<void>(`/managers/me/documents/${documentId}`, { method: "DELETE" }),
 };

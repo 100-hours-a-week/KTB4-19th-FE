@@ -85,6 +85,7 @@ async function send(
 }
 
 async function parse<T>(response: Response): Promise<T> {
+  if (response.status === 204) return undefined as T;
   const payload = await response.json().catch(() => null);
   if (!response.ok) {
     throw toApiError(response.status, payload as ErrorResponseBody | null);

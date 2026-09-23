@@ -11,6 +11,8 @@ export function DocumentDetailPage() {
   const [document, setDocument] = useState<RuleDocumentResponse | null>(null);
   const [title, setTitle] = useState('');
   const [editing, setEditing] = useState(false);
+  const [replacement, setReplacement] = useState<File | null>(null);
+  const [saving, setSaving] = useState(false);
   const [state, setState] = useState<'loading' | 'default' | 'error'>('loading');
 
   useEffect(() => {
@@ -22,8 +24,23 @@ export function DocumentDetailPage() {
 
   const save = async () => {
     if (!document || !title.trim()) return;
-    const updated = await fileApi.updateDocument(document.documentId, title.trim());
-    setDocument(updated); setEditing(false);
+    setSaving(true);
+    try {
+      let attachmentId: number | undefined;
+      if (replacement) {
+        const upload = await fileApi.createUpload(replacement, 'RULE_DOCUMENT');
+        await fileApi.uploadToS3(upload, replacement);
+        await fileApi.complete(upload.attachmentId);
+        attachmentId = upload.attachmentId;
+      }
+      const updated = await fileApi.updateDocument(document.documentId, title.trim(), attachmentId);
+      setDocument(updated); setReplacement(null); setEditing(false);
+    } finally { setSaving(false); }
+  };
+  const remove = async () => {
+    if (!document || !window.confirm('이 문서를 삭제할까요?')) return;
+    await fileApi.deleteDocument(document.documentId);
+    window.location.href = '/manager/documents';
   };
   const isImage = /\.(jpe?g|png)$/i.test(document?.originalName ?? '');
 
@@ -34,6 +51,8 @@ export function DocumentDetailPage() {
         {document && <>
           {!editing && <span className="document-icon"><IconDocumentLine /></span>}
           <TextField label="문서 제목" showRequiredIndicator={false}><TextFieldInput value={title} disabled={!editing} onChange={(event) => setTitle(event.target.value)} /></TextField>
+          {editing && <label className="button-like"><ActionButton variant="neutralOutline" asChild><span>새 파일로 교체</span></ActionButton><input hidden type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={(event) => setReplacement(event.target.files?.[0] ?? null)} /></label>}
+          {replacement && <p>{replacement.name}으로 교체 예정</p>}
           <div className="document-detail-meta"><span>버전 {document.version}</span><span>첨부파일 {document.attachmentId}</span><span>수정 {new Date(document.updatedAt).toLocaleDateString('ko-KR')}</span></div>
           {document.fileUrl && <div className="document-preview">
             {isImage ? <img src={document.fileUrl} alt={document.title} className="document-preview__image" /> : <iframe
@@ -42,10 +61,10 @@ export function DocumentDetailPage() {
               className="document-preview__frame"
             />}
           </div>}
-          <div className="button-row form-actions">
+          <div className="button-row form-actions document-detail-actions">
             <Link to="/manager/documents"><ActionButton variant="neutralOutline">목록</ActionButton></Link>
-            {document.fileUrl && <a href={document.fileUrl} target="_blank" rel="noreferrer"><ActionButton variant="neutralOutline">새 탭에서 열기</ActionButton></a>}
-            {editing ? <ActionButton variant="brandSolid" onClick={() => void save()}>저장</ActionButton> : <ActionButton variant="neutralOutline" onClick={() => setEditing(true)}>수정</ActionButton>}
+            {document.fileUrl && <a href={document.fileUrl} target="_blank" rel="noreferrer"><ActionButton variant="neutralOutline">열기</ActionButton></a>}
+            {editing ? <ActionButton variant="brandSolid" disabled={saving} onClick={() => void save()}>{saving ? '저장 중...' : '저장'}</ActionButton> : <><ActionButton variant="neutralOutline" onClick={() => setEditing(true)}>수정</ActionButton><ActionButton variant="neutralOutline" onClick={() => void remove()}>삭제</ActionButton></>}
           </div>
         </>}
       </StateBoundary>
