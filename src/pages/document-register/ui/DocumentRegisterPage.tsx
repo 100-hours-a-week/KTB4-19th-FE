@@ -20,7 +20,7 @@ export function DocumentRegisterPage() {
     setUploading(true);
     setError(null);
     try {
-      const uploadInfo = await fileApi.createUpload(file);
+      const uploadInfo = await fileApi.createUpload(file, "RULE_DOCUMENT");
       await fileApi.uploadToS3(uploadInfo, file);
       await fileApi.complete(uploadInfo.attachmentId);
       setSaved(true);

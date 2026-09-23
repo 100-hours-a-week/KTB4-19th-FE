@@ -72,7 +72,7 @@ async function uploadImages(images: SelectedImage[]) {
   try {
     return await Promise.all(
       images.map(async ({ file }) => {
-        const upload = await fileApi.createUpload(file);
+        const upload = await fileApi.createUpload(file, "CONVERSATION");
         await fileApi.uploadToS3(upload, file);
         await fileApi.complete(upload.attachmentId);
         return upload.attachmentId;

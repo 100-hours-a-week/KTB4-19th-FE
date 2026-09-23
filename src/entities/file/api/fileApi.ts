@@ -1,9 +1,12 @@
 import { apiRequest } from "@/shared/api";
 
+export type FilePurpose = "CONVERSATION" | "RULE_DOCUMENT";
+
 export type FileUploadRequest = {
   originalName: string;
   fileType: string;
   fileSize: number;
+  purpose: FilePurpose;
 };
 
 export type FileUploadResponse = {
@@ -28,13 +31,14 @@ const extensionOf = (file: File) => {
 };
 
 export const fileApi = {
-  createUpload: (file: File) =>
+  createUpload: (file: File, purpose: FilePurpose) =>
     apiRequest<FileUploadResponse>("/files", {
       method: "POST",
       body: {
         originalName: file.name,
         fileType: extensionOf(file),
         fileSize: file.size,
+        purpose,
       } satisfies FileUploadRequest,
     }),
 
