@@ -28,11 +28,12 @@ export function DocumentDetailPage() {
 
   return <>
     <PageTitle eyebrow="운영규칙 문서" title={editing ? '문서 수정' : '문서 상세'} description="등록된 건물 운영 문서를 확인합니다." />
-    <section className="panel form-panel">
+    <section className="panel document-detail-card">
       <StateBoundary state={state} emptyTitle="문서를 찾을 수 없어요">
         {document && <>
+          {!editing && <span className="document-icon"><span aria-hidden="true">▤</span></span>}
           <TextField label="문서 제목"><TextFieldInput value={title} disabled={!editing} onChange={(event) => setTitle(event.target.value)} /></TextField>
-          <p>버전 {document.version} · 첨부파일 {document.attachmentId}</p>
+          <div className="document-detail-meta"><span>버전 {document.version}</span><span>첨부파일 {document.attachmentId}</span><span>수정 {new Date(document.updatedAt).toLocaleDateString('ko-KR')}</span></div>
           {document.fileUrl && <div className="document-preview">
             {isImage ? <img src={document.fileUrl} alt={document.title} className="document-preview__image" /> : <iframe
               title={`${document.title} 미리보기`}
@@ -41,7 +42,6 @@ export function DocumentDetailPage() {
             />}
             <a href={document.fileUrl} target="_blank" rel="noreferrer">새 탭에서 열기</a>
           </div>}
-          <p>수정 {new Date(document.updatedAt).toLocaleDateString('ko-KR')}</p>
           <div className="button-row form-actions">
             <Link to="/manager/documents"><ActionButton variant="neutralOutline">목록</ActionButton></Link>
             {editing ? <ActionButton variant="brandSolid" onClick={() => void save()}>저장</ActionButton> : <ActionButton variant="neutralOutline" onClick={() => setEditing(true)}>수정</ActionButton>}
