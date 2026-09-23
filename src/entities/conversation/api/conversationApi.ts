@@ -9,6 +9,7 @@ import type {
 } from '../model/types';
 
 const conversationBase = '/residents/me/conversations';
+const managerConversationBase = '/managers/me/conversations';
 
 export const conversationApi = {
   list: (params: { keyword?: string; cursor?: string; size?: number }) =>
@@ -24,6 +25,14 @@ export const conversationApi = {
   ) =>
     apiRequest<ConversationMessagesResponse>(
       `${conversationBase}/${conversationId}/messages`,
+      { query: params },
+    ),
+  managerMessages: (
+    conversationId: number,
+    params: { cursor?: number; size?: number },
+  ) =>
+    apiRequest<ConversationMessagesResponse>(
+      `${managerConversationBase}/${conversationId}/messages`,
       { query: params },
     ),
   resolve: (conversationId: number) =>

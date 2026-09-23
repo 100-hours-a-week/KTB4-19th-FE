@@ -11,6 +11,8 @@ export const conversationKeys = {
     [...conversationKeys.lists(), params] as const,
   messages: (conversationId: number) =>
     [...conversationKeys.all, 'messages', conversationId] as const,
+  managerMessages: (conversationId: number) =>
+    [...conversationKeys.all, 'manager', 'messages', conversationId] as const,
 };
 
 export type MessagesData = InfiniteData<
@@ -53,4 +55,20 @@ export function conversationMessagesQuery(conversationId: number) {
 
 export function useConversationMessages(conversationId: number) {
   return useInfiniteQuery(conversationMessagesQuery(conversationId));
+}
+
+export function useManagerConversationMessages(conversationId: number) {
+  return useInfiniteQuery({
+    queryKey: conversationKeys.managerMessages(conversationId),
+    queryFn: ({ pageParam }: { pageParam: number | undefined }) =>
+      conversationApi.managerMessages(conversationId, {
+        cursor: pageParam,
+        size: messagePageSize,
+      }),
+    initialPageParam: undefined as number | undefined,
+    getNextPageParam: (lastPage: ConversationMessagesResponse) =>
+      lastPage.hasNext && lastPage.nextCursor !== null
+        ? lastPage.nextCursor
+        : undefined,
+  });
 }
