@@ -4,7 +4,6 @@ import type {
   ConversationCreateResponse,
   ConversationListResponse,
   ConversationMessagesResponse,
-  ConversationStatusUpdateResponse,
   MessageSendResponse,
 } from '../model/types';
 
@@ -34,14 +33,6 @@ export const conversationApi = {
     apiRequest<ConversationMessagesResponse>(
       `${managerConversationBase}/${conversationId}/messages`,
       { query: params },
-    ),
-  resolve: (conversationId: number) =>
-    apiRequest<ConversationStatusUpdateResponse>(
-      `${conversationBase}/${conversationId}`,
-      {
-        method: 'PATCH',
-        body: { conversationStatus: 'RESOLVED' },
-      },
     ),
   send: (conversationId: number, request: ContentRequest) =>
     apiRequest<MessageSendResponse>(

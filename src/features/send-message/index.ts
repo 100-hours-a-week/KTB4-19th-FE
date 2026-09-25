@@ -1,6 +1,5 @@
 export {
   ImageUploadError,
-  useResolveConversation,
   useSendMessage,
   useStartConversation,
   type MessageDraft,

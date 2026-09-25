@@ -20,7 +20,6 @@ const typeLabel: Record<ConversationType, string> = {
 
 const statusTone: Record<string, 'neutral' | 'informative' | 'positive'> = {
   ACTIVE: 'informative',
-  RESOLVED: 'positive',
   PENDING: 'neutral',
   IN_PROGRESS: 'informative',
   DONE: 'positive',
