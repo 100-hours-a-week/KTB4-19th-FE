@@ -19,7 +19,6 @@ import {
   ChatComposer,
   ImageUploadError,
   releaseImages,
-  useResolveConversation,
   useSendMessage,
   useStartConversation,
   type SelectedImage,
@@ -112,7 +111,6 @@ export function ChatPage() {
 function ConversationChat({ conversationId }: { conversationId: number }) {
   const messagesQuery = useConversationMessages(conversationId);
   const sendMessage = useSendMessage(conversationId);
-  const resolveConversation = useResolveConversation(conversationId);
   const createComplaint = useCreateComplaint();
   const countdown = useRetryCountdown();
   const [input, setInput] = useState('');
@@ -275,22 +273,6 @@ function ConversationChat({ conversationId }: { conversationId: number }) {
             lockedSeconds={countdown.remaining}
             errorMessage={sendError ? sendErrorMessage(sendError) : undefined}
           />
-          <div className="chat-closed button-row">
-            {resolveConversation.isError && (
-              <Callout
-                tone="critical"
-                description="대화를 종료하지 못했어요. 다시 시도해 주세요."
-              />
-            )}
-            <ActionButton
-              variant="neutralOutline"
-              loading={resolveConversation.isPending}
-              disabled={resolveConversation.isPending}
-              onClick={() => resolveConversation.mutate()}
-            >
-              대화 종료
-            </ActionButton>
-          </div>
         </>
       )}
     </ChatLayout>

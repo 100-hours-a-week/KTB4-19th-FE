@@ -54,20 +54,6 @@ export function useSendMessage(conversationId: number) {
   });
 }
 
-export function useResolveConversation(conversationId: number) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: () => conversationApi.resolve(conversationId),
-    onSuccess: () =>
-      Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: conversationKeys.messages(conversationId),
-        }),
-        queryClient.invalidateQueries({ queryKey: conversationKeys.lists() }),
-      ]),
-  });
-}
-
 async function uploadImages(images: SelectedImage[]) {
   try {
     return await Promise.all(

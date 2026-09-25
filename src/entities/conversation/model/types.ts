@@ -4,13 +4,6 @@ export type MessageType = 'TEXT' | 'IMAGE' | 'SUMMARY_CARD';
 export type ConversationType = 'INQUIRY' | 'COMPLAINT';
 export type ConversationStatus = 'ACTIVE' | 'RESOLVED' | 'COMPLAINT_CREATED';
 
-export type ConversationStatusUpdateResponse = {
-  conversationId: number;
-  conversationStatus: ConversationStatus;
-  conversationStatusLabel: string;
-  updatedAt: string;
-};
-
 export type Attachment = {
   attachmentId: number;
   fileUrl: string | null;

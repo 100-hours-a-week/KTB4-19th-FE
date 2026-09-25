@@ -15,7 +15,6 @@ export type {
   ConversationListResponse,
   ConversationMessagesResponse,
   ConversationStatus,
-  ConversationStatusUpdateResponse,
   ConversationType,
   Message,
   MessageSendResponse,
