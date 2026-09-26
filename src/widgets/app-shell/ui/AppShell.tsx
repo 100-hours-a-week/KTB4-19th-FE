@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Link, NavLink, useLocation } from 'react-router-dom';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/entities/session';
 import { ViewModeToggle } from '@/features/switch-view-mode';
 import type { RouteRole } from '@/shared/config';
@@ -13,6 +13,7 @@ type Props = {
 
 export function AppShell({ role, children }: Props) {
   const location = useLocation();
+  const navigate = useNavigate();
   const items = role === 'manager' ? managerNav : residentNav;
   const withRouteContext = (to: string) =>
     role === 'manager' && location.search ? `${to}${location.search}` : to;
@@ -49,6 +50,7 @@ export function AppShell({ role, children }: Props) {
       <div className="app-main">
         <header className="topbar">
           <div className="topbar-actions">
+            {location.pathname.startsWith('/terms/') && <button className="topbar-back" type="button" onClick={() => navigate(-1)}>← 돌아가기</button>}
             <ViewModeToggle className="view-mode-toggle--topbar" />
           </div>
         </header>

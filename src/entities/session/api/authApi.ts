@@ -45,9 +45,10 @@ export type OnboardingStatus = {
 };
 
 export type ManagerProfileRequest = {
+  email?: string;
   userName: string;
   phone: string;
-  agreements: Array<{
+  agreements?: Array<{
     termsType: 'SERVICE' | 'PRIVACY' | 'MARKETING';
     isAgreed: boolean;
   }>;

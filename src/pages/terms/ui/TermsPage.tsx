@@ -1,13 +1,16 @@
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import {
   TERMS_TYPES,
   useTerm,
   useTerms,
   type TermsType,
 } from '@/entities/terms';
-import { Logo, StateBoundary } from '@/shared/ui';
+import { PageTitle, StateBoundary } from '@/shared/ui';
+import { useAuth } from '@/entities/session';
+import { AppShell } from '@/widgets/app-shell';
 
 export function TermsPage() {
+  const auth = useAuth();
   const { termsType: rawTermsType } = useParams();
   const termsType = toTermsType(rawTermsType);
   const termsQuery = useTerms();
@@ -21,35 +24,32 @@ export function TermsPage() {
       : termsQuery.isError || detailQuery.isError || !term || !detailQuery.data
         ? 'error'
         : 'default';
+  const description = termsType === 'PRIVACY'
+    ? '기본 개인정보 수집 및 이용 동의 약관입니다.'
+    : '기본 서비스 이용약관입니다.';
 
-  return (
+  const content = (
     <div className="terms-page">
-      <Link className="brand" to="/auth/signup" aria-label="집사이">
-        <Logo />
-      </Link>
       <article>
-        <p className="eyebrow">공통 정책</p>
         {termsType === null ? (
           <StateBoundary state="error">
             <></>
           </StateBoundary>
         ) : (
           <>
-            <h1>{term?.title ?? '약관'}</h1>
-            <StateBoundary
-              state={state}
-              onRetry={() => {
-                void termsQuery.refetch();
-                void detailQuery.refetch();
-              }}
-            >
-              <div className="terms-content">{detailQuery.data?.content}</div>
+            <PageTitle eyebrow="공통 정책" title={term?.title ?? '약관'} description={description} />
+            <StateBoundary state={state} onRetry={() => { void termsQuery.refetch(); void detailQuery.refetch(); }}>
+              {detailQuery.data?.content !== description && <div className="terms-content">{detailQuery.data?.content}</div>}
             </StateBoundary>
           </>
         )}
       </article>
     </div>
   );
+  if (auth.status === 'authenticated' && (auth.user.userRole === 'MANAGER' || auth.user.userRole === 'RESIDENT')) {
+    return <AppShell role={auth.user.userRole === 'MANAGER' ? 'manager' : 'resident'}>{content}</AppShell>;
+  }
+  return content;
 }
 
 function toTermsType(value: string | undefined): TermsType | null {
