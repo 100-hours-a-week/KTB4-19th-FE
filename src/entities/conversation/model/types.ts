@@ -78,9 +78,7 @@ export type ConversationListResponse = {
 export type ConversationMessagesResponse = {
   conversationId: number;
   conversationTitle: string;
-  conversationType: ConversationType;
   conversationStatus: ConversationStatus;
-  statusCode: string;
   statusLabel: string;
   complaintId: number | null;
   hasNext: boolean;
