@@ -298,7 +298,7 @@ function ClosedNotice({
       />
     );
   }
-  if (conversation.complaintId !== null) {
+  if (conversation.conversationStatus === 'COMPLAINT_CREATED') {
     return (
       <Callout
         className="chat-closed"
@@ -308,7 +308,7 @@ function ClosedNotice({
             ? '이미 민원이 접수된 대화예요'
             : '민원이 접수된 대화예요'
         }
-        description={`현재 처리 상태: ${conversation.statusLabel}. 새로운 문의는 새 대화에서 시작해 주세요.`}
+        description="처리 상태는 민원 목록에서 확인해 주세요. 새로운 문의는 새 대화에서 시작해 주세요."
       />
     );
   }

@@ -20,9 +20,7 @@ const typeLabel: Record<ConversationType, string> = {
 
 const statusTone: Record<string, 'neutral' | 'informative' | 'positive'> = {
   ACTIVE: 'informative',
-  PENDING: 'neutral',
-  IN_PROGRESS: 'informative',
-  DONE: 'positive',
+  COMPLAINT_CREATED: 'positive',
 };
 
 type Props = {
