@@ -1,4 +1,5 @@
 import { IconChevronRightLine } from '@karrotmarket/react-monochrome-icon';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ActionButton } from 'seed-design/ui/action-button';
 import {
@@ -147,6 +148,31 @@ function MyPageLayout({
   privacyTitle: string;
   onLogout: () => Promise<void>;
 }) {
+  const auth = useAuth();
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [profile, setProfile] = useState({ email, phone: phone ?? '' });
+  const [draft, setDraft] = useState({ email, phone: phone ?? '' });
+  const [error, setError] = useState<string | null>(null);
+
+  const saveProfile = async () => {
+    setSaving(true);
+    setError(null);
+    try {
+      await auth.updateManagerProfile({
+        email: draft.email.trim(),
+        userName: name ?? '',
+        phone: draft.phone.trim(),
+      });
+      setProfile({ email: draft.email.trim(), phone: draft.phone.trim() });
+      setEditing(false);
+    } catch {
+      setError('이메일과 연락처를 확인해 주세요.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="detail-grid">
       <section className="panel profile-panel">
@@ -156,10 +182,26 @@ function MyPageLayout({
             <h2>{name ?? '이름 없음'}</h2>
             <p>{roleLabel}</p>
           </div>
-          <ActionButton variant="neutralOutline">프로필 수정</ActionButton>
+          {editing ? (
+            <div className="profile-actions">
+              <ActionButton variant="neutralOutline" onClick={() => setEditing(false)}>취소</ActionButton>
+              <ActionButton variant="brandSolid" loading={saving} onClick={() => void saveProfile()}>저장</ActionButton>
+            </div>
+          ) : (
+            <ActionButton variant="neutralOutline" onClick={() => { setDraft(profile); setEditing(true); }}>
+              프로필 수정
+            </ActionButton>
+          )}
         </div>
-        <InfoRow label="이메일" value={email} />
-        <InfoRow label="연락처" value={phone ?? '등록된 연락처가 없어요.'} />
+        {editing ? (
+          <div className="profile-edit-fields">
+            <label>이메일<input type="email" value={draft.email} onChange={(event) => setDraft({ ...draft, email: event.target.value })} /></label>
+            <label>연락처<input value={draft.phone} onChange={(event) => setDraft({ ...draft, phone: event.target.value })} /></label>
+            {error && <p role="alert">{error}</p>}
+          </div>
+        ) : (
+          <><InfoRow label="이메일" value={profile.email} /><InfoRow label="연락처" value={profile.phone || '등록된 연락처가 없어요.'} /></>
+        )}
       </section>
       <aside className="panel detail-aside">
         <h2>{sideTitle}</h2>
