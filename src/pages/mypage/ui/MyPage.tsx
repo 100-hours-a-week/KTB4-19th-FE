@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ActionButton } from 'seed-design/ui/action-button';
 import {
+  authApi,
   useAuth,
   useManagerMyPage,
   useResidentMyPage,
@@ -159,11 +160,7 @@ function MyPageLayout({
     setSaving(true);
     setError(null);
     try {
-      await auth.updateManagerProfile({
-        email: draft.email.trim(),
-        userName: name ?? '',
-        phone: draft.phone.trim(),
-      });
+      await authApi.updateProfile({ email: draft.email.trim(), phone: draft.phone.trim() });
       setProfile({ email: draft.email.trim(), phone: draft.phone.trim() });
       setEditing(false);
     } catch {
