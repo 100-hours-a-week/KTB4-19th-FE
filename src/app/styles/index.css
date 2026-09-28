@@ -133,8 +133,9 @@ button { cursor: pointer; }
 .info-row strong { text-align: right; font-size: var(--seed-font-size-t4); }
 
 .list-panel { display: grid; gap: var(--seed-dimension-x5); }
-.list-tools { display: flex; justify-content: space-between; align-items: center; gap: var(--seed-dimension-x4); }
-.list-tools > div:first-child { width: min(360px, 100%); }
+.list-tools { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--seed-dimension-x4); min-width: 0; }
+.list-tools > :first-child { width: min(360px, 100%); min-width: 0; }
+.list-tools > :last-child { min-width: 0; }
 .list-stack { display: grid; }
 .list-row, .notification-row { width: 100%; border: 0; border-bottom: 1px solid var(--seed-color-stroke-neutral-muted); background: transparent; padding: var(--seed-dimension-x4) 0; display: flex; align-items: center; gap: var(--seed-dimension-x4); text-align: left; }
 .list-row:hover, .notification-row:hover { background: var(--seed-color-bg-layer-default-pressed); }
@@ -385,7 +386,7 @@ button { cursor: pointer; }
   .document-card h2 { font-size: var(--seed-font-size-t5); }
   .resident-hero h2 { font-size: var(--seed-font-size-t8); line-height: 1.35; }
   .filter-bar, .filter-bar--left, .list-tools { align-items: stretch; flex-direction: column; gap: var(--seed-dimension-x3); }
-  .list-tools > div:first-child { width: 100%; }
+  .list-tools > :first-child { width: 100%; }
   .list-row { gap: var(--seed-dimension-x2); }
   .list-leading > div, .notification-row > div { min-width: 0; }
   .row-title strong, .notification-row strong { font-size: var(--seed-font-size-t5); overflow-wrap: anywhere; }
@@ -425,6 +426,10 @@ button { cursor: pointer; }
   .invitation-card > strong { font-size: var(--seed-font-size-t10); }
   .page-title h1, .chat-header h1, .auth-form h1, .flow-card h1, .terms-page h1 { font-size: var(--seed-font-size-t8); }
   .row-title strong, .notification-row strong { font-size: var(--seed-font-size-t4); }
+}
+
+@container app-viewport (max-width: 440px) {
+  .list-tools > :last-child .seed-segmented-control__item { min-width: 0; padding-inline: var(--seed-dimension-x1); }
 }
 
 /* ---------- 화면 모드 (web / mobile) ---------- */
