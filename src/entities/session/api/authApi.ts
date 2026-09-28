@@ -60,6 +60,7 @@ export type ManagerProfileResponse = {
   phone?: string;
   agreements?: UserAgreement[];
 };
+export type ProfileUpdateRequest = { email: string; phone: string };
 
 export type LoginRequest = {
   email: string;
@@ -116,6 +117,8 @@ export const authApi = {
       body: request,
     }),
   updateManagerProfile: (request: ManagerProfileRequest) =>
+    apiRequest<ManagerProfileResponse>("/users/me", { method: "PATCH", body: request }),
+  updateProfile: (request: ProfileUpdateRequest) =>
     apiRequest<ManagerProfileResponse>("/users/me", { method: "PATCH", body: request }),
   me: () => apiRequest<AuthUser>("/users/me"),
   onboardingStatus: () => apiRequest<OnboardingStatus>("/users/me/onboarding-status"),
