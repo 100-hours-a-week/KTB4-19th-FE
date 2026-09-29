@@ -7,7 +7,9 @@ import { TextField, TextFieldInput } from 'seed-design/ui/text-field';
 import {
   authApi,
   buildSignupRequest,
+  EMAIL_MAX_LENGTH,
   emailAvailabilityFeedback,
+  PASSWORD_MAX_LENGTH,
 } from '@/entities/session';
 import { useTerms } from '@/entities/terms';
 import { isApiError, type ApiError } from '@/shared/api';
@@ -164,7 +166,9 @@ export function SignupForm() {
           <TextField
             label="이메일"
             value={email}
-            onValueChange={({ value }) => updateEmail(value)}
+            onValueChange={({ slicedValue }) => updateEmail(slicedValue)}
+            maxGraphemeCount={EMAIL_MAX_LENGTH}
+            hideCharacterCount
             invalid={!!emailError}
             errorMessage={emailError}
             disabled={pending}
@@ -185,8 +189,10 @@ export function SignupForm() {
               </ActionButton>
             }
           >
+            {/* type="email"은 도메인의 비ASCII 문자를 퓨니코드로 바꿔 서버 형식 검증을 우회하므로 text로 받는다. */}
             <TextFieldInput
-              type="email"
+              type="text"
+              inputMode="email"
               autoComplete="email"
               placeholder="example@email.com"
             />
@@ -203,30 +209,28 @@ export function SignupForm() {
         </div>
         <TextField
           label="비밀번호"
-          description="영문, 숫자, 특수문자를 포함해 8자 이상"
+          description={`영문, 숫자, 특수문자를 포함해 8~${PASSWORD_MAX_LENGTH}자`}
           invalid={!!passwordError}
           errorMessage={passwordError}
           disabled={pending}
+          value={password}
+          onValueChange={({ slicedValue }) => setPassword(slicedValue)}
+          maxGraphemeCount={PASSWORD_MAX_LENGTH}
+          hideCharacterCount
         >
-          <TextFieldInput
-            type="password"
-            autoComplete="new-password"
-            value={password}
-            onChange={(event) => setPassword(event.currentTarget.value)}
-          />
+          <TextFieldInput type="password" autoComplete="new-password" />
         </TextField>
         <TextField
           label="비밀번호 확인"
           invalid={!!passwordConfirmError}
           errorMessage={passwordConfirmError}
           disabled={pending}
+          value={passwordConfirm}
+          onValueChange={({ slicedValue }) => setPasswordConfirm(slicedValue)}
+          maxGraphemeCount={PASSWORD_MAX_LENGTH}
+          hideCharacterCount
         >
-          <TextFieldInput
-            type="password"
-            autoComplete="new-password"
-            value={passwordConfirm}
-            onChange={(event) => setPasswordConfirm(event.currentTarget.value)}
-          />
+          <TextFieldInput type="password" autoComplete="new-password" />
         </TextField>
         <TextField
           label="이름"
