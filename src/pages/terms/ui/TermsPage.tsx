@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
   TERMS_TYPES,
   useTerm,
@@ -11,6 +11,8 @@ import { AppShell } from '@/widgets/app-shell';
 
 export function TermsPage() {
   const auth = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   const { termsType: rawTermsType } = useParams();
   const termsType = toTermsType(rawTermsType);
   const termsQuery = useTerms();
@@ -28,8 +30,25 @@ export function TermsPage() {
     ? '기본 개인정보 수집 및 이용 동의 약관입니다.'
     : '기본 서비스 이용약관입니다.';
 
+  const inAppShell =
+    auth.status === 'authenticated' &&
+    (auth.user.userRole === 'MANAGER' || auth.user.userRole === 'RESIDENT');
+
+  const goBack = () => {
+    if (location.key === 'default') {
+      navigate('/');
+      return;
+    }
+    navigate(-1);
+  };
+
   const content = (
-    <div className="terms-page">
+    <div className={inAppShell ? 'terms-page' : 'terms-page terms-page--standalone'}>
+      {!inAppShell && (
+        <button className="terms-back" type="button" onClick={goBack}>
+          ← 돌아가기
+        </button>
+      )}
       <article>
         {termsType === null ? (
           <StateBoundary state="error">
@@ -46,7 +65,7 @@ export function TermsPage() {
       </article>
     </div>
   );
-  if (auth.status === 'authenticated' && (auth.user.userRole === 'MANAGER' || auth.user.userRole === 'RESIDENT')) {
+  if (inAppShell) {
     return <AppShell role={auth.user.userRole === 'MANAGER' ? 'manager' : 'resident'}>{content}</AppShell>;
   }
   return content;

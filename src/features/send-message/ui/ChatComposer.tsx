@@ -157,7 +157,7 @@ export function ChatComposer({
       )}
       <TextField
         value={value}
-        onValueChange={({ value: next }) => onChange(next)}
+        onValueChange={({ slicedValue }) => onChange(slicedValue)}
         maxGraphemeCount={messageMaxLength}
         hideCharacterCount={false}
         invalid={!!(imageError ?? errorMessage)}
