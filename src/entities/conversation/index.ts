@@ -23,6 +23,11 @@ export type {
   SummaryCard,
 } from './model/types';
 export {
+  closedStatusLabel,
+  closingCheckIntervalMs,
+  isClosedAt,
+} from './lib/conversationClosing.mjs';
+export {
   ConversationMessage,
   PendingResidentMessage,
 } from './ui/ConversationMessage';

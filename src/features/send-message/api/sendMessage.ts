@@ -48,7 +48,11 @@ export function useSendMessage(conversationId: number) {
       queryClient.setQueryData<MessagesData>(
         conversationKeys.messages(conversationId),
         (data) =>
-          appendTurn(data, [toResidentMessage(sent), sent.assistantMessage]),
+          appendTurn(
+            data,
+            [toResidentMessage(sent), sent.assistantMessage],
+            sent.closesAt,
+          ),
       );
       queryClient.invalidateQueries({ queryKey: conversationKeys.lists() });
     },
@@ -75,13 +79,14 @@ async function uploadImages(images: SelectedImage[]) {
 function appendTurn(
   data: MessagesData | undefined,
   messages: Message[],
+  closesAt: string | null,
 ): MessagesData | undefined {
   if (!data || data.pages.length === 0) return data;
   const [latest, ...older] = data.pages;
   return {
     ...data,
     pages: [
-      { ...latest, messages: [...latest.messages, ...messages] },
+      { ...latest, closesAt, messages: [...latest.messages, ...messages] },
       ...older,
     ],
   };
