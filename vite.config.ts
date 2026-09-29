@@ -1,12 +1,41 @@
 import react from '@vitejs/plugin-react';
 import { seedDesignPlugin } from '@seed-design/vite-plugin';
-import { defineConfig, loadEnv } from 'vite';
+import { defineConfig, loadEnv, type Plugin } from 'vite';
+
+const CLARITY_PROJECT_ID = 'ypalq4u0z2';
+
+const CLARITY_SNIPPET = `
+  (function(c,l,a,r,i,t,y){
+    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+  })(window, document, "clarity", "script", "${CLARITY_PROJECT_ID}");
+`;
+
+function clarityPlugin(): Plugin {
+  return {
+    name: 'zipsai-clarity',
+    apply: 'build',
+    transformIndexHtml: () => [
+      {
+        tag: 'script',
+        attrs: { type: 'text/javascript' },
+        children: CLARITY_SNIPPET,
+        injectTo: 'head',
+      },
+    ],
+  };
+}
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), 'VITE_');
 
   return {
-    plugins: [react(), seedDesignPlugin({ colorMode: 'light-only' })],
+    plugins: [
+      react(),
+      seedDesignPlugin({ colorMode: 'light-only' }),
+      clarityPlugin(),
+    ],
     resolve: {
       tsconfigPaths: true,
     },
