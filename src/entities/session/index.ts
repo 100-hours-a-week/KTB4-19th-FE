@@ -16,6 +16,10 @@ export {
 } from './api/authApi';
 export { roleHome } from './lib/roleHome';
 export { AuthProvider, useAuth } from './model/AuthProvider';
+export {
+  EMAIL_MAX_LENGTH,
+  PASSWORD_MAX_LENGTH,
+} from './model/credentialLimits';
 export { emailAvailabilityFeedback } from './api/emailAvailability.mjs';
 export { buildSignupRequest } from './api/signupRequest.mjs';
 export {

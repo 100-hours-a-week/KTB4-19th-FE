@@ -192,7 +192,7 @@ function MyPageLayout({
         </div>
         {editing ? (
           <div className="profile-edit-fields">
-            <label>이메일<input type="email" value={draft.email} onChange={(event) => setDraft({ ...draft, email: event.target.value })} /></label>
+            <label>이메일<input type="text" inputMode="email" autoComplete="email" value={draft.email} onChange={(event) => setDraft({ ...draft, email: event.target.value })} /></label>
             <label>연락처<input value={draft.phone} onChange={(event) => setDraft({ ...draft, phone: event.target.value })} /></label>
             {error && <p role="alert">{error}</p>}
           </div>

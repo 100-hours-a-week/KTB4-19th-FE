@@ -3,7 +3,11 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ActionButton } from "seed-design/ui/action-button";
 import { Callout } from "seed-design/ui/callout";
 import { TextField, TextFieldInput } from "seed-design/ui/text-field";
-import { useAuth } from "@/entities/session";
+import {
+  EMAIL_MAX_LENGTH,
+  PASSWORD_MAX_LENGTH,
+  useAuth,
+} from "@/entities/session";
 import { isApiError, type ApiError } from "@/shared/api";
 import { useRetryCountdown } from "@/shared/lib";
 import { AuthLayout } from "@/widgets/auth-layout";
@@ -61,12 +65,16 @@ export function LoginPage() {
         <TextField
           label="이메일"
           value={email}
-          onValueChange={({ value }) => setEmail(value)}
+          onValueChange={({ slicedValue }) => setEmail(slicedValue)}
+          maxGraphemeCount={EMAIL_MAX_LENGTH}
+          hideCharacterCount
           invalid={!!error?.violationFor('email')}
           errorMessage={error?.violationFor('email')}
         >
+          {/* type="email"은 도메인의 비ASCII 문자를 퓨니코드로 바꿔 서버 형식 검증을 우회하므로 text로 받는다. */}
           <TextFieldInput
-            type="email"
+            type="text"
+            inputMode="email"
             autoComplete="email"
             placeholder="example@email.com"
           />
@@ -74,7 +82,9 @@ export function LoginPage() {
         <TextField
           label="비밀번호"
           value={password}
-          onValueChange={({ value }) => setPassword(value)}
+          onValueChange={({ slicedValue }) => setPassword(slicedValue)}
+          maxGraphemeCount={PASSWORD_MAX_LENGTH}
+          hideCharacterCount
           invalid={!!error?.violationFor('password')}
           errorMessage={error?.violationFor('password')}
         >
