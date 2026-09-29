@@ -13,6 +13,7 @@ import {
 import { ActionButton } from 'seed-design/ui/action-button';
 import { TextField, TextFieldTextarea } from 'seed-design/ui/text-field';
 import {
+  imageAttachmentEnabled,
   imageSelectionError,
   imageSizeError,
   maxImageCount,
@@ -54,7 +55,7 @@ export function ChatComposer({
   const [preparingImages, setPreparingImages] = useState(false);
   const [imageError, setImageError] = useState<string | null>(null);
   const [draggingFiles, setDraggingFiles] = useState(false);
-  const canAddImages = !sending && !preparingImages;
+  const canAddImages = imageAttachmentEnabled && !sending && !preparingImages;
   const canSend =
     (value.trim().length > 0 || images.length > 0) &&
     !sending &&
@@ -99,7 +100,7 @@ export function ChatComposer({
   };
 
   const addImages = async (files: File[]) => {
-    if (files.length === 0) return;
+    if (!imageAttachmentEnabled || files.length === 0) return;
     const selectionError = imageSelectionError(images.length, files);
     setImageError(selectionError);
     if (selectionError) return;
@@ -169,25 +170,29 @@ export function ChatComposer({
         />
       </TextField>
       <div className="composer-actions">
-        <ActionButton
-          type="button"
-          variant="neutralWeak"
-          size="small"
-          loading={preparingImages}
-          disabled={sending || images.length >= maxImageCount}
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <PrefixIcon svg={<IconPictureLine />} />
-          사진 {images.length}/{maxImageCount}
-        </ActionButton>
-        <input
-          ref={fileInputRef}
-          hidden
-          type="file"
-          multiple
-          accept={imageAccept}
-          onChange={selectImages}
-        />
+        {imageAttachmentEnabled && (
+          <>
+            <ActionButton
+              type="button"
+              variant="neutralWeak"
+              size="small"
+              loading={preparingImages}
+              disabled={sending || images.length >= maxImageCount}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <PrefixIcon svg={<IconPictureLine />} />
+              사진 {images.length}/{maxImageCount}
+            </ActionButton>
+            <input
+              ref={fileInputRef}
+              hidden
+              type="file"
+              multiple
+              accept={imageAccept}
+              onChange={selectImages}
+            />
+          </>
+        )}
         <span>Enter로 전송 · Shift+Enter로 줄바꿈</span>
         <ActionButton
           type="submit"

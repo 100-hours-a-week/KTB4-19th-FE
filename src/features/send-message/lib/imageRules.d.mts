@@ -1,5 +1,6 @@
 type ImageFileLike = { name: string; type: string };
 
+export const imageAttachmentEnabled: boolean;
 export const maxImageCount: number;
 export const maxImageBytes: number;
 export const maxUploadBytes: number;
