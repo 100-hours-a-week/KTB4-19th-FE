@@ -8,6 +8,7 @@ import {
   type MessageSendResponse,
 } from '@/entities/conversation';
 import { fileApi } from '@/entities/file';
+import { imageAttachmentEnabled } from '../lib/imageRules.mjs';
 import type { SelectedImage } from '../lib/selectedImage';
 
 export type MessageDraft = { content: string; images: SelectedImage[] };
@@ -55,10 +56,11 @@ export function useSendMessage(conversationId: number) {
 }
 
 async function uploadImages(images: SelectedImage[]) {
+  if (!imageAttachmentEnabled) return [];
   try {
     return await Promise.all(
       images.map(async ({ file }) => {
-        const upload = await fileApi.createUpload(file, "CONVERSATION");
+        const upload = await fileApi.createUpload(file, 'CONVERSATION');
         await fileApi.uploadToS3(upload, file);
         await fileApi.complete(upload.attachmentId);
         return upload.attachmentId;
