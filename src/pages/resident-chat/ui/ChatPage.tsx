@@ -6,6 +6,9 @@ import { Callout } from 'seed-design/ui/callout';
 import {
   ConversationMessage,
   PendingResidentMessage,
+  closedStatusLabel,
+  closingCheckIntervalMs,
+  isClosedAt,
   useConversationMessages,
   type ConversationMessagesResponse,
 } from '@/entities/conversation';
@@ -24,7 +27,7 @@ import {
   type SelectedImage,
 } from '@/features/send-message';
 import { isApiError, type ApiError } from '@/shared/api';
-import { formatRoomNo, useRetryCountdown } from '@/shared/lib';
+import { formatRoomNo, useNow, useRetryCountdown } from '@/shared/lib';
 
 // 대화 시작 인사는 서버가 저장하지 않는 클라이언트 고정 문구다.
 const greeting = '불편한 점이나 궁금한 점을 편하게 말씀해 주세요.';
@@ -113,6 +116,7 @@ function ConversationChat({ conversationId }: { conversationId: number }) {
   const sendMessage = useSendMessage(conversationId);
   const createComplaint = useCreateComplaint();
   const countdown = useRetryCountdown();
+  const now = useNow(closingCheckIntervalMs);
   const [input, setInput] = useState('');
   const [images, setImages] = useState<SelectedImage[]>([]);
   const [sendError, setSendError] = useState<SendError | null>(null);
@@ -157,7 +161,10 @@ function ConversationChat({ conversationId }: { conversationId: number }) {
   const messages = [...messagesQuery.data.pages]
     .reverse()
     .flatMap((page) => page.messages);
-  const isActive = conversation.conversationStatus === 'ACTIVE';
+  const closedByIdle =
+    !sendMessage.isPending && isClosedAt(conversation.closesAt, now);
+  const isActive =
+    conversation.conversationStatus === 'ACTIVE' && !closedByIdle;
   // 접수 확인 카드는 SUMMARY_CARD 메시지에 실려 온다. 접수 후에도 기록으로 남기되 버튼은 진행 중일 때만 누를 수 있다.
   const summaryCard = [...messages]
     .reverse()
@@ -202,7 +209,12 @@ function ConversationChat({ conversationId }: { conversationId: number }) {
   return (
     <ChatLayout
       title={conversation.conversationTitle}
-      badge={<ConversationBadge conversation={conversation} />}
+      badge={
+        <ConversationBadge
+          active={isActive}
+          label={closedByIdle ? closedStatusLabel : conversation.statusLabel}
+        />
+      }
     >
       <div className="chat-body">
         {messagesQuery.hasNextPage ? (
@@ -316,21 +328,21 @@ function ClosedNotice({
     <Callout
       className="chat-closed"
       tone="neutral"
-      description="종료된 대화예요. 새로운 문의는 새 대화에서 시작해 주세요."
+      description="마지막 대화 후 5분이 지나 종료된 대화예요. 새로운 문의는 새 대화에서 시작해 주세요."
     />
   );
 }
 
 function ConversationBadge({
-  conversation,
+  active,
+  label,
 }: {
-  conversation: ConversationMessagesResponse;
+  active: boolean;
+  label: string;
 }) {
-  const tone =
-    conversation.conversationStatus === 'ACTIVE' ? 'informative' : 'neutral';
   return (
-    <Badge tone={tone} variant="weak">
-      {conversation.statusLabel}
+    <Badge tone={active ? 'informative' : 'neutral'} variant="weak">
+      {label}
     </Badge>
   );
 }

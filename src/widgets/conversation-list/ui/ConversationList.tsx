@@ -7,11 +7,14 @@ import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ActionButton } from 'seed-design/ui/action-button';
 import {
+  closedStatusLabel,
+  closingCheckIntervalMs,
+  isClosedAt,
   useConversationList,
   type ConversationListItem,
   type ConversationType,
 } from '@/entities/conversation';
-import { formatListTime } from '@/shared/lib';
+import { formatListTime, useNow } from '@/shared/lib';
 
 const typeLabel: Record<ConversationType, string> = {
   INQUIRY: '생활 문의',
@@ -21,6 +24,7 @@ const typeLabel: Record<ConversationType, string> = {
 const statusTone: Record<string, 'neutral' | 'informative' | 'positive'> = {
   ACTIVE: 'informative',
   COMPLAINT_CREATED: 'positive',
+  CLOSED: 'neutral',
 };
 
 type Props = {
@@ -32,6 +36,7 @@ type Props = {
 
 export function ConversationList({ keyword, size, compact = false }: Props) {
   const query = useConversationList({ keyword, size });
+  const now = useNow(closingCheckIntervalMs);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const {
     hasNextPage,
@@ -110,7 +115,7 @@ export function ConversationList({ keyword, size, compact = false }: Props) {
   return (
     <div className="list-stack">
       {conversations.map((item) => (
-        <ConversationRow item={item} key={item.conversationId} />
+        <ConversationRow item={item} now={now} key={item.conversationId} />
       ))}
       {!compact && hasNextPage && (
         <div ref={loadMoreRef}>
@@ -132,7 +137,16 @@ export function ConversationList({ keyword, size, compact = false }: Props) {
   );
 }
 
-function ConversationRow({ item }: { item: ConversationListItem }) {
+function ConversationRow({
+  item,
+  now,
+}: {
+  item: ConversationListItem;
+  now: number;
+}) {
+  const closed = isClosedAt(item.closesAt, now);
+  const statusCode = closed ? 'CLOSED' : item.statusCode;
+  const statusLabel = closed ? closedStatusLabel : item.statusLabel;
   return (
     <Link
       className="list-row"
@@ -144,8 +158,8 @@ function ConversationRow({ item }: { item: ConversationListItem }) {
       <div className="grow">
         <div className="row-title">
           <strong>{item.conversationTitle}</strong>
-          <Badge tone={statusTone[item.statusCode] ?? 'neutral'} variant="weak">
-            {item.statusLabel}
+          <Badge tone={statusTone[statusCode] ?? 'neutral'} variant="weak">
+            {statusLabel}
           </Badge>
         </div>
         <p>
