@@ -338,6 +338,7 @@ button { cursor: pointer; }
 .terms-content { color: var(--seed-color-fg-neutral-muted); margin-top: var(--seed-dimension-x5); line-height: 1.8; white-space: pre-wrap; }
 .terms-page article > p:not(.eyebrow):not(.terms-date) { color: var(--seed-color-fg-neutral-muted); margin-top: var(--seed-dimension-x3); line-height: 1.8; }
 .terms-page article { max-width: none; margin: 0; text-align: left; }
+.terms-page--standalone { min-height: var(--app-vh); padding: var(--seed-dimension-x8); background: var(--seed-color-bg-layer-default); }
 
 .bottom-nav { display: none; }
 .skeleton-stack { display: grid; gap: var(--seed-dimension-x4); }

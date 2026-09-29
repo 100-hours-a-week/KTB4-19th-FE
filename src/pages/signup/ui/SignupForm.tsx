@@ -14,18 +14,30 @@ import {
 import { useTerms } from '@/entities/terms';
 import { isApiError, type ApiError } from '@/shared/api';
 import { useRetryCountdown } from '@/shared/lib';
+import {
+  parseSignupDraft,
+  signupDraftKey,
+  toSignupDraft,
+} from '../lib/signupDraft.mjs';
 
 export function SignupForm() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
+  const [savedDraft] = useState(takeSavedDraft);
+  const [email, setEmail] = useState(savedDraft?.email ?? '');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
-  const [userName, setUserName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [acceptedServiceTerms, setAcceptedServiceTerms] = useState(false);
-  const [acceptedPrivacyTerms, setAcceptedPrivacyTerms] = useState(false);
+  const [userName, setUserName] = useState(savedDraft?.userName ?? '');
+  const [phone, setPhone] = useState(savedDraft?.phone ?? '');
+  const [acceptedServiceTerms, setAcceptedServiceTerms] = useState(
+    savedDraft?.acceptedServiceTerms ?? false,
+  );
+  const [acceptedPrivacyTerms, setAcceptedPrivacyTerms] = useState(
+    savedDraft?.acceptedPrivacyTerms ?? false,
+  );
   const [checkingEmail, setCheckingEmail] = useState(false);
-  const [emailAvailable, setEmailAvailable] = useState<boolean | null>(null);
+  const [emailAvailable, setEmailAvailable] = useState<boolean | null>(
+    savedDraft?.emailAvailable ?? null,
+  );
   const [emailCheckError, setEmailCheckError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
@@ -85,6 +97,24 @@ export function SignupForm() {
     setEmailCheckError(null);
     setError(null);
     setFormMessage(null);
+  };
+
+  const saveDraft = () => {
+    try {
+      sessionStorage.setItem(
+        signupDraftKey,
+        toSignupDraft({
+          email,
+          userName,
+          phone,
+          emailAvailable,
+          acceptedServiceTerms,
+          acceptedPrivacyTerms,
+        }),
+      );
+    } catch {
+      return;
+    }
   };
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
@@ -270,8 +300,10 @@ export function SignupForm() {
             disabled={pending}
             label={
               <>
-                <Link to="/terms/SERVICE">{serviceTitle}</Link>에 동의합니다.
-                (필수)
+                <Link to="/terms/SERVICE" onClick={saveDraft}>
+                  {serviceTitle}
+                </Link>
+                에 동의합니다. (필수)
               </>
             }
           />
@@ -284,8 +316,10 @@ export function SignupForm() {
             disabled={pending}
             label={
               <>
-                <Link to="/terms/PRIVACY">{privacyTitle}</Link>에 동의합니다.
-                (필수)
+                <Link to="/terms/PRIVACY" onClick={saveDraft}>
+                  {privacyTitle}
+                </Link>
+                에 동의합니다. (필수)
               </>
             }
           />
@@ -305,6 +339,16 @@ export function SignupForm() {
       </form>
     </>
   );
+}
+
+function takeSavedDraft() {
+  try {
+    const raw = sessionStorage.getItem(signupDraftKey);
+    sessionStorage.removeItem(signupDraftKey);
+    return parseSignupDraft(raw);
+  } catch {
+    return null;
+  }
 }
 
 function retryMessage(remainingSeconds: number) {
