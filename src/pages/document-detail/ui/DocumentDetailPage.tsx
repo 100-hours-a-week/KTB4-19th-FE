@@ -1,10 +1,11 @@
-import { IconDocumentLine } from '@karrotmarket/react-monochrome-icon';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ActionButton } from 'seed-design/ui/action-button';
 import { TextField, TextFieldInput } from 'seed-design/ui/text-field';
+import { useManagerBuilding } from '@/entities/building';
 import { DOCUMENT_TITLE_MAX_LENGTH, fileApi, type RuleDocumentResponse } from '@/entities/file';
-import { PageTitle, StateBoundary } from '@/shared/ui';
+import { formatListTime } from '@/shared/lib';
+import { InfoRow, PageTitle, StateBoundary } from '@/shared/ui';
 
 export function DocumentDetailPage() {
   const { documentId } = useParams();
@@ -14,6 +15,7 @@ export function DocumentDetailPage() {
   const [replacement, setReplacement] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [state, setState] = useState<'loading' | 'default' | 'error'>('loading');
+  const buildingName = useManagerBuilding().data?.buildingName;
 
   useEffect(() => {
     if (!documentId) return;
@@ -45,15 +47,12 @@ export function DocumentDetailPage() {
   const isImage = /\.(jpe?g|png)$/i.test(document?.originalName ?? '');
 
   return <>
-    <PageTitle eyebrow="운영규칙 문서" title={editing ? '문서 수정' : '문서 상세'} description="등록된 건물 운영 문서를 확인합니다." />
-    <section className="panel document-detail-card">
-      <StateBoundary state={state} emptyTitle="문서를 찾을 수 없어요">
-        {document && <>
-          {!editing && <span className="document-icon"><IconDocumentLine /></span>}
-          <TextField label="문서 제목" showRequiredIndicator={false} maxGraphemeCount={DOCUMENT_TITLE_MAX_LENGTH} hideCharacterCount={!editing} value={title} onValueChange={({ slicedValue }) => setTitle(slicedValue)}><TextFieldInput disabled={!editing} /></TextField>
-          {editing && <label className="button-like"><ActionButton variant="neutralOutline" asChild><span>새 파일로 교체</span></ActionButton><input hidden type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={(event) => setReplacement(event.target.files?.[0] ?? null)} /></label>}
+    <PageTitle eyebrow="운영규칙 문서" title={editing ? '문서 수정' : document?.title ?? '문서 상세'} description={document ? [buildingName, `${formatListTime(document.updatedAt)} 수정`].filter(Boolean).join(' · ') : undefined} />
+    <StateBoundary state={state} emptyTitle="문서를 찾을 수 없어요">
+      {document && <div className="detail-grid">
+        <section className="panel document-detail-card">
+          {editing && <TextField label="문서 제목" showRequiredIndicator={false} maxGraphemeCount={DOCUMENT_TITLE_MAX_LENGTH} value={title} onValueChange={({ slicedValue }) => setTitle(slicedValue)}><TextFieldInput /></TextField>}
           {replacement && <p>{replacement.name}으로 교체 예정</p>}
-          <div className="document-detail-meta"><span>버전 {document.version}</span><span>수정 {new Date(document.updatedAt).toLocaleDateString('ko-KR')}</span></div>
           {document.fileUrl && <div className="document-preview">
             {isImage ? <img src={document.fileUrl} alt={document.title} className="document-preview__image" /> : <iframe
               title={`${document.title} 미리보기`}
@@ -64,10 +63,15 @@ export function DocumentDetailPage() {
           <div className="button-row form-actions document-detail-actions">
             <Link to="/manager/documents"><ActionButton variant="neutralOutline">목록</ActionButton></Link>
             {document.fileUrl && <a href={document.fileUrl} target="_blank" rel="noreferrer"><ActionButton variant="neutralOutline">열기</ActionButton></a>}
-            {editing ? <ActionButton variant="brandSolid" disabled={saving} onClick={() => void save()}>{saving ? '저장 중...' : '저장'}</ActionButton> : <><ActionButton variant="neutralOutline" onClick={() => setEditing(true)}>수정</ActionButton><ActionButton variant="neutralOutline" onClick={() => void remove()}>삭제</ActionButton></>}
+            {editing ? <><label className="button-like"><ActionButton variant="neutralOutline" asChild><span>새 파일로 교체</span></ActionButton><input hidden type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={(event) => setReplacement(event.target.files?.[0] ?? null)} /></label><ActionButton variant="brandSolid" disabled={saving} onClick={() => void save()}>{saving ? '저장 중...' : '저장'}</ActionButton></> : <><ActionButton variant="neutralOutline" onClick={() => setEditing(true)}>수정</ActionButton><ActionButton variant="neutralOutline" onClick={() => void remove()}>삭제</ActionButton></>}
           </div>
-        </>}
-      </StateBoundary>
-    </section>
+        </section>
+        <aside className="panel detail-aside">
+          <h2>문서 정보</h2>
+          <InfoRow label="버전" value={document.version} />
+          <InfoRow label="수정일" value={formatListTime(document.updatedAt)} />
+        </aside>
+      </div>}
+    </StateBoundary>
   </>;
 }
