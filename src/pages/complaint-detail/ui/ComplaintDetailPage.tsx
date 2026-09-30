@@ -4,10 +4,15 @@ import {
 } from '@karrotmarket/react-monochrome-icon';
 import { Badge } from '@seed-design/react';
 import { Link, useParams } from 'react-router-dom';
-import { ActionButton } from 'seed-design/ui/action-button';
 import { Callout } from 'seed-design/ui/callout';
 import {
+  SegmentedControl,
+  SegmentedControlItem,
+} from 'seed-design/ui/segmented-control';
+import {
+  canChangeComplaintStatus,
   ComplaintPhotoGrid,
+  type ComplaintStatus,
   ComplaintStatusBadge,
   useManagerComplaint,
   useResidentComplaint,
@@ -26,6 +31,12 @@ export function ComplaintDetailPage({ role }: { role: RouteRole }) {
   );
 }
 
+const complaintStatusOptions: { value: ComplaintStatus; label: string }[] = [
+  { value: 'PENDING', label: '처리전' },
+  { value: 'IN_PROGRESS', label: '처리중' },
+  { value: 'DONE', label: '완료' },
+];
+
 function ManagerComplaintDetailPage() {
   const { complaintId: rawComplaintId } = useParams();
   const complaintId = Number(rawComplaintId);
@@ -38,12 +49,6 @@ function ManagerComplaintDetail({ complaintId }: { complaintId: number }) {
   const query = useManagerComplaint(complaintId);
   const updateStatus = useUpdateManagerComplaintStatus();
   const complaint = query.data;
-  const nextStatus =
-    complaint?.statusCode === 'PENDING'
-      ? 'IN_PROGRESS'
-      : complaint?.statusCode === 'IN_PROGRESS'
-        ? 'DONE'
-        : null;
   const viewState: ViewState = query.isPending
     ? 'loading'
     : query.isError
@@ -52,9 +57,13 @@ function ManagerComplaintDetail({ complaintId }: { complaintId: number }) {
         ? 'default'
         : 'empty';
 
-  const update = () => {
-    if (nextStatus)
-      updateStatus.mutate({ complaintId, statusCode: nextStatus });
+  const update = (statusCode: ComplaintStatus) => {
+    if (
+      complaint &&
+      !updateStatus.isPending &&
+      canChangeComplaintStatus(complaint.statusCode, statusCode)
+    )
+      updateStatus.mutate({ complaintId, statusCode });
   };
 
   return (
@@ -69,18 +78,25 @@ function ManagerComplaintDetail({ complaintId }: { complaintId: number }) {
         }
         action={
           complaint && (
-            <ActionButton
-              variant="neutralOutline"
-              onClick={update}
-              loading={updateStatus.isPending}
-              disabled={!nextStatus || updateStatus.isPending}
+            <SegmentedControl
+              aria-label="민원 처리 상태 변경"
+              value={complaint.statusCode}
+              onValueChange={(value) => update(value as ComplaintStatus)}
             >
-              {complaint.statusCode === 'PENDING'
-                ? '처리 시작'
-                : complaint.statusCode === 'IN_PROGRESS'
-                  ? '처리 완료'
-                  : '완료된 민원'}
-            </ActionButton>
+              {complaintStatusOptions.map(({ value, label }) => (
+                <SegmentedControlItem
+                  key={value}
+                  value={value}
+                  disabled={
+                    value !== complaint.statusCode &&
+                    (updateStatus.isPending ||
+                      !canChangeComplaintStatus(complaint.statusCode, value))
+                  }
+                >
+                  {label}
+                </SegmentedControlItem>
+              ))}
+            </SegmentedControl>
           )
         }
       />
