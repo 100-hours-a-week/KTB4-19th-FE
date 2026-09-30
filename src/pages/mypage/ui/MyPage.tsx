@@ -4,6 +4,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ActionButton } from 'seed-design/ui/action-button';
 import {
   authApi,
+  EMAIL_MAX_LENGTH,
+  PHONE_MAX_LENGTH,
   useAuth,
   useManagerMyPage,
   useResidentMyPage,
@@ -192,8 +194,8 @@ function MyPageLayout({
         </div>
         {editing ? (
           <div className="profile-edit-fields">
-            <label>이메일<input type="text" inputMode="email" autoComplete="email" value={draft.email} onChange={(event) => setDraft({ ...draft, email: event.target.value })} /></label>
-            <label>연락처<input value={draft.phone} onChange={(event) => setDraft({ ...draft, phone: event.target.value })} /></label>
+            <label>이메일<input type="text" inputMode="email" autoComplete="email" maxLength={EMAIL_MAX_LENGTH} value={draft.email} onChange={(event) => setDraft({ ...draft, email: event.target.value })} /></label>
+            <label>연락처<input type="tel" inputMode="tel" autoComplete="tel" value={draft.phone} onChange={(event) => setDraft({ ...draft, phone: event.target.value.replace(/[^0-9-]/g, '').slice(0, PHONE_MAX_LENGTH) })} /></label>
             {error && <p role="alert">{error}</p>}
           </div>
         ) : (

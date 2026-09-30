@@ -7,6 +7,7 @@ import { TextField, TextFieldInput } from 'seed-design/ui/text-field';
 import {
   authApi,
   buildManagerProfileRequest,
+  NAME_MAX_LENGTH,
   useAuth,
 } from '@/entities/session';
 import { useTerms } from '@/entities/terms';
@@ -77,7 +78,7 @@ export function ManagerProfilePage() {
     event.preventDefault();
     if (pending) return;
     const digits = phone.replace(/\D/g, '');
-    if (!name.trim() || name.trim().length > 7)
+    if (!name.trim() || name.trim().length > NAME_MAX_LENGTH)
       return setErrorMessage('이름을 1~7자로 입력해 주세요.');
     if (!/^\d{10,11}$/.test(digits))
       return setErrorMessage('전화번호를 숫자 10~11자리로 입력해 주세요.');
@@ -126,7 +127,7 @@ export function ManagerProfilePage() {
         >
           <TextFieldInput
             value={name}
-            maxLength={7}
+            maxLength={NAME_MAX_LENGTH}
             onChange={(event) => setName(event.target.value)}
             autoComplete="name"
           />

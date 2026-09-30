@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ActionButton } from 'seed-design/ui/action-button';
 import { TextField, TextFieldInput } from 'seed-design/ui/text-field';
-import { fileApi, type RuleDocumentResponse } from '@/entities/file';
+import { DOCUMENT_TITLE_MAX_LENGTH, fileApi, type RuleDocumentResponse } from '@/entities/file';
 import { PageTitle, StateBoundary } from '@/shared/ui';
 
 export function DocumentDetailPage() {
@@ -50,7 +50,7 @@ export function DocumentDetailPage() {
       <StateBoundary state={state} emptyTitle="문서를 찾을 수 없어요">
         {document && <>
           {!editing && <span className="document-icon"><IconDocumentLine /></span>}
-          <TextField label="문서 제목" showRequiredIndicator={false}><TextFieldInput value={title} disabled={!editing} onChange={(event) => setTitle(event.target.value)} /></TextField>
+          <TextField label="문서 제목" showRequiredIndicator={false} maxGraphemeCount={DOCUMENT_TITLE_MAX_LENGTH} hideCharacterCount={!editing} value={title} onValueChange={({ slicedValue }) => setTitle(slicedValue)}><TextFieldInput disabled={!editing} /></TextField>
           {editing && <label className="button-like"><ActionButton variant="neutralOutline" asChild><span>새 파일로 교체</span></ActionButton><input hidden type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={(event) => setReplacement(event.target.files?.[0] ?? null)} /></label>}
           {replacement && <p>{replacement.name}으로 교체 예정</p>}
           <div className="document-detail-meta"><span>버전 {document.version}</span><span>수정 {new Date(document.updatedAt).toLocaleDateString('ko-KR')}</span></div>
