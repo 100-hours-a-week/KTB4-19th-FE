@@ -18,6 +18,7 @@ import {
   useResidentComplaint,
   useUpdateManagerComplaintStatus,
 } from '@/entities/complaint';
+import { imageAttachmentEnabled } from '@/features/send-message';
 import type { RouteRole } from '@/shared/config';
 import { formatListTime, formatOccurredTime, formatRoomNo } from '@/shared/lib';
 import { InfoRow, PageTitle, StateBoundary, type ViewState } from '@/shared/ui';
@@ -140,10 +141,12 @@ function ManagerComplaintDetail({ complaintId }: { complaintId: number }) {
                   />
                   <InfoRow label="증상" value={complaint.symptom ?? '-'} />
                 </section>
-                <section>
-                  <h2>첨부 사진 ({complaint.attachmentCount})</h2>
-                  <ComplaintPhotoGrid photos={complaint.attachments} />
-                </section>
+                {imageAttachmentEnabled && (
+                  <section>
+                    <h2>첨부 사진 ({complaint.attachmentCount})</h2>
+                    <ComplaintPhotoGrid photos={complaint.attachments} />
+                  </section>
+                )}
               </section>
               <aside className="panel detail-aside">
                 <h2>처리 정보</h2>
@@ -250,10 +253,12 @@ function ResidentComplaintDetail({ complaintId }: { complaintId: number }) {
                 />
                 <InfoRow label="증상" value={complaint.symptom || '-'} />
               </section>
-              <section>
-                <h2>첨부 사진 ({complaint.attachmentCount})</h2>
-                <ComplaintPhotoGrid photos={complaint.attachments} />
-              </section>
+              {imageAttachmentEnabled && (
+                <section>
+                  <h2>첨부 사진 ({complaint.attachmentCount})</h2>
+                  <ComplaintPhotoGrid photos={complaint.attachments} />
+                </section>
+              )}
             </section>
             <aside className="panel detail-aside">
               <h2>처리 정보</h2>
