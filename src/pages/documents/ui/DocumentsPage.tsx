@@ -1,5 +1,4 @@
 import {
-  IconChevronRightLine,
   IconDocumentLine,
   IconMagnifyingglassLine,
   IconPlusLine,
@@ -34,6 +33,12 @@ export function DocumentsPage() {
     const timer = window.setTimeout(() => { void loadDocuments(); }, 0);
     return () => window.clearTimeout(timer);
   }, [loadDocuments]);
+
+  const removeDocument = async (documentId: number) => {
+    if (!window.confirm('이 문서를 삭제할까요?')) return;
+    await fileApi.deleteDocument(documentId);
+    await loadDocuments();
+  };
 
   const filteredDocuments = useMemo(
     () => documents.filter((document) => document.title.toLowerCase().includes(keyword.trim().toLowerCase())),
@@ -71,12 +76,11 @@ export function DocumentsPage() {
         <StateBoundary state={state} emptyTitle="등록된 운영규칙이 없어요" onRetry={() => void loadDocuments()}>
           <div className="list-stack">
             {filteredDocuments.map((doc) => (
-              <Link
-                className="list-row"
-                to={`/manager/documents/${doc.documentId}`}
-                key={doc.documentId}
-              >
-                <div className="list-leading">
+              <div className="list-row" key={doc.documentId}>
+                <Link
+                  className="list-leading"
+                  to={`/manager/documents/${doc.documentId}`}
+                >
                   <span className="document-icon">
                     <IconDocumentLine />
                   </span>
@@ -90,9 +94,23 @@ export function DocumentsPage() {
                         .join(' · ')}
                     </p>
                   </div>
+                </Link>
+                <div className="button-row">
+                  <Link
+                    to={`/manager/documents/${doc.documentId}`}
+                    state={{ editing: true }}
+                  >
+                    <ActionButton variant="neutralOutline" size="small">수정</ActionButton>
+                  </Link>
+                  <ActionButton
+                    variant="neutralOutline"
+                    size="small"
+                    onClick={() => void removeDocument(doc.documentId)}
+                  >
+                    삭제
+                  </ActionButton>
                 </div>
-                <IconChevronRightLine />
-              </Link>
+              </div>
             ))}
           </div>
         </StateBoundary>
