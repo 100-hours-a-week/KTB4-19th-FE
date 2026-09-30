@@ -28,3 +28,8 @@ export type { ComplaintStatus } from './model/types';
 export { ComplaintStatusBadge } from './ui/ComplaintStatusBadge';
 export { ComplaintPhotoGrid } from './ui/ComplaintPhotoGrid';
 export { ComplaintThumbnail } from './ui/ComplaintThumbnail';
+export {
+  canChangeComplaintStatus,
+  complaintStatusOrder,
+  nextComplaintStatus,
+} from './lib/complaintStatusFlow.mjs';
