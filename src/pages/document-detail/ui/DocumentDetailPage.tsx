@@ -53,7 +53,7 @@ export function DocumentDetailPage() {
           <TextField label="문서 제목" showRequiredIndicator={false}><TextFieldInput value={title} disabled={!editing} onChange={(event) => setTitle(event.target.value)} /></TextField>
           {editing && <label className="button-like"><ActionButton variant="neutralOutline" asChild><span>새 파일로 교체</span></ActionButton><input hidden type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={(event) => setReplacement(event.target.files?.[0] ?? null)} /></label>}
           {replacement && <p>{replacement.name}으로 교체 예정</p>}
-          <div className="document-detail-meta"><span>버전 {document.version}</span><span>첨부파일 {document.attachmentId}</span><span>수정 {new Date(document.updatedAt).toLocaleDateString('ko-KR')}</span></div>
+          <div className="document-detail-meta"><span>버전 {document.version}</span><span>수정 {new Date(document.updatedAt).toLocaleDateString('ko-KR')}</span></div>
           {document.fileUrl && <div className="document-preview">
             {isImage ? <img src={document.fileUrl} alt={document.title} className="document-preview__image" /> : <iframe
               title={`${document.title} 미리보기`}

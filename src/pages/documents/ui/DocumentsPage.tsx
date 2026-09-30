@@ -80,7 +80,7 @@ export function DocumentsPage() {
                 <div>
                   <h2>{doc.title}</h2>
                   <p>
-                    버전 {doc.version} · 첨부파일 {doc.attachmentId}
+                    버전 {doc.version}
                   </p>
                   <small>수정 {new Date(doc.updatedAt).toLocaleDateString('ko-KR')}</small>
                 </div>
