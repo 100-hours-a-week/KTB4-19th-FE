@@ -1,8 +1,5 @@
-import { IconPlusLine } from '@karrotmarket/react-monochrome-icon';
-import { PrefixIcon } from '@seed-design/react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ActionButton } from 'seed-design/ui/action-button';
 import {
   SegmentedControl,
   SegmentedControlItem,
@@ -44,12 +41,6 @@ export function RoomsPage() {
         eyebrow="건물 관리"
         title="호실 현황"
         description="층별 입주 상태와 초대 현황을 확인하세요."
-        action={
-          <ActionButton variant="brandSolid">
-            <PrefixIcon svg={<IconPlusLine />} />
-            호실 추가
-          </ActionButton>
-        }
       />
       <section className="metrics-grid metrics-grid--three">
         <MetricCard label="입주" value={summary?.livingCount ?? '—'} />
