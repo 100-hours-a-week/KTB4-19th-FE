@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import { ActionButton } from 'seed-design/ui/action-button';
 import { TextField, TextFieldInput } from 'seed-design/ui/text-field';
 import { useManagerBuilding } from '@/entities/building';
@@ -11,7 +11,11 @@ export function DocumentDetailPage() {
   const { documentId } = useParams();
   const [document, setDocument] = useState<RuleDocumentResponse | null>(null);
   const [title, setTitle] = useState('');
-  const [editing, setEditing] = useState(false);
+  // 목록의 수정 버튼으로 들어오면 바로 수정 상태로 연다.
+  const location = useLocation();
+  const [editing, setEditing] = useState(
+    (location.state as { editing?: boolean } | null)?.editing === true,
+  );
   const [replacement, setReplacement] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [state, setState] = useState<'loading' | 'default' | 'error'>('loading');
