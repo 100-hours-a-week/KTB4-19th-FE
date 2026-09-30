@@ -144,7 +144,8 @@ button { cursor: pointer; }
 .row-title { display: flex; flex-wrap: wrap; align-items: center; gap: var(--seed-dimension-x2); }
 .row-title strong { font-size: var(--seed-font-size-t5); }
 .list-row p { color: var(--seed-color-fg-neutral-subtle); margin-top: var(--seed-dimension-x1); font-size: var(--seed-font-size-t3); }
-.list-row > svg { width: 18px; flex: 0 0 auto; color: var(--seed-color-fg-neutral-subtle); }
+.list-row > svg, .row-chevron svg { width: 18px; flex: 0 0 auto; color: var(--seed-color-fg-neutral-subtle); }
+.row-chevron { display: flex; flex: 0 0 auto; }
 .urgency-dot { width: 10px; height: 10px; border-radius: var(--seed-radius-full); background: var(--seed-color-bg-neutral-weak); }
 .urgency-dot.urgent, .unread-dot { background: var(--seed-color-bg-critical-solid); }
 .urgency-label { color: var(--seed-color-fg-neutral-subtle); font-size: var(--seed-font-size-t3); }

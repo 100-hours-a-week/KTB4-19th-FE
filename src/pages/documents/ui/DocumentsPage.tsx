@@ -1,4 +1,5 @@
 import {
+  IconChevronRightLine,
   IconDocumentLine,
   IconMagnifyingglassLine,
   IconPlusLine,
@@ -110,6 +111,13 @@ export function DocumentsPage() {
                     삭제
                   </ActionButton>
                 </div>
+                <Link
+                  className="row-chevron"
+                  to={`/manager/documents/${doc.documentId}`}
+                  aria-label={`${doc.title} 상세 보기`}
+                >
+                  <IconChevronRightLine />
+                </Link>
               </div>
             ))}
           </div>
