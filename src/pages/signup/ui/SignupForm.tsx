@@ -9,7 +9,9 @@ import {
   buildSignupRequest,
   EMAIL_MAX_LENGTH,
   emailAvailabilityFeedback,
+  NAME_MAX_LENGTH,
   PASSWORD_MAX_LENGTH,
+  PHONE_MAX_LENGTH,
 } from '@/entities/session';
 import { useTerms } from '@/entities/terms';
 import { isApiError, type ApiError } from '@/shared/api';
@@ -271,6 +273,7 @@ export function SignupForm() {
         >
           <TextFieldInput
             autoComplete="name"
+            maxLength={NAME_MAX_LENGTH}
             value={userName}
             onChange={(event) => setUserName(event.currentTarget.value)}
           />
@@ -287,7 +290,13 @@ export function SignupForm() {
             autoComplete="tel"
             placeholder="010-0000-0000"
             value={phone}
-            onChange={(event) => setPhone(event.currentTarget.value)}
+            onChange={(event) =>
+              setPhone(
+                event.currentTarget.value
+                  .replace(/[^0-9-]/g, '')
+                  .slice(0, PHONE_MAX_LENGTH),
+              )
+            }
           />
         </TextField>
         <div className="signup-terms">
