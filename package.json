@@ -16,6 +16,7 @@
     "@karrotmarket/react-monochrome-icon": "^1.26.0",
     "@seed-design/css": "^2.8.1",
     "@seed-design/react": "^2.4.1",
+    "@sentry/react": "^11.1.0",
     "@tanstack/react-query": "^5.102.8",
     "heic-to": "^1.5.2",
     "heic2any": "^0.0.4",
