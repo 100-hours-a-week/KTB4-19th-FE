@@ -5,6 +5,7 @@ import { FeedbackButton } from '@/features/send-feedback';
 import { ViewModeToggle } from '@/features/switch-view-mode';
 import type { RouteRole } from '@/shared/config';
 import { Logo } from '@/shared/ui';
+import { backTarget } from '../model/backTarget.mjs';
 import { managerNav, residentNav } from '../model/navigation';
 
 type Props = {
@@ -18,6 +19,15 @@ export function AppShell({ role, children }: Props) {
   const items = role === 'manager' ? managerNav : residentNav;
   const withRouteContext = (to: string) =>
     role === 'manager' && location.search ? `${to}${location.search}` : to;
+  const back = backTarget(location.pathname);
+  const goBack = () => {
+    if (!back) return;
+    if (back.preferHistory && location.key !== 'default') {
+      navigate(-1);
+      return;
+    }
+    navigate(withRouteContext(back.path));
+  };
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -51,6 +61,11 @@ export function AppShell({ role, children }: Props) {
       <div className="app-main">
         <header className="topbar">
           <div className="topbar-actions">
+            {back && (
+              <button className="topbar-back" type="button" onClick={goBack}>
+                ← 돌아가기
+              </button>
+            )}
             {location.pathname.startsWith('/terms/') && <button className="topbar-back" type="button" onClick={() => navigate(-1)}>← 돌아가기</button>}
             <FeedbackButton />
             <ViewModeToggle className="view-mode-toggle--topbar" />
