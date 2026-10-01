@@ -32,3 +32,16 @@ export async function sendMessage(page: Page, message: string) {
   await page.getByRole('textbox', { name: '메시지' }).fill(message);
   await page.getByRole('button', { name: '전송' }).click();
 }
+
+export async function agreeToTerms(page: Page, index: number) {
+  await page
+    .locator('.seed-checkbox__root')
+    .nth(index)
+    .locator('.seed-checkmark__root')
+    .click();
+}
+
+export async function selectRole(page: Page, role: '입주민' | '관리자') {
+  await page.getByText(role, { exact: true }).click();
+  await page.getByRole('button', { name: '선택 완료' }).click();
+}
