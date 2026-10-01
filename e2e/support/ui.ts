@@ -1,5 +1,11 @@
 import type { Page } from '@playwright/test';
 
+export function segment(page: Page, label: string) {
+  return page.locator('label.seed-segmented-control__item', {
+    hasText: new RegExp(`^${label}$`),
+  });
+}
+
 const maxLoginAttempts = 4;
 const rateLimitWindowMs = 35_000;
 

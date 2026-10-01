@@ -20,6 +20,12 @@ export type Residence = {
   roomNo: string;
 };
 
+export type CreatedComplaint = {
+  complaintId: number;
+  conversationId: number;
+  title: string;
+};
+
 const agreements = [
   { termsType: 'SERVICE', isAgreed: true },
   { termsType: 'PRIVACY', isAgreed: true },
@@ -107,6 +113,15 @@ async function signUpWithRole(
   return { email, password, accessToken: selected.accessToken };
 }
 
+export async function createUnconnectedResident(): Promise<Account> {
+  const api = await newApi();
+  try {
+    return await signUpWithRole(api, 'RESIDENT');
+  } finally {
+    await api.dispose();
+  }
+}
+
 export async function createResidence(): Promise<Residence> {
   const api = await newApi();
   try {
@@ -143,6 +158,38 @@ export async function createResidence(): Promise<Residence> {
   }
 }
 
+export async function createComplaint(
+  resident: Account,
+): Promise<CreatedComplaint> {
+  const conversation = await startConversation(resident, '천장에서 물이 새요');
+  await sendConversationMessage(
+    resident,
+    conversation.conversationId,
+    '욕실 천장',
+  );
+  return submitComplaint(resident, conversation.conversationId);
+}
+
+export async function submitComplaint(
+  resident: Account,
+  conversationId: number,
+) {
+  const api = await newApi();
+  try {
+    return await call<CreatedComplaint>(
+      api,
+      'POST',
+      '/residents/me/complaints',
+      {
+        token: resident.accessToken,
+        data: { conversationId },
+      },
+    );
+  } finally {
+    await api.dispose();
+  }
+}
+
 export async function startConversation(resident: Account, content: string) {
   const api = await newApi();
   try {
@@ -170,4 +217,25 @@ export async function loginAs(
     }),
   );
   expect(response.ok(), `로그인 실패: ${await response.text()}`).toBeTruthy();
+}
+
+export async function sendConversationMessage(
+  resident: Account,
+  conversationId: number,
+  content: string,
+) {
+  const api = await newApi();
+  try {
+    await call(
+      api,
+      'POST',
+      `/residents/me/conversations/${conversationId}/messages`,
+      {
+        token: resident.accessToken,
+        data: { content },
+      },
+    );
+  } finally {
+    await api.dispose();
+  }
 }
