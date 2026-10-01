@@ -1,4 +1,8 @@
+import { existsSync } from 'node:fs';
 import { defineConfig, devices } from '@playwright/test';
+
+const isProductionRun = process.env.npm_lifecycle_event === 'test:e2e:prod';
+if (isProductionRun && existsSync('e2e/.env')) process.loadEnvFile('e2e/.env');
 
 const baseURL = process.env.BASE_URL ?? 'http://localhost:5173';
 const isLocal = new URL(baseURL).hostname === 'localhost';
