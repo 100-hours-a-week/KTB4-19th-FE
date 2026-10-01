@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/entities/session';
+import { FeedbackButton } from '@/features/send-feedback';
 import { ViewModeToggle } from '@/features/switch-view-mode';
 import type { RouteRole } from '@/shared/config';
 import { Logo } from '@/shared/ui';
@@ -51,6 +52,7 @@ export function AppShell({ role, children }: Props) {
         <header className="topbar">
           <div className="topbar-actions">
             {location.pathname.startsWith('/terms/') && <button className="topbar-back" type="button" onClick={() => navigate(-1)}>← 돌아가기</button>}
+            <FeedbackButton />
             <ViewModeToggle className="view-mode-toggle--topbar" />
           </div>
         </header>

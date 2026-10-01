@@ -315,6 +315,7 @@ button { cursor: pointer; }
 .terms-back { margin-bottom: var(--seed-dimension-x5); border: 0; background: transparent; color: var(--seed-color-fg-neutral); font: inherit; font-weight: 700; cursor: pointer; }
 .topbar-actions { display: flex; align-items: center; gap: var(--seed-dimension-x4); }
 .topbar-back { border: 0; background: transparent; color: var(--seed-color-fg-neutral); font: inherit; font-weight: 700; cursor: pointer; }
+.topbar-feedback { border: 1px solid var(--seed-color-stroke-neutral-muted); border-radius: var(--seed-radius-full); background: transparent; color: var(--seed-color-fg-neutral); font: inherit; font-size: 12px; font-weight: 600; padding: 3px 10px; cursor: pointer; }
 .terms-page article .eyebrow { color: #3182f6; }
 .terms-page article h1 { color: #202124; font-size: var(--seed-font-size-t12); }
 .terms-description { margin-top: var(--seed-dimension-x4); color: #6b7280; font-size: var(--seed-font-size-t5); }
