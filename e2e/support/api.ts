@@ -13,6 +13,13 @@ export type Account = {
   accessToken: string;
 };
 
+export type Invitation = {
+  manager: Account;
+  buildingName: string;
+  roomNo: string;
+  code: string;
+};
+
 export type Residence = {
   manager: Account;
   resident: Account;
@@ -34,11 +41,11 @@ const agreements = [
 
 const maxRateLimitRetries = 3;
 
-function randomEmail() {
+export function randomEmail() {
   return `e2e-${randomUUID()}@test.com`;
 }
 
-function randomPassword() {
+export function randomPassword() {
   return `Aa1!${randomUUID().slice(0, 12)}`;
 }
 
@@ -122,7 +129,21 @@ export async function createUnconnectedResident(): Promise<Account> {
   }
 }
 
-export async function createResidence(): Promise<Residence> {
+export async function createAccountWithoutRole() {
+  const api = await newApi();
+  try {
+    const email = randomEmail();
+    const password = randomPassword();
+    await call(api, 'POST', '/auth/signup', {
+      data: { email, password, passwordConfirm: password, agreements },
+    });
+    return { email, password };
+  } finally {
+    await api.dispose();
+  }
+}
+
+export async function createInvitation(): Promise<Invitation> {
   const api = await newApi();
   try {
     const manager = await signUpWithRole(api, 'MANAGER');
@@ -136,10 +157,7 @@ export async function createResidence(): Promise<Residence> {
       api,
       'POST',
       '/managers/me/building/rooms',
-      {
-        token: manager.accessToken,
-        data: { roomNos: [roomNo] },
-      },
+      { token: manager.accessToken, data: { roomNos: [roomNo] } },
     );
     const invitation = await call<{ code: string }>(
       api,
@@ -147,10 +165,20 @@ export async function createResidence(): Promise<Residence> {
       `/managers/me/rooms/${created.rooms[0].roomId}/invitation-codes`,
       { token: manager.accessToken },
     );
+    return { manager, buildingName, roomNo, code: invitation.code };
+  } finally {
+    await api.dispose();
+  }
+}
+
+export async function createResidence(): Promise<Residence> {
+  const { manager, buildingName, roomNo, code } = await createInvitation();
+  const api = await newApi();
+  try {
     const resident = await signUpWithRole(api, 'RESIDENT');
     await call(api, 'PUT', '/residents/me/room', {
       token: resident.accessToken,
-      data: { code: invitation.code },
+      data: { code },
     });
     return { manager, resident, buildingName, roomNo };
   } finally {
