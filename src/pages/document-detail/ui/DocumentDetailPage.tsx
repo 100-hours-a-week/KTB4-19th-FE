@@ -6,6 +6,7 @@ import { useManagerBuilding } from '@/entities/building';
 import { DOCUMENT_TITLE_MAX_LENGTH, fileApi, type RuleDocumentResponse } from '@/entities/file';
 import { formatListTime } from '@/shared/lib';
 import { InfoRow, PageTitle, StateBoundary } from '@/shared/ui';
+import { hasDocumentChange } from '../lib/documentChange.mjs';
 
 export function DocumentDetailPage() {
   const { documentId } = useParams();
@@ -30,6 +31,11 @@ export function DocumentDetailPage() {
 
   const save = async () => {
     if (!document || !title.trim()) return;
+    if (!hasDocumentChange(document.title, title, replacement)) {
+      setTitle(document.title);
+      setEditing(false);
+      return;
+    }
     setSaving(true);
     try {
       let attachmentId: number | undefined;
