@@ -9,7 +9,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ActionButton } from 'seed-design/ui/action-button';
 import { TextField, TextFieldInput } from 'seed-design/ui/text-field';
 import { PageTitle } from '@/shared/ui';
-import { DOCUMENT_TITLE_MAX_LENGTH, fileApi } from '@/entities/file';
+import {
+  DOCUMENT_TITLE_MAX_LENGTH,
+  ENCRYPTED_PDF_MESSAGE,
+  fileApi,
+  isEncryptedPdf,
+} from '@/entities/file';
+import { isApiError } from '@/shared/api';
 
 export function DocumentRegisterPage() {
   const navigate = useNavigate();
@@ -22,6 +28,12 @@ export function DocumentRegisterPage() {
   const selectFile = async (selectedFile: File | undefined) => {
     if (!selectedFile) return;
     setError(null);
+
+    if (await isEncryptedPdf(selectedFile)) {
+      setFile(null);
+      setError(ENCRYPTED_PDF_MESSAGE);
+      return;
+    }
 
     if (
       !/\.heic$/i.test(selectedFile.name) &&
@@ -66,10 +78,14 @@ export function DocumentRegisterPage() {
       setSaved(true);
       navigate('/manager/documents');
     } catch (exception) {
+      const violation = isApiError(exception)
+        ? exception.violationFor('attachmentId')
+        : undefined;
       setError(
-        exception instanceof Error
-          ? exception.message
-          : '문서 업로드에 실패했습니다.',
+        violation ??
+          (exception instanceof Error
+            ? exception.message
+            : '문서 업로드에 실패했습니다.'),
       );
     } finally {
       setUploading(false);
