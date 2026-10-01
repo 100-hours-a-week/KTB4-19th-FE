@@ -10,7 +10,8 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,mjs,mts}\" \"*.{ts,tsx,js,jsx,mjs,mts}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,mjs,mts}\" \"*.{ts,tsx,js,jsx,mjs,mts}\"",
     "test": "node --test",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@karrotmarket/react-monochrome-icon": "^1.26.0",
@@ -26,6 +27,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.63.0",
     "@seed-design/cli": "^1.7.0",
     "@seed-design/vite-plugin": "^2.1.0",
     "@types/node": "^26.5.1",
