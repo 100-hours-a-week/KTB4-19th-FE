@@ -1,8 +1,9 @@
 import {
+  IconDot3HorizontalChatbubbleLeftFill,
   IconMagnifyingglassLine,
   IconPlusLine,
 } from '@karrotmarket/react-monochrome-icon';
-import { PrefixIcon } from '@seed-design/react';
+import { Icon, PrefixIcon } from '@seed-design/react';
 import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { ActionButton } from 'seed-design/ui/action-button';
@@ -28,12 +29,8 @@ export function ConversationsPage() {
             이전 문의와 민원 접수 대화를 다시 확인하세요.
           </p>
         </div>
-        <div className="page-action">
-          <Link to="/resident/conversations/new">
-            <ActionButton variant="brandSolid">
-              <PrefixIcon svg={<IconPlusLine />} />새 대화
-            </ActionButton>
-          </Link>
+        <div className="page-action page-action--header">
+          <NewConversationLink />
         </div>
       </header>
       <section className="panel list-panel">
@@ -51,6 +48,28 @@ export function ConversationsPage() {
         </form>
         <ConversationList keyword={keyword} />
       </section>
+      <div className="conversation-fab">
+        <Link to="/resident/conversations/new">
+          <ActionButton
+            variant="brandSolid"
+            size="large"
+            layout="iconOnly"
+            aria-label="새 대화"
+          >
+            <Icon svg={<IconDot3HorizontalChatbubbleLeftFill />} />
+          </ActionButton>
+        </Link>
+      </div>
     </>
+  );
+}
+
+function NewConversationLink() {
+  return (
+    <Link to="/resident/conversations/new">
+      <ActionButton variant="brandSolid">
+        <PrefixIcon svg={<IconPlusLine />} />새 대화
+      </ActionButton>
+    </Link>
   );
 }
