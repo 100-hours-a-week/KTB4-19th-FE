@@ -3,7 +3,8 @@ import { Link, useLocation, useParams } from 'react-router-dom';
 import { ActionButton } from 'seed-design/ui/action-button';
 import { TextField, TextFieldInput } from 'seed-design/ui/text-field';
 import { useManagerBuilding } from '@/entities/building';
-import { DOCUMENT_TITLE_MAX_LENGTH, fileApi, type RuleDocumentResponse } from '@/entities/file';
+import { DOCUMENT_TITLE_MAX_LENGTH, ENCRYPTED_PDF_MESSAGE, fileApi, isEncryptedPdf, type RuleDocumentResponse } from '@/entities/file';
+import { isApiError } from '@/shared/api';
 import { formatListTime } from '@/shared/lib';
 import { InfoRow, PageTitle, StateBoundary } from '@/shared/ui';
 import { hasDocumentChange } from '../lib/documentChange.mjs';
@@ -19,6 +20,7 @@ export function DocumentDetailPage() {
   );
   const [replacement, setReplacement] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [state, setState] = useState<'loading' | 'default' | 'error'>('loading');
   const buildingName = useManagerBuilding().data?.buildingName;
 
@@ -37,6 +39,7 @@ export function DocumentDetailPage() {
       return;
     }
     setSaving(true);
+    setError(null);
     try {
       let attachmentId: number | undefined;
       if (replacement) {
@@ -47,7 +50,19 @@ export function DocumentDetailPage() {
       }
       const updated = await fileApi.updateDocument(document.documentId, title.trim(), attachmentId);
       setDocument(updated); setReplacement(null); setEditing(false);
+    } catch (exception) {
+      const violation = isApiError(exception) ? exception.violationFor('attachmentId') : undefined;
+      setError(violation ?? (exception instanceof Error ? exception.message : '문서를 저장하지 못했어요.'));
     } finally { setSaving(false); }
+  };
+  const selectReplacement = async (selected: File | undefined) => {
+    setError(null);
+    if (selected && await isEncryptedPdf(selected)) {
+      setReplacement(null);
+      setError(ENCRYPTED_PDF_MESSAGE);
+      return;
+    }
+    setReplacement(selected ?? null);
   };
   const remove = async () => {
     if (!document || !window.confirm('이 문서를 삭제할까요?')) return;
@@ -63,6 +78,7 @@ export function DocumentDetailPage() {
         <section className="panel document-detail-card">
           {editing && <TextField label="문서 제목" showRequiredIndicator={false} maxGraphemeCount={DOCUMENT_TITLE_MAX_LENGTH} value={title} onValueChange={({ slicedValue }) => setTitle(slicedValue)}><TextFieldInput /></TextField>}
           {replacement && <p>{replacement.name}으로 교체 예정</p>}
+          {error && <div className="inline-error">{error}</div>}
           {document.fileUrl && <div className="document-preview">
             {isImage ? <img src={document.fileUrl} alt={document.title} className="document-preview__image" /> : <iframe
               title={`${document.title} 미리보기`}
@@ -73,7 +89,7 @@ export function DocumentDetailPage() {
           <div className="button-row form-actions document-detail-actions">
             <Link to="/manager/documents"><ActionButton variant="neutralOutline">목록</ActionButton></Link>
             {document.fileUrl && <a href={document.fileUrl} target="_blank" rel="noreferrer"><ActionButton variant="neutralOutline">열기</ActionButton></a>}
-            {editing ? <><label className="button-like"><ActionButton variant="neutralOutline" asChild><span>새 파일로 교체</span></ActionButton><input hidden type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={(event) => setReplacement(event.target.files?.[0] ?? null)} /></label><ActionButton variant="brandSolid" disabled={saving} onClick={() => void save()}>{saving ? '저장 중...' : '저장'}</ActionButton></> : <><ActionButton variant="neutralOutline" onClick={() => setEditing(true)}>수정</ActionButton><ActionButton variant="neutralOutline" onClick={() => void remove()}>삭제</ActionButton></>}
+            {editing ? <><label className="button-like"><ActionButton variant="neutralOutline" asChild><span>새 파일로 교체</span></ActionButton><input hidden type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={(event) => void selectReplacement(event.target.files?.[0])} /></label><ActionButton variant="brandSolid" disabled={saving} onClick={() => void save()}>{saving ? '저장 중...' : '저장'}</ActionButton></> : <><ActionButton variant="neutralOutline" onClick={() => setEditing(true)}>수정</ActionButton><ActionButton variant="neutralOutline" onClick={() => void remove()}>삭제</ActionButton></>}
           </div>
         </section>
         <aside className="panel detail-aside">
