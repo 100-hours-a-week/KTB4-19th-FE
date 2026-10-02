@@ -294,6 +294,7 @@ button { cursor: pointer; }
 .auth-page { min-height: var(--app-vh); display: grid; grid-template-columns: 1fr 1fr; background: var(--seed-color-bg-layer-default); }
 .auth-visual { display: flex; align-items: flex-end; padding: 9cqw; color: var(--seed-color-fg-neutral-inverted); background: var(--seed-color-bg-neutral-inverted); }
 .auth-visual-content { max-width: 480px; }
+.brand--visual { gap: var(--seed-dimension-x3); font-size: var(--seed-font-size-t10); }
 .auth-visual h1 { margin-top: var(--seed-dimension-x6); font-size: var(--seed-font-size-t14); line-height: 1.22; letter-spacing: -.045em; }
 .auth-visual p { color: var(--seed-color-fg-neutral-inverted); opacity: .72; margin-top: var(--seed-dimension-x4); line-height: 1.6; }
 .auth-form { width: min(520px, 100%); margin: auto; padding: var(--seed-dimension-x10); }

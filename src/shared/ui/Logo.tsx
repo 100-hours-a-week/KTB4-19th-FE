@@ -14,11 +14,11 @@ export function LogoSymbol({ size = 'medium' }: { size?: 'medium' | 'large' }) {
 }
 
 /** 심볼 + 워드마크 */
-export function Logo() {
+export function Logo({ size = 'medium' }: { size?: 'medium' | 'large' }) {
   return (
     <>
-      <LogoSymbol />
-      <span className="logo-wordmark">집사이</span>
+      <LogoSymbol size={size} />
+      <span className="logo-wordmark">zipsAI</span>
     </>
   );
 }
