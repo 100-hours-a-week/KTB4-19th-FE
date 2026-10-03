@@ -56,6 +56,7 @@ export type ManagerProfileRequest = {
 
 export type ManagerProfileResponse = {
   userId: number;
+  email?: string;
   userName?: string;
   phone?: string;
   agreements?: UserAgreement[];

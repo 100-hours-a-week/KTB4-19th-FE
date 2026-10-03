@@ -162,8 +162,14 @@ function MyPageLayout({
     setSaving(true);
     setError(null);
     try {
-      await authApi.updateProfile({ email: draft.email.trim(), phone: draft.phone.trim() });
-      setProfile({ email: draft.email.trim(), phone: draft.phone.trim() });
+      const result = await authApi.updateProfile({
+        email: draft.email.trim(),
+        phone: draft.phone.trim(),
+      });
+      setProfile({
+        email: result.email ?? draft.email.trim(),
+        phone: result.phone ?? draft.phone.trim(),
+      });
       setEditing(false);
     } catch {
       setError('이메일과 연락처를 확인해 주세요.');
