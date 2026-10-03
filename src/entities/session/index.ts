@@ -1,5 +1,6 @@
 export {
   authApi,
+  sessionKeys,
   useOnboardingStatus,
   type AuthUser,
   type EmailAvailabilityResponse,

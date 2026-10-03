@@ -126,7 +126,7 @@ export const authApi = {
   onboardingStatus: () => apiRequest<OnboardingStatus>("/users/me/onboarding-status"),
 };
 
-const sessionKeys = {
+export const sessionKeys = {
   onboardingStatus: () => ['session', 'onboarding-status'] as const,
 };
 
