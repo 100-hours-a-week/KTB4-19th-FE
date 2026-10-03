@@ -76,9 +76,6 @@ export function BulkRoomRegisterPage() {
     setErrorMessage(null);
     try {
       const result = await roomApi.createMany(selectedList);
-      await queryClient.invalidateQueries({
-        queryKey: sessionKeys.onboardingStatus(),
-      });
       setCreatedRooms(result.rooms.map((room) => room.roomNo));
     } catch (error) {
       setErrorMessage(roomErrorMessage(error));
@@ -96,7 +93,12 @@ export function BulkRoomRegisterPage() {
         <p>등록된 호실 번호: {createdRooms.join(', ')}</p>
         <ActionButton
           variant="brandSolid"
-          onClick={() => navigate('/manager', { replace: true })}
+          onClick={() => {
+            void queryClient.invalidateQueries({
+              queryKey: sessionKeys.onboardingStatus(),
+            });
+            navigate('/manager', { replace: true });
+          }}
         >
           관리자 홈으로
         </ActionButton>
