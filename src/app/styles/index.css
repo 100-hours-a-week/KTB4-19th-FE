@@ -303,6 +303,8 @@ button { cursor: pointer; }
 .signup-terms { display: grid; gap: var(--seed-dimension-x3); }
 .auth-footer { text-align: center; color: var(--seed-color-fg-neutral-subtle); margin-top: var(--seed-dimension-x5); }
 .auth-footer a { color: var(--seed-color-fg-brand); font-weight: 700; }
+.auth-service-info { display: grid; gap: var(--seed-dimension-x2); margin-top: var(--seed-dimension-x10); padding-top: var(--seed-dimension-x5); border-top: 1px solid var(--seed-color-stroke-neutral-muted); color: var(--seed-color-fg-neutral-subtle); font-size: var(--seed-font-size-t3); line-height: 1.6; }
+.auth-service-info a { color: var(--seed-color-fg-brand); }
 .role-cards { display: grid; grid-template-columns: 1fr 1fr; gap: var(--seed-dimension-x3); margin: var(--seed-dimension-x7) 0 var(--seed-dimension-x5); }
 .role-cards > label { min-height: 180px; border: 1px solid var(--seed-color-stroke-neutral-muted); border-radius: var(--seed-radius-r4); background: var(--seed-color-bg-layer-default); padding: var(--seed-dimension-x5); align-items: flex-start; }
 .role-cards > label:has(input:checked) { border: 2px solid var(--seed-color-stroke-brand-solid); background: var(--seed-color-bg-brand-weak); }

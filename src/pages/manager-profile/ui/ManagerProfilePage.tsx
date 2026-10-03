@@ -98,7 +98,7 @@ export function ManagerProfilePage() {
 
   return (
     <main className="focused-flow">
-      <Link className="focused-brand" to="/manager" aria-label="집사이">
+      <Link className="focused-brand" to="/manager" aria-label="zipsAI">
         <Logo />
       </Link>
       <div className="flow-progress" aria-label="관리자 가입 진행 단계">

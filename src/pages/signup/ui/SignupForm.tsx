@@ -190,7 +190,7 @@ export function SignupForm() {
 
   return (
     <>
-      <p className="eyebrow">집사이 시작하기</p>
+      <p className="eyebrow">zipsAI 시작하기</p>
       <h1>회원가입</h1>
       <p>필수 정보만 입력하면 바로 시작할 수 있어요.</p>
       <form className="form-stack" onSubmit={submit} noValidate>

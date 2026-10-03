@@ -34,7 +34,7 @@ export function AppShell({ role, children }: Props) {
         <Link
           className="brand"
           to={withRouteContext(role === 'manager' ? '/manager' : '/resident')}
-          aria-label="집사이 홈"
+          aria-label="zipsAI 홈"
         >
           <Logo />
         </Link>
