@@ -25,7 +25,12 @@ import { TermsPage } from '@/pages/terms';
 import type { RouteRole } from '@/shared/config';
 import { Logo } from '@/shared/ui';
 import { AppShell } from '@/widgets/app-shell';
-import { HomeRedirect, RequireResidentConnection, RequireRole } from './guards';
+import {
+  HomeRedirect,
+  RequireOnboardingStep,
+  RequireResidentConnection,
+  RequireRole,
+} from './guards';
 
 export function AppRouter() {
   const shell = (content: ReactNode, routeRole: RouteRole) => (
@@ -41,14 +46,19 @@ export function AppRouter() {
   const managerShell = (content: ReactNode) => (
     <RequireRole role="MANAGER">{shell(content, 'manager')}</RequireRole>
   );
-  const managerOnboardingShell = (content: ReactNode) => (
+  const managerOnboardingShell = (
+    content: ReactNode,
+    step: 'BUILDING_REGISTRATION' | 'ROOM_REGISTRATION',
+  ) => (
     <RequireRole role="MANAGER">
-      <main className="focused-flow manager-onboarding-flow">
-        <Link className="focused-brand" to="/manager" aria-label="집사이">
-          <Logo />
-        </Link>
-        {content}
-      </main>
+      <RequireOnboardingStep step={step}>
+        <main className="focused-flow manager-onboarding-flow">
+          <Link className="focused-brand" to="/manager" aria-label="집사이">
+            <Logo />
+          </Link>
+          {content}
+        </main>
+      </RequireOnboardingStep>
     </RequireRole>
   );
   return (
@@ -69,11 +79,17 @@ export function AppRouter() {
       />
       <Route
         path="/manager/building/new"
-        element={managerOnboardingShell(<BuildingRegisterPage />)}
+        element={managerOnboardingShell(
+          <BuildingRegisterPage />,
+          'BUILDING_REGISTRATION',
+        )}
       />
       <Route
         path="/manager/building/rooms/bulk"
-        element={managerOnboardingShell(<BulkRoomRegisterPage />)}
+        element={managerOnboardingShell(
+          <BulkRoomRegisterPage />,
+          'ROOM_REGISTRATION',
+        )}
       />
       <Route path="/manager/rooms" element={managerShell(<RoomsPage />)} />
       <Route
