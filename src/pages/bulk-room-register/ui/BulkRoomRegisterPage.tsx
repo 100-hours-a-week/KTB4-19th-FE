@@ -1,4 +1,5 @@
 import { IconCheckmarkCircleFill } from '@karrotmarket/react-monochrome-icon';
+import { useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState, type FormEvent } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { ActionButton } from 'seed-design/ui/action-button';
@@ -11,13 +12,14 @@ import {
   isRoomCountValid,
   selectedRoomNumbers,
 } from '@/entities/room';
-import { useAuth } from '@/entities/session';
+import { sessionKeys, useAuth } from '@/entities/session';
 import { isApiError } from '@/shared/api';
 import { FullPageLoading, PageTitle } from '@/shared/ui';
 
 export function BulkRoomRegisterPage() {
   const auth = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [floorCount, setFloorCount] = useState('1');
   const [roomsPerFloor, setRoomsPerFloor] = useState('5');
   const [selected, setSelected] = useState<Set<string> | null>(null);
@@ -74,6 +76,9 @@ export function BulkRoomRegisterPage() {
     setErrorMessage(null);
     try {
       const result = await roomApi.createMany(selectedList);
+      await queryClient.invalidateQueries({
+        queryKey: sessionKeys.onboardingStatus(),
+      });
       setCreatedRooms(result.rooms.map((room) => room.roomNo));
     } catch (error) {
       setErrorMessage(roomErrorMessage(error));

@@ -2,17 +2,20 @@ import {
   IconBuilding2Line,
   IconCheckmarkCircleFill,
 } from '@karrotmarket/react-monochrome-icon';
+import { useQueryClient } from '@tanstack/react-query';
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ActionButton } from 'seed-design/ui/action-button';
 import { Callout } from 'seed-design/ui/callout';
 import { TextField, TextFieldInput } from 'seed-design/ui/text-field';
 import { buildingApi } from '@/entities/building';
+import { sessionKeys } from '@/entities/session';
 import { isApiError } from '@/shared/api';
 import { InfoRow, PageTitle } from '@/shared/ui';
 
 export function BuildingRegisterPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [buildingName, setBuildingName] = useState('');
   const [roadAddress, setRoadAddress] = useState('');
   const [pending, setPending] = useState(false);
@@ -33,6 +36,9 @@ export function BuildingRegisterPage() {
         roadAddress: roadAddress.trim(),
       });
       setSaved(true);
+      await queryClient.invalidateQueries({
+        queryKey: sessionKeys.onboardingStatus(),
+      });
       navigate('/manager/building/rooms/bulk');
     } catch (error) {
       setErrorMessage(buildingErrorMessage(error));
