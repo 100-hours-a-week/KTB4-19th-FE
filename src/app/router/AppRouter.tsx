@@ -53,7 +53,7 @@ export function AppRouter() {
     <RequireRole role="MANAGER">
       <RequireOnboardingStep step={step}>
         <main className="focused-flow manager-onboarding-flow">
-          <Link className="focused-brand" to="/manager" aria-label="집사이">
+          <Link className="focused-brand" to="/manager" aria-label="zipsAI">
             <Logo />
           </Link>
           {content}

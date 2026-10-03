@@ -89,7 +89,7 @@ export function BuildingRegisterPage() {
               value={buildingName}
               maxLength={20}
               onChange={(event) => setBuildingName(event.target.value)}
-              placeholder="예: 집사이 타워"
+              placeholder="예: zipsAI 타워"
             />
           </TextField>
           <TextField

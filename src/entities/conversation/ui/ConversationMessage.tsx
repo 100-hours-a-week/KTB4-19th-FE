@@ -16,7 +16,7 @@ export function ConversationMessage({
   );
   return (
     <div className={`message ${isResident ? 'resident' : 'assistant'}`}>
-      {!isResident && <span className="message-name">집사이 AI</span>}
+      {!isResident && <span className="message-name">zipsAI</span>}
       {message.content && <p>{message.content}</p>}
       {images.length > 0 && (
         <div className="message-images">
