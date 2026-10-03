@@ -1,11 +1,13 @@
 export {
   authApi,
+  useOnboardingStatus,
   type AuthUser,
   type EmailAvailabilityResponse,
   type LoginRequest,
   type LoginResponse,
   type ManagerProfileRequest,
   type ManagerProfileResponse,
+  type OnboardingStatus,
   type RoleSelectionRequest,
   type RoleSelectionResponse,
   type SelectedUserRole,

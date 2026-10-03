@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/shared/api';
 
 const authBase = '/auth';
@@ -123,3 +124,16 @@ export const authApi = {
   me: () => apiRequest<AuthUser>("/users/me"),
   onboardingStatus: () => apiRequest<OnboardingStatus>("/users/me/onboarding-status"),
 };
+
+const sessionKeys = {
+  onboardingStatus: () => ['session', 'onboarding-status'] as const,
+};
+
+export function useOnboardingStatus(enabled = true) {
+  return useQuery({
+    queryKey: sessionKeys.onboardingStatus(),
+    queryFn: authApi.onboardingStatus,
+    enabled,
+    retry: false,
+  });
+}
