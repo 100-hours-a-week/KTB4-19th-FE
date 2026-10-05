@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { visibleRooms } from './visibleRooms.mjs';
+import { groupRoomsByFloor, visibleRooms } from './visibleRooms.mjs';
 
 const rooms = [
   ['1011', 'INVITED'],
@@ -79,4 +79,66 @@ test('preserves the source array and each room object for all filters', () => {
       );
     }
   }
+});
+
+test('groups sorted rooms by actual floor without merging floors 1 and 10', () => {
+  const sorted = visibleRooms(rooms, 'ALL');
+  const source = Object.freeze([...sorted]);
+  const grouped = groupRoomsByFloor(source);
+  assert.deepEqual(
+    grouped.map(({ floor, rooms: floorRooms }) => ({
+      floor,
+      roomNumbers: floorRooms.map((room) => room.roomNo),
+    })),
+    [
+      { floor: 1, roomNumbers: ['101', '102'] },
+      { floor: 2, roomNumbers: ['201'] },
+      { floor: 9, roomNumbers: ['901'] },
+      { floor: 10, roomNumbers: ['1001', '1002', '1010', '1011'] },
+      { floor: 11, roomNumbers: ['1101'] },
+    ],
+  );
+  assert.deepEqual(source, sorted);
+  assert.deepEqual(
+    grouped.flatMap((group) => group.rooms),
+    sorted,
+  );
+  grouped
+    .flatMap((group) => group.rooms)
+    .forEach((room, index) => {
+      assert.equal(room, sorted[index]);
+    });
+});
+
+test('shows only floors with rooms matching each status and handles empty groups', () => {
+  for (const [status, expectedFloors] of [
+    ['LIVING', [1, 10]],
+    ['INVITED', [1, 9, 10]],
+    ['EMPTY', [2, 10, 11]],
+  ]) {
+    const filtered = visibleRooms(rooms, status);
+    const grouped = groupRoomsByFloor(filtered);
+    assert.deepEqual(
+      grouped.map((group) => group.floor),
+      expectedFloors,
+    );
+    assert.deepEqual(
+      grouped.flatMap((group) => group.rooms),
+      filtered,
+    );
+  }
+  assert.deepEqual(groupRoomsByFloor([]), []);
+});
+
+test('keeps rooms with an unrecognized floor in a separate final group', () => {
+  const other = ['A101', '1', '001'].map((roomNo, index) => ({
+    ...rooms[0],
+    roomId: 100 + index,
+    roomNo,
+  }));
+  const known = rooms.find((room) => room.roomNo === '101');
+  assert.deepEqual(groupRoomsByFloor([...other, known]), [
+    { floor: 1, rooms: [known] },
+    { floor: null, rooms: other },
+  ]);
 });
