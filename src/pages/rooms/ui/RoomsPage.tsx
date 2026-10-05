@@ -13,16 +13,14 @@ import {
 import { isApiError } from '@/shared/api';
 import { formatRoomNo } from '@/shared/lib';
 import { MetricCard, PageTitle, StateBoundary } from '@/shared/ui';
+import { visibleRooms } from '../lib/visibleRooms.mjs';
 
 export function RoomsPage() {
   const roomsQuery = useManagerRooms();
   const summaryQuery = useManagerRoomSummary();
   const [status, setStatus] = useState<'ALL' | RoomStatus>('ALL');
   const rooms = roomsQuery.data?.rooms ?? [];
-  const filtered =
-    status === 'ALL'
-      ? rooms
-      : rooms.filter((room) => room.roomStatus === status);
+  const filtered = visibleRooms(rooms, status);
   const viewState = roomsQuery.isPending
     ? 'loading'
     : roomsQuery.isError
