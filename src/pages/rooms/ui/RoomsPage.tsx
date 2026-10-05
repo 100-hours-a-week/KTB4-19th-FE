@@ -13,16 +13,15 @@ import {
 import { isApiError } from '@/shared/api';
 import { formatRoomNo } from '@/shared/lib';
 import { MetricCard, PageTitle, StateBoundary } from '@/shared/ui';
+import { groupRoomsByFloor, visibleRooms } from '../lib/visibleRooms.mjs';
 
 export function RoomsPage() {
   const roomsQuery = useManagerRooms();
   const summaryQuery = useManagerRoomSummary();
   const [status, setStatus] = useState<'ALL' | RoomStatus>('ALL');
   const rooms = roomsQuery.data?.rooms ?? [];
-  const filtered =
-    status === 'ALL'
-      ? rooms
-      : rooms.filter((room) => room.roomStatus === status);
+  const filtered = visibleRooms(rooms, status);
+  const floors = groupRoomsByFloor(filtered);
   const viewState = roomsQuery.isPending
     ? 'loading'
     : roomsQuery.isError
@@ -64,26 +63,40 @@ export function RoomsPage() {
         onRetry={() => roomsQuery.refetch()}
         emptyTitle="조건에 맞는 호실이 없어요"
       >
-        <section className="room-grid">
-          {filtered.map((room) => (
-            <Link
-              className="room-card"
-              to={`/manager/rooms/${room.roomId}`}
-              key={room.roomId}
+        <div className="room-floor-list">
+          {floors.map(({ floor, rooms: floorRooms }) => (
+            <section
+              key={floor ?? 'other'}
+              aria-labelledby={`room-floor-${floor ?? 'other'}`}
             >
-              <div>
-                <strong>{formatRoomNo(room.roomNo)}</strong>
-                <RoomStatusBadge status={room.roomStatus} />
+              <div className="section-heading">
+                <h2 id={`room-floor-${floor ?? 'other'}`}>
+                  {floor === null ? '기타 호실' : `${floor}층`}
+                </h2>
               </div>
-              <p>
-                {room.residentName ??
-                  (room.roomStatus === 'INVITED'
-                    ? '초대 응답 대기 중'
-                    : '입주민 없음')}
-              </p>
-            </Link>
+              <div className="room-grid">
+                {floorRooms.map((room) => (
+                  <Link
+                    className="room-card"
+                    to={`/manager/rooms/${room.roomId}`}
+                    key={room.roomId}
+                  >
+                    <div>
+                      <strong>{formatRoomNo(room.roomNo)}</strong>
+                      <RoomStatusBadge status={room.roomStatus} />
+                    </div>
+                    <p>
+                      {room.residentName ??
+                        (room.roomStatus === 'INVITED'
+                          ? '초대 응답 대기 중'
+                          : '입주민 없음')}
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            </section>
           ))}
-        </section>
+        </div>
       </StateBoundary>
     </>
   );

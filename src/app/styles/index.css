@@ -80,6 +80,7 @@ button { cursor: pointer; }
 .filter-bar { display: flex; justify-content: flex-end; margin: var(--seed-dimension-x5) 0; }
 .filter-bar--left { justify-content: space-between; align-items: center; padding: var(--seed-dimension-x3) var(--seed-dimension-x4); border-radius: var(--seed-radius-r3); background: var(--seed-color-bg-layer-default); }
 .filter-bar--left > span { color: var(--seed-color-fg-neutral-subtle); font-size: var(--seed-font-size-t3); font-weight: 700; }
+.room-floor-list { display: grid; gap: var(--seed-dimension-x8); }
 .room-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--seed-dimension-x4); }
 .room-card { min-height: 154px; padding: var(--seed-dimension-x5); border: 1px solid var(--seed-color-stroke-neutral-muted); border-radius: var(--seed-radius-r4); background: var(--seed-color-bg-layer-default); transition: transform .16s ease, border-color .16s ease; }
 .room-card:hover { transform: translateY(-2px); border-color: var(--seed-color-stroke-brand-weak); }
