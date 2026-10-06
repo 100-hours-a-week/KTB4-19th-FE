@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { ActionButton } from 'seed-design/ui/action-button';
 import { Callout } from 'seed-design/ui/callout';
 import { TextField, TextFieldInput } from 'seed-design/ui/text-field';
-import { buildingApi } from '@/entities/building';
+import { buildingApi, buildingKeys } from '@/entities/building';
 import { sessionKeys } from '@/entities/session';
 import { isApiError } from '@/shared/api';
 import { InfoRow, PageTitle } from '@/shared/ui';
@@ -36,9 +36,12 @@ export function BuildingRegisterPage() {
         roadAddress: roadAddress.trim(),
       });
       setSaved(true);
-      await queryClient.invalidateQueries({
-        queryKey: sessionKeys.onboardingStatus(),
-      });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: buildingKeys.detail() }),
+        queryClient.invalidateQueries({
+          queryKey: sessionKeys.onboardingStatus(),
+        }),
+      ]);
       navigate('/manager/building/rooms/bulk');
     } catch (error) {
       setErrorMessage(buildingErrorMessage(error));

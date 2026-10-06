@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { BuildingRequired } from '@/entities/building';
 import {
   SegmentedControl,
   SegmentedControlItem,
@@ -99,17 +100,5 @@ export function RoomsPage() {
         </div>
       </StateBoundary>
     </>
-  );
-}
-
-function BuildingRequired() {
-  return (
-    <div className="result-state">
-      <h2>건물 정보가 필요해요</h2>
-      <p>등록된 건물이 없어요. 건물을 먼저 등록해 주세요.</p>
-      <Link className="text-link" to="/manager/building/new">
-        건물 등록으로 이동
-      </Link>
-    </div>
   );
 }
