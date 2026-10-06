@@ -1,5 +1,6 @@
 import { type ReactNode } from 'react';
 import { Link, Route, Routes } from 'react-router-dom';
+import { ManagerBuildingBoundary } from '@/entities/building';
 import { BuildingRegisterPage } from '@/pages/building-register';
 import { BulkRoomRegisterPage } from '@/pages/bulk-room-register';
 import { ComplaintDetailPage } from '@/pages/complaint-detail';
@@ -91,14 +92,25 @@ export function AppRouter() {
           'ROOM_REGISTRATION',
         )}
       />
-      <Route path="/manager/rooms" element={managerShell(<RoomsPage />)} />
+      <Route
+        path="/manager/rooms"
+        element={managerShell(
+          <ManagerBuildingBoundary>
+            <RoomsPage />
+          </ManagerBuildingBoundary>,
+        )}
+      />
       <Route
         path="/manager/rooms/:roomId"
         element={managerShell(<RoomDetailPage />)}
       />
       <Route
         path="/manager/complaints"
-        element={managerShell(<ComplaintsPage role="manager" />)}
+        element={managerShell(
+          <ManagerBuildingBoundary>
+            <ComplaintsPage role="manager" />
+          </ManagerBuildingBoundary>,
+        )}
       />
       <Route
         path="/manager/complaints/:complaintId"
@@ -110,7 +122,11 @@ export function AppRouter() {
       />
       <Route
         path="/manager/documents"
-        element={managerShell(<DocumentsPage />)}
+        element={managerShell(
+          <ManagerBuildingBoundary>
+            <DocumentsPage />
+          </ManagerBuildingBoundary>,
+        )}
       />
       <Route
         path="/manager/documents/new"
