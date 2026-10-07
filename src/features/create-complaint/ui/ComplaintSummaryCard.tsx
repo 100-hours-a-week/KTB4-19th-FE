@@ -29,7 +29,94 @@ type Props = {
 
 const limits = { location: 50, symptom: 100 } as const;
 
-export function ComplaintSummaryCard({
+export function ComplaintSummaryCard(props: Props) {
+  if (props.summaryCard.complaintType === 'QA')
+    return <QuestionCard {...props} />;
+  return <ComplaintCard {...props} />;
+}
+
+function QuestionCard({
+  summaryCard,
+  actionable,
+  submitting,
+  error,
+  onSubmit,
+}: Props) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState<ComplaintDraft>({
+    location: null,
+    occurredTime: null,
+    symptom: summaryCard.symptom,
+  });
+
+  const saveEdit = (event: FormEvent) => {
+    event.preventDefault();
+    setEditing(false);
+  };
+
+  if (editing) {
+    return (
+      <form className="summary-card summary-card--editing" onSubmit={saveEdit}>
+        <div className="summary-title">
+          <strong>질문 수정</strong>
+        </div>
+        <DraftField
+          label="질문"
+          field="symptom"
+          draft={draft}
+          setDraft={setDraft}
+        />
+        <div className="button-row">
+          <ActionButton type="submit" variant="brandSolid">
+            수정 완료
+          </ActionButton>
+          <ActionButton
+            type="button"
+            variant="neutralOutline"
+            onClick={() => setEditing(false)}
+          >
+            닫기
+          </ActionButton>
+        </div>
+      </form>
+    );
+  }
+
+  return (
+    <div className="summary-card">
+      <div className="summary-title">
+        <IconCheckmarkCircleFill />
+        <strong>관리자에게 전달할 질문</strong>
+      </div>
+      <InfoRow label="질문" value={<DraftValue value={draft.symptom} />} />
+      {error && (
+        <p className="summary-error" role="alert">
+          {complaintErrorMessage(error)}
+        </p>
+      )}
+      {actionable && (
+        <div className="button-row">
+          <ActionButton
+            variant="brandSolid"
+            loading={submitting}
+            onClick={() => onSubmit(draft)}
+          >
+            질문 전달
+          </ActionButton>
+          <ActionButton
+            variant="neutralOutline"
+            disabled={submitting}
+            onClick={() => setEditing(true)}
+          >
+            질문 수정
+          </ActionButton>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ComplaintCard({
   summaryCard,
   actionable,
   submitting,

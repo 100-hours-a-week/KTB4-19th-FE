@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/shared/api';
-import type { ComplaintStatus } from '../model/types';
+import type { ComplaintStatus, ComplaintType } from '../model/types';
 
 const managerBuildingBase = '/managers/me/building';
 const managerComplaintsBase = '/managers/me/complaints';
@@ -11,6 +11,7 @@ export type ManagerComplaintItem = {
   buildingName: string;
   roomNo: string;
   title: string;
+  complaintType: ComplaintType | null;
   statusCode: ComplaintStatus;
   statusLabel: string;
   urgency: number;
@@ -41,6 +42,7 @@ export type ManagerComplaintDetailResponse = {
   buildingName: string;
   roomNo: string;
   title: string;
+  complaintType: ComplaintType | null;
   statusCode: ComplaintStatus;
   statusLabel: string;
   urgency: number;
@@ -75,6 +77,7 @@ export type ComplaintStatusUpdateResponse = {
 export type ResidentComplaintItem = {
   complaintId: number;
   title: string;
+  complaintType: ComplaintType | null;
   statusCode: ComplaintStatus;
   statusLabel: string;
   fileUrl: string;
@@ -105,6 +108,7 @@ export type ResidentComplaintDetailResponse = {
   buildingName: string;
   roomNo: string;
   title: string;
+  complaintType: ComplaintType | null;
   statusCode: ComplaintStatus;
   statusLabel: string;
   location: string;

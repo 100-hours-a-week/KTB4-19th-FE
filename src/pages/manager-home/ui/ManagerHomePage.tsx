@@ -10,6 +10,7 @@ import { ActionButton } from 'seed-design/ui/action-button';
 import { BuildingRequired, useManagerBuilding } from '@/entities/building';
 import {
   ComplaintStatusBadge,
+  ComplaintTypeBadge,
   useManagerComplaintSummary,
   useManagerComplaints,
 } from '@/entities/complaint';
@@ -193,6 +194,7 @@ function ComplaintRows({ compact = false }: { compact?: boolean }) {
             <div>
               <div className="row-title">
                 <strong>{item.title}</strong>
+                <ComplaintTypeBadge type={item.complaintType} />
                 <ComplaintStatusBadge status={item.statusCode} />
               </div>
               <p>

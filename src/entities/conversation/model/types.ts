@@ -15,6 +15,7 @@ export type Attachment = {
  * SUMMARY_CARD 타입의 AI 메시지에 실린다.
  */
 export type SummaryCard = {
+  complaintType: 'COMPLAINT' | 'QA';
   location: string | null;
   /** ISO-8601 오프셋 시각. 표시할 때 포맷해야 한다. */
   occurredTime: string | null;
