@@ -51,6 +51,7 @@ export type ManagerComplaintDetailResponse = {
   occurredTime: string | null;
   symptom: string | null;
   aiSummary: string | null;
+  comment: string | null;
   attachmentCount: number;
   attachments: ComplaintAttachment[];
   createdAt: string;
@@ -115,6 +116,7 @@ export type ResidentComplaintDetailResponse = {
   occurredTime: string;
   symptom: string;
   aiSummary: string;
+  comment: string | null;
   attachmentCount: number;
   attachments: ResidentComplaintAttachment[];
   createdAt: string;
@@ -206,6 +208,15 @@ export const complaintApi = {
         body: { statusCode },
       },
     ),
+  updateManagerComment: (complaintId: number, comment: string) =>
+    apiRequest<null>(`${managerComplaintsBase}/${complaintId}/comment`, {
+      method: 'PUT',
+      body: { comment },
+    }),
+  deleteManagerComment: (complaintId: number) =>
+    apiRequest<null>(`${managerComplaintsBase}/${complaintId}/comment`, {
+      method: 'DELETE',
+    }),
   managerSummary: () =>
     apiRequest<ManagerComplaintSummaryResponse>(
       `${managerBuildingBase}/complaints/summary`,
@@ -308,5 +319,34 @@ export function useUpdateManagerComplaintStatus() {
           queryKey: complaintKeys.managerDetail(complaintId),
         }),
       ]),
+  });
+}
+
+export function useUpdateManagerComplaintComment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      complaintId,
+      comment,
+    }: {
+      complaintId: number;
+      comment: string;
+    }) => complaintApi.updateManagerComment(complaintId, comment),
+    onSuccess: (_result, { complaintId }) =>
+      queryClient.invalidateQueries({
+        queryKey: complaintKeys.managerDetail(complaintId),
+      }),
+  });
+}
+
+export function useDeleteManagerComplaintComment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (complaintId: number) =>
+      complaintApi.deleteManagerComment(complaintId),
+    onSuccess: (_result, complaintId) =>
+      queryClient.invalidateQueries({
+        queryKey: complaintKeys.managerDetail(complaintId),
+      }),
   });
 }

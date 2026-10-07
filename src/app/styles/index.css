@@ -129,6 +129,10 @@ button { cursor: pointer; }
 .resident-card small { display: block; color: var(--seed-color-fg-neutral-subtle); margin-top: var(--seed-dimension-x2); }
 .detail-aside { height: fit-content; }
 .detail-aside > h2 { margin-bottom: var(--seed-dimension-x4); }
+.complaint-result { display: grid; gap: var(--seed-dimension-x3); padding-top: var(--seed-dimension-x6); border-top: 1px solid var(--seed-color-stroke-neutral-muted); }
+.complaint-detail .complaint-result > h2 { margin-bottom: 0; }
+.result-box { padding: var(--seed-dimension-x4); border-radius: var(--seed-radius-r3); background: var(--seed-color-bg-neutral-weak); line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+.result-hint { color: var(--seed-color-fg-neutral-muted); }
 .info-row { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--seed-dimension-x4); padding: var(--seed-dimension-x3) 0; border-bottom: 1px solid var(--seed-color-stroke-neutral-muted); line-height: 1.45; }
 .info-row span { color: var(--seed-color-fg-neutral-subtle); font-size: var(--seed-font-size-t3); }
 .info-row strong { text-align: right; font-size: var(--seed-font-size-t4); }
