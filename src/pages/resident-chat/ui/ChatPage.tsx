@@ -258,7 +258,6 @@ function ConversationChat({ conversationId }: { conversationId: number }) {
             imageCount={sendMessage.variables?.images.length}
           />
         )}
-        <div ref={bottomRef} />
       </div>
       {!isActive ? (
         <ClosedNotice
@@ -287,6 +286,7 @@ function ConversationChat({ conversationId }: { conversationId: number }) {
           />
         </>
       )}
+      <div className="chat-end" ref={bottomRef} />
     </ChatLayout>
   );
 }
