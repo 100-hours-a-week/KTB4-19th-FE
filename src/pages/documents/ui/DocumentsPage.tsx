@@ -45,6 +45,8 @@ export function DocumentsPage() {
     () => documents.filter((document) => document.title.toLowerCase().includes(keyword.trim().toLowerCase())),
     [documents, keyword],
   );
+  const noSearchResult = state === 'default' && filteredDocuments.length === 0;
+
   return (
     <>
       <PageTitle
@@ -74,7 +76,11 @@ export function DocumentsPage() {
             등록 문서 {documents.length}개
           </Badge>
         </div>
-        <StateBoundary state={state} emptyTitle="등록된 운영규칙이 없어요" onRetry={() => void loadDocuments()}>
+        <StateBoundary
+          state={noSearchResult ? 'empty' : state}
+          emptyTitle={noSearchResult ? '조건에 맞는 문서가 없어요' : '등록된 운영규칙이 없어요'}
+          onRetry={() => void loadDocuments()}
+        >
           <div className="list-stack">
             {filteredDocuments.map((doc) => (
               <div className="list-row" key={doc.documentId}>
