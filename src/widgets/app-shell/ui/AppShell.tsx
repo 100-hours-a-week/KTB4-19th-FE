@@ -75,7 +75,7 @@ export function AppShell({ role, children }: Props) {
           {children}
         </main>
         <nav className="bottom-nav" aria-label="모바일 메뉴">
-          {items.slice(0, 4).map(([to, label, NavIcon]) => (
+          {items.map(([to, label, NavIcon]) => (
             <NavLink
               key={to}
               to={withRouteContext(to)}

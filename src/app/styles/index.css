@@ -400,7 +400,7 @@ button { cursor: pointer; }
   .row-title strong, .notification-row strong { font-size: var(--seed-font-size-t5); overflow-wrap: anywhere; }
   .list-row p, .notification-row p, .notification-row small { font-size: var(--seed-font-size-t3); }
   .urgency-label { display: none; }
-  .bottom-nav { position: fixed; inset: auto 0 0; height: calc(68px + var(--app-safe-bottom)); display: grid; grid-template-columns: repeat(4, 1fr); background: var(--seed-color-bg-layer-default); border-top: 1px solid var(--seed-color-stroke-neutral-muted); z-index: 30; padding-bottom: var(--app-safe-bottom); }
+  .bottom-nav { position: fixed; inset: auto 0 0; height: calc(68px + var(--app-safe-bottom)); display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); background: var(--seed-color-bg-layer-default); border-top: 1px solid var(--seed-color-stroke-neutral-muted); z-index: 30; padding-bottom: var(--app-safe-bottom); }
   .bottom-nav a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: var(--seed-color-fg-neutral-subtle); font-size: var(--seed-font-size-t1); }
   .bottom-nav a.active { color: var(--seed-color-fg-brand); font-weight: 700; }
   .bottom-nav svg { width: 22px; height: 22px; }
