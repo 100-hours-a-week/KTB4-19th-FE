@@ -172,6 +172,7 @@ function ConversationChat({ conversationId }: { conversationId: number }) {
   // 마지막 메시지가 카드면 서버가 메시지를 받지 않으므로(CONVERSATION_AWAITING_CONFIRMATION) 입력창 대신 카드로 유도한다.
   const awaitingConfirmation =
     isActive && messages.at(-1)?.messageType === 'SUMMARY_CARD';
+  const isQuestion = summaryCard?.complaintType === 'QA';
 
   const submitMessage = () => {
     setSendError(null);
@@ -264,13 +265,20 @@ function ConversationChat({ conversationId }: { conversationId: number }) {
           conversation={conversation}
           createdComplaint={createdComplaint}
           alreadyCreated={complaintError?.code === 'COMPLAINT_ALREADY_CREATED'}
+          isQuestion={isQuestion}
         />
       ) : awaitingConfirmation ? (
         <Callout
           className="chat-closed"
           tone="informative"
-          title="접수 내용을 확인해 주세요"
-          description="위 카드의 내용이 맞으면 [이대로 접수]를, 고칠 부분이 있으면 [내용 수정]을 눌러 주세요."
+          title={
+            isQuestion ? '질문을 확인해 주세요' : '접수 내용을 확인해 주세요'
+          }
+          description={
+            isQuestion
+              ? '위 질문이 맞으면 [질문 전달]을, 고칠 부분이 있으면 [질문 수정]을 눌러 주세요.'
+              : '위 카드의 내용이 맞으면 [이대로 접수]를, 고칠 부분이 있으면 [내용 수정]을 눌러 주세요.'
+          }
         />
       ) : (
         <>
@@ -295,11 +303,23 @@ function ClosedNotice({
   conversation,
   createdComplaint,
   alreadyCreated,
+  isQuestion,
 }: {
   conversation: ConversationMessagesResponse;
   createdComplaint: ComplaintCreateResponse | null;
   alreadyCreated: boolean;
+  isQuestion: boolean;
 }) {
+  if (createdComplaint && isQuestion) {
+    return (
+      <Callout
+        className="chat-closed"
+        tone="positive"
+        title="질문이 전달됐어요"
+        description="관리자가 답변을 남기면 민원 목록에서 확인할 수 있어요."
+      />
+    );
+  }
   if (createdComplaint) {
     return (
       <Callout
@@ -315,12 +335,12 @@ function ClosedNotice({
       <Callout
         className="chat-closed"
         tone="neutral"
-        title={
-          alreadyCreated
-            ? '이미 민원이 접수된 대화예요'
-            : '민원이 접수된 대화예요'
+        title={closedTitle(isQuestion, alreadyCreated)}
+        description={
+          isQuestion
+            ? '관리자 답변은 민원 목록에서 확인해 주세요. 새로운 문의는 새 대화에서 시작해 주세요.'
+            : '처리 상태는 민원 목록에서 확인해 주세요. 새로운 문의는 새 대화에서 시작해 주세요.'
         }
-        description="처리 상태는 민원 목록에서 확인해 주세요. 새로운 문의는 새 대화에서 시작해 주세요."
       />
     );
   }
@@ -427,4 +447,14 @@ function sendErrorMessage(error: SendError) {
   if (error.status === 403) return '이 대화에 메시지를 보낼 수 없어요.';
   if (error.status === 404) return '대화를 찾을 수 없어요.';
   return '메시지를 보내지 못했어요. 입력한 내용은 그대로 두었으니 다시 전송해 주세요.';
+}
+
+function closedTitle(isQuestion: boolean, alreadyCreated: boolean) {
+  if (isQuestion)
+    return alreadyCreated
+      ? '이미 질문이 전달된 대화예요'
+      : '질문이 전달된 대화예요';
+  return alreadyCreated
+    ? '이미 민원이 접수된 대화예요'
+    : '민원이 접수된 대화예요';
 }

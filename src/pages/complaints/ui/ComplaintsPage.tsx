@@ -12,6 +12,7 @@ import { TextField, TextFieldInput } from 'seed-design/ui/text-field';
 import {
   ComplaintStatusBadge,
   ComplaintThumbnail,
+  ComplaintTypeBadge,
   useManagerComplaints,
   useResidentComplaints,
   type ComplaintStatus,
@@ -103,6 +104,7 @@ function ManagerComplaintsPage() {
                   <div>
                     <div className="row-title">
                       <strong>{item.title}</strong>
+                      <ComplaintTypeBadge type={item.complaintType} />
                       <ComplaintStatusBadge status={item.statusCode} />
                     </div>
                     <p>
@@ -200,6 +202,7 @@ function ResidentComplaintsPage() {
                   <div>
                     <div className="row-title">
                       <strong>{item.title}</strong>
+                      <ComplaintTypeBadge type={item.complaintType} />
                       <ComplaintStatusBadge status={item.statusCode} />
                     </div>
                     <p>{formatListTime(item.createdAt)}</p>

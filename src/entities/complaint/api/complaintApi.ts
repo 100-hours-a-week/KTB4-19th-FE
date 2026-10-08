@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/shared/api';
-import type { ComplaintStatus } from '../model/types';
+import type { ComplaintStatus, ComplaintType } from '../model/types';
 
 const managerBuildingBase = '/managers/me/building';
 const managerComplaintsBase = '/managers/me/complaints';
@@ -11,6 +11,7 @@ export type ManagerComplaintItem = {
   buildingName: string;
   roomNo: string;
   title: string;
+  complaintType: ComplaintType | null;
   statusCode: ComplaintStatus;
   statusLabel: string;
   urgency: number;
@@ -41,6 +42,7 @@ export type ManagerComplaintDetailResponse = {
   buildingName: string;
   roomNo: string;
   title: string;
+  complaintType: ComplaintType | null;
   statusCode: ComplaintStatus;
   statusLabel: string;
   urgency: number;
@@ -49,6 +51,7 @@ export type ManagerComplaintDetailResponse = {
   occurredTime: string | null;
   symptom: string | null;
   aiSummary: string | null;
+  comment: string | null;
   attachmentCount: number;
   attachments: ComplaintAttachment[];
   createdAt: string;
@@ -75,6 +78,7 @@ export type ComplaintStatusUpdateResponse = {
 export type ResidentComplaintItem = {
   complaintId: number;
   title: string;
+  complaintType: ComplaintType | null;
   statusCode: ComplaintStatus;
   statusLabel: string;
   fileUrl: string;
@@ -105,12 +109,14 @@ export type ResidentComplaintDetailResponse = {
   buildingName: string;
   roomNo: string;
   title: string;
+  complaintType: ComplaintType | null;
   statusCode: ComplaintStatus;
   statusLabel: string;
   location: string;
   occurredTime: string;
   symptom: string;
   aiSummary: string;
+  comment: string | null;
   attachmentCount: number;
   attachments: ResidentComplaintAttachment[];
   createdAt: string;
@@ -202,6 +208,15 @@ export const complaintApi = {
         body: { statusCode },
       },
     ),
+  updateManagerComment: (complaintId: number, comment: string) =>
+    apiRequest<null>(`${managerComplaintsBase}/${complaintId}/comment`, {
+      method: 'PUT',
+      body: { comment },
+    }),
+  deleteManagerComment: (complaintId: number) =>
+    apiRequest<null>(`${managerComplaintsBase}/${complaintId}/comment`, {
+      method: 'DELETE',
+    }),
   managerSummary: () =>
     apiRequest<ManagerComplaintSummaryResponse>(
       `${managerBuildingBase}/complaints/summary`,
@@ -304,5 +319,34 @@ export function useUpdateManagerComplaintStatus() {
           queryKey: complaintKeys.managerDetail(complaintId),
         }),
       ]),
+  });
+}
+
+export function useUpdateManagerComplaintComment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      complaintId,
+      comment,
+    }: {
+      complaintId: number;
+      comment: string;
+    }) => complaintApi.updateManagerComment(complaintId, comment),
+    onSuccess: (_result, { complaintId }) =>
+      queryClient.invalidateQueries({
+        queryKey: complaintKeys.managerDetail(complaintId),
+      }),
+  });
+}
+
+export function useDeleteManagerComplaintComment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (complaintId: number) =>
+      complaintApi.deleteManagerComment(complaintId),
+    onSuccess: (_result, complaintId) =>
+      queryClient.invalidateQueries({
+        queryKey: complaintKeys.managerDetail(complaintId),
+      }),
   });
 }

@@ -1,12 +1,14 @@
 export {
   complaintApi,
   complaintKeys,
+  useDeleteManagerComplaintComment,
   useManagerComplaint,
   useManagerComplaintSummary,
   useManagerComplaints,
   useResidentComplaint,
   useResidentConnection,
   useResidentComplaints,
+  useUpdateManagerComplaintComment,
   useUpdateManagerComplaintStatus,
   type ComplaintAttachment,
   type ComplaintCreateRequest,
@@ -24,8 +26,9 @@ export {
   type ResidentComplaintListResponse,
 } from './api/complaintApi';
 export { complaints } from './model/mock';
-export type { ComplaintStatus } from './model/types';
+export type { ComplaintStatus, ComplaintType } from './model/types';
 export { ComplaintStatusBadge } from './ui/ComplaintStatusBadge';
+export { ComplaintTypeBadge } from './ui/ComplaintTypeBadge';
 export { ComplaintPhotoGrid } from './ui/ComplaintPhotoGrid';
 export { ComplaintThumbnail } from './ui/ComplaintThumbnail';
 export {

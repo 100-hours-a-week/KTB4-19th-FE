@@ -14,11 +14,17 @@ import {
   ComplaintPhotoGrid,
   type ComplaintStatus,
   ComplaintStatusBadge,
+  type ComplaintType,
+  ComplaintTypeBadge,
   useManagerComplaint,
   useResidentComplaint,
   useUpdateManagerComplaintStatus,
 } from '@/entities/complaint';
 import { imageAttachmentEnabled } from '@/features/send-message';
+import {
+  commentLabel,
+  ComplaintResultSection,
+} from '@/features/write-complaint-comment';
 import type { RouteRole } from '@/shared/config';
 import { formatListTime, formatOccurredTime, formatRoomNo } from '@/shared/lib';
 import { InfoRow, PageTitle, StateBoundary, type ViewState } from '@/shared/ui';
@@ -91,6 +97,7 @@ function ManagerComplaintDetail({ complaintId }: { complaintId: number }) {
                   disabled={
                     value !== complaint.statusCode &&
                     (updateStatus.isPending ||
+                      value === 'DONE' ||
                       !canChangeComplaintStatus(complaint.statusCode, value))
                   }
                 >
@@ -117,6 +124,7 @@ function ManagerComplaintDetail({ complaintId }: { complaintId: number }) {
             <div className="detail-grid">
               <section className="panel complaint-detail">
                 <div className="complaint-heading">
+                  <ComplaintTypeBadge type={complaint.complaintType} />
                   <ComplaintStatusBadge status={complaint.statusCode} />
                   <Badge
                     tone={complaint.isUrgent ? 'critical' : 'neutral'}
@@ -132,21 +140,19 @@ function ManagerComplaintDetail({ complaintId }: { complaintId: number }) {
                     <p>{complaint.aiSummary ?? '요약 정보가 없어요.'}</p>
                   </div>
                 </section>
-                <section>
-                  <h2>발생 정보</h2>
-                  <InfoRow label="위치" value={complaint.location ?? '-'} />
-                  <InfoRow
-                    label="시점"
-                    value={formatOccurredTime(complaint.occurredTime) ?? '-'}
-                  />
-                  <InfoRow label="증상" value={complaint.symptom ?? '-'} />
-                </section>
+                <OccurrenceSection complaint={complaint} />
                 {imageAttachmentEnabled && (
                   <section>
                     <h2>첨부 사진 ({complaint.attachmentCount})</h2>
                     <ComplaintPhotoGrid photos={complaint.attachments} />
                   </section>
                 )}
+                <ComplaintResultSection
+                  complaintId={complaintId}
+                  complaintType={complaint.complaintType}
+                  statusCode={complaint.statusCode}
+                  comment={complaint.comment}
+                />
               </section>
               <aside className="panel detail-aside">
                 <h2>처리 정보</h2>
@@ -235,6 +241,7 @@ function ResidentComplaintDetail({ complaintId }: { complaintId: number }) {
           <div className="detail-grid">
             <section className="panel complaint-detail">
               <div className="complaint-heading">
+                <ComplaintTypeBadge type={complaint.complaintType} />
                 <ComplaintStatusBadge status={complaint.statusCode} />
               </div>
               <section>
@@ -244,19 +251,17 @@ function ResidentComplaintDetail({ complaintId }: { complaintId: number }) {
                   <p>{complaint.aiSummary || '요약 정보가 없어요.'}</p>
                 </div>
               </section>
-              <section>
-                <h2>발생 정보</h2>
-                <InfoRow label="위치" value={complaint.location || '-'} />
-                <InfoRow
-                  label="시점"
-                  value={formatOccurredTime(complaint.occurredTime) || '-'}
-                />
-                <InfoRow label="증상" value={complaint.symptom || '-'} />
-              </section>
+              <OccurrenceSection complaint={complaint} />
               {imageAttachmentEnabled && (
                 <section>
                   <h2>첨부 사진 ({complaint.attachmentCount})</h2>
                   <ComplaintPhotoGrid photos={complaint.attachments} />
+                </section>
+              )}
+              {complaint.statusCode === 'DONE' && complaint.comment && (
+                <section className="complaint-result">
+                  <h2>{commentLabel(complaint.complaintType)}</h2>
+                  <p className="result-box">{complaint.comment}</p>
                 </section>
               )}
             </section>
@@ -287,6 +292,37 @@ function ResidentComplaintDetail({ complaintId }: { complaintId: number }) {
         )}
       </StateBoundary>
     </>
+  );
+}
+
+function OccurrenceSection({
+  complaint,
+}: {
+  complaint: {
+    complaintType: ComplaintType | null;
+    location: string | null;
+    occurredTime: string | null;
+    symptom: string | null;
+  };
+}) {
+  if (complaint.complaintType === 'QA') {
+    return (
+      <section>
+        <h2>질문</h2>
+        <p>{complaint.symptom || '-'}</p>
+      </section>
+    );
+  }
+  return (
+    <section>
+      <h2>발생 정보</h2>
+      <InfoRow label="위치" value={complaint.location || '-'} />
+      <InfoRow
+        label="시점"
+        value={formatOccurredTime(complaint.occurredTime) || '-'}
+      />
+      <InfoRow label="증상" value={complaint.symptom || '-'} />
+    </section>
   );
 }
 
