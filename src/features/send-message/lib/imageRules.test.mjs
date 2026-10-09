@@ -17,13 +17,15 @@ const png = { name: 'crack.png', type: 'image/png' };
 const heic = { name: 'IMG_0001.HEIC', type: '' };
 
 test('jpg, png, heic 사진은 첨부할 수 있다', () => {
-  assert.equal(imageSelectionError(0, [jpg, png, heic]), null);
+  assert.equal(imageSelectionError(0, [jpg]), null);
+  assert.equal(imageSelectionError(0, [png]), null);
+  assert.equal(imageSelectionError(0, [heic]), null);
 });
 
-test('이미 붙인 사진을 포함해 3장을 넘으면 거부한다', () => {
+test('이미 붙인 사진을 포함해 1장을 넘으면 거부한다', () => {
   assert.equal(
-    imageSelectionError(2, [jpg, png]),
-    '사진은 3장까지 첨부할 수 있어요.',
+    imageSelectionError(1, [jpg]),
+    '사진은 1장까지 첨부할 수 있어요.',
   );
 });
 
@@ -55,12 +57,13 @@ test('10MB를 넘는 사진은 거부한다', () => {
 });
 
 test('확장자 대소문자와 상관없이 타입이나 확장자로 판별한다', () => {
+  assert.equal(imageSelectionError(0, [{ name: 'LEAK.JPG', type: '' }]), null);
   assert.equal(
-    imageSelectionError(0, [
-      { name: 'LEAK.JPG', type: '' },
-      { name: 'crack.jpeg', type: '' },
-      { name: 'camera-upload', type: 'image/png' },
-    ]),
+    imageSelectionError(0, [{ name: 'crack.jpeg', type: '' }]),
+    null,
+  );
+  assert.equal(
+    imageSelectionError(0, [{ name: 'camera-upload', type: 'image/png' }]),
     null,
   );
 });

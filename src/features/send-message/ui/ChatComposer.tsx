@@ -187,7 +187,6 @@ export function ChatComposer({
               ref={fileInputRef}
               hidden
               type="file"
-              multiple
               accept={imageAccept}
               onChange={selectImages}
             />

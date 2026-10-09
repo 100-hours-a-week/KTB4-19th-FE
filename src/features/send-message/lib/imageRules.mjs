@@ -1,5 +1,5 @@
 export const imageAttachmentEnabled = true;
-export const maxImageCount = 3;
+export const maxImageCount = 1;
 export const maxImageBytes = 10 * 1024 * 1024;
 export const maxUploadBytes = 2 * 1024 * 1024;
 export const maxImageEdge = 1600;
