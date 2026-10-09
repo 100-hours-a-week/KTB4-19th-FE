@@ -129,6 +129,7 @@ export type ComplaintCreateRequest = {
   occurredTime: string | null;
   symptom: string | null;
   attachmentIds: number[];
+  representativeAttachmentId?: number | null;
 };
 
 export type ComplaintCreateResponse = {
