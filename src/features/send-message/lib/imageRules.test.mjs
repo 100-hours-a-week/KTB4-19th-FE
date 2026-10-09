@@ -32,7 +32,7 @@ test('이미 붙인 사진을 포함해 1장을 넘으면 거부한다', () => {
 test('사진이 아닌 파일은 거부한다', () => {
   assert.equal(
     imageSelectionError(0, [{ name: 'rule.pdf', type: 'application/pdf' }]),
-    'JPG, PNG, HEIC 사진만 첨부할 수 있어요.',
+    'JPG, PNG, WEBP, HEIC 사진만 첨부할 수 있어요.',
   );
 });
 
@@ -68,14 +68,18 @@ test('확장자 대소문자와 상관없이 타입이나 확장자로 판별한
   );
 });
 
-test('서버가 받지 않는 gif와 webp는 거부한다', () => {
-  assert.equal(
-    imageSelectionError(0, [{ name: 'motion.gif', type: 'image/gif' }]),
-    'JPG, PNG, HEIC 사진만 첨부할 수 있어요.',
-  );
+test('webp 사진은 타입이나 확장자로 판별해 첨부할 수 있다', () => {
   assert.equal(
     imageSelectionError(0, [{ name: 'shot.webp', type: 'image/webp' }]),
-    'JPG, PNG, HEIC 사진만 첨부할 수 있어요.',
+    null,
+  );
+  assert.equal(imageSelectionError(0, [{ name: 'SHOT.WEBP', type: '' }]), null);
+});
+
+test('서버가 받지 않는 gif는 거부한다', () => {
+  assert.equal(
+    imageSelectionError(0, [{ name: 'motion.gif', type: 'image/gif' }]),
+    'JPG, PNG, WEBP, HEIC 사진만 첨부할 수 있어요.',
   );
 });
 

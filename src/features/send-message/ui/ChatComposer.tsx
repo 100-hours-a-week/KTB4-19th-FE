@@ -27,7 +27,7 @@ import {
 export const messageMaxLength = 200;
 
 const imageAccept =
-  'image/jpeg,image/png,image/heic,image/heif,.jpg,.jpeg,.png,.heic,.heif';
+  'image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic,.heif';
 
 type Props = {
   value: string;
