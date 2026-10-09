@@ -1,5 +1,5 @@
 export const imageAttachmentEnabled = true;
-export const maxImageCount = 3;
+export const maxImageCount = 1;
 export const maxImageBytes = 10 * 1024 * 1024;
 export const maxUploadBytes = 2 * 1024 * 1024;
 export const maxImageEdge = 1600;
@@ -16,8 +16,8 @@ export function isHeicImage(file) {
 
 function isUploadableImage(file) {
   return (
-    ['image/jpeg', 'image/png'].includes(file.type) ||
-    ['jpg', 'jpeg', 'png'].includes(extensionOf(file.name))
+    ['image/jpeg', 'image/png', 'image/webp'].includes(file.type) ||
+    ['jpg', 'jpeg', 'png', 'webp'].includes(extensionOf(file.name))
   );
 }
 
@@ -30,7 +30,7 @@ export function imageSelectionError(attachedCount, files) {
   if (attachedCount + files.length > maxImageCount)
     return `사진은 ${maxImageCount}장까지 첨부할 수 있어요.`;
   if (files.some((file) => !isUploadableImage(file) && !isHeicImage(file)))
-    return 'JPG, PNG, HEIC 사진만 첨부할 수 있어요.';
+    return 'JPG, PNG, WEBP, HEIC 사진만 첨부할 수 있어요.';
   return null;
 }
 
