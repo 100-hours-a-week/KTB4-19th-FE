@@ -1,8 +1,8 @@
 import { IconCheckmarkCircleFill } from '@karrotmarket/react-monochrome-icon';
-import { useState, type FormEvent } from 'react';
+import { useId, useState, type FormEvent } from 'react';
 import { ActionButton } from 'seed-design/ui/action-button';
 import { TextField, TextFieldInput } from 'seed-design/ui/text-field';
-import type { SummaryCard } from '@/entities/conversation';
+import type { Attachment, SummaryCard } from '@/entities/conversation';
 import type { ApiError } from '@/shared/api';
 import {
   formatOccurredTime,
@@ -10,12 +10,14 @@ import {
   toDateTimeLocalValue,
 } from '@/shared/lib';
 import { InfoRow } from '@/shared/ui';
+import { representativePhotoId } from '../lib/representativePhoto.mjs';
 
 export type ComplaintDraft = {
   location: string | null;
   /** ISO-8601 오프셋 시각. 서버에 그대로 보내고 화면에서만 포맷한다. */
   occurredTime: string | null;
   symptom: string | null;
+  representativeAttachmentId?: number | null;
 };
 
 type Props = {
@@ -24,6 +26,7 @@ type Props = {
   actionable: boolean;
   submitting: boolean;
   error: ApiError | null;
+  photos: Attachment[];
   onSubmit: (draft: ComplaintDraft) => void;
 };
 
@@ -40,6 +43,7 @@ function QuestionCard({
   actionable,
   submitting,
   error,
+  photos,
   onSubmit,
 }: Props) {
   const [editing, setEditing] = useState(false);
@@ -48,6 +52,11 @@ function QuestionCard({
     occurredTime: null,
     symptom: summaryCard.symptom,
   });
+  const [selectedPhotoId, setSelectedPhotoId] = useState<number | null>(null);
+  const representativeAttachmentId = representativePhotoId(
+    photos,
+    selectedPhotoId,
+  );
 
   const saveEdit = (event: FormEvent) => {
     event.preventDefault();
@@ -89,6 +98,14 @@ function QuestionCard({
         <strong>관리자에게 전달할 질문</strong>
       </div>
       <InfoRow label="질문" value={<DraftValue value={draft.symptom} />} />
+      {actionable && photos.length > 0 && (
+        <RepresentativePhotoPicker
+          photos={photos}
+          selectedId={representativeAttachmentId}
+          disabled={submitting}
+          onSelect={setSelectedPhotoId}
+        />
+      )}
       {error && (
         <p className="summary-error" role="alert">
           {complaintErrorMessage(error)}
@@ -99,7 +116,7 @@ function QuestionCard({
           <ActionButton
             variant="brandSolid"
             loading={submitting}
-            onClick={() => onSubmit(draft)}
+            onClick={() => onSubmit({ ...draft, representativeAttachmentId })}
           >
             질문 전달
           </ActionButton>
@@ -207,6 +224,39 @@ function ComplaintCard({
         </div>
       )}
     </div>
+  );
+}
+
+function RepresentativePhotoPicker({
+  photos,
+  selectedId,
+  disabled,
+  onSelect,
+}: {
+  photos: Attachment[];
+  selectedId: number | null;
+  disabled: boolean;
+  onSelect: (attachmentId: number) => void;
+}) {
+  const name = useId();
+  return (
+    <fieldset className="representative-photos" disabled={disabled}>
+      <legend>대표 사진</legend>
+      {photos.map((photo, index) => (
+        <label className="representative-photo" key={photo.attachmentId}>
+          <input
+            type="radio"
+            name={name}
+            checked={photo.attachmentId === selectedId}
+            onChange={() => onSelect(photo.attachmentId)}
+          />
+          <img
+            src={photo.fileUrl ?? undefined}
+            alt={`대표 사진 후보 ${index + 1}`}
+          />
+        </label>
+      ))}
+    </fieldset>
   );
 }
 

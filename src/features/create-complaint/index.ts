@@ -4,6 +4,7 @@ export type {
   ComplaintCreateRequest,
   ComplaintCreateResponse,
 } from './model/types';
+export { residentPhotos } from './lib/representativePhoto.mjs';
 export {
   ComplaintSummaryCard,
   type ComplaintDraft,

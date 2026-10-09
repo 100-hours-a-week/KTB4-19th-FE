@@ -14,6 +14,7 @@ import {
 } from '@/entities/conversation';
 import {
   ComplaintSummaryCard,
+  residentPhotos,
   useCreateComplaint,
   type ComplaintCreateResponse,
   type ComplaintDraft,
@@ -250,6 +251,7 @@ function ConversationChat({ conversationId }: { conversationId: number }) {
                 ? null
                 : complaintError
             }
+            photos={residentPhotos(messages)}
             onSubmit={submitComplaint}
           />
         )}
