@@ -1,4 +1,4 @@
-export const imageAttachmentEnabled = false;
+export const imageAttachmentEnabled = true;
 export const maxImageCount = 3;
 export const maxImageBytes = 10 * 1024 * 1024;
 export const maxUploadBytes = 2 * 1024 * 1024;
