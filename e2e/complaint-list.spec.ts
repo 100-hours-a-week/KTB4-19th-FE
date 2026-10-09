@@ -103,7 +103,7 @@ test('관리자가 처리 상태를 바꾸면 입주민 화면에도 같은 상�
 
   await segment(page, '처리중').click();
   await expect(heading.getByText('처리중')).toBeVisible();
-  await segment(page, '완료').click();
+  await page.getByRole('button', { name: '처리 내용 없이 완료' }).click();
   await expect(heading.getByText('처리완료')).toBeVisible();
 
   await loginAs(page, residence.resident);
@@ -152,11 +152,17 @@ test('관리자는 처리 상태를 순서대로만 바꿀 수 있다', async ({
   await loginAs(page, residence.manager);
   await page.goto(`/manager/complaints/${complaint.complaintId}`);
 
+  const completeButton = page.getByRole('button', {
+    name: '처리 내용 없이 완료',
+  });
+
   await expect(segment(page, '완료').locator('input')).toBeDisabled();
+  await expect(completeButton).toHaveCount(0);
   await segment(page, '처리중').click();
 
   await expect(segment(page, '처리전').locator('input')).toBeDisabled();
-  await expect(segment(page, '완료').locator('input')).toBeEnabled();
+  await expect(segment(page, '완료').locator('input')).toBeDisabled();
+  await expect(completeButton).toBeVisible();
 });
 
 test('입주민이 민원 제목으로 검색하면 맞는 민원만 보인다', async ({ page }) => {
