@@ -80,4 +80,7 @@ test('관리자 대화 원본에서 이전 대화 더 보기를 누르면 앞선
   await page.getByRole('button', { name: '이전 대화 더 보기' }).click();
 
   await expect(firstMessage).toBeVisible();
+  await expect(page.locator('.readonly-chat .message').first()).toContainText(
+    firstQuestion,
+  );
 });

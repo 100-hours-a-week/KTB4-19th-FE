@@ -19,7 +19,9 @@ function ManagerConversation({ conversationId }: { conversationId: number }) {
   const messagesQuery = useManagerConversationMessages(conversationId);
   const pages = messagesQuery.data?.pages;
   const conversation = pages?.[0];
-  const messages = pages?.flatMap((page) => page.messages) ?? [];
+  const messages = pages
+    ? [...pages].reverse().flatMap((page) => page.messages)
+    : [];
 
   if (messagesQuery.isError) {
     const error = messagesQuery.error;
@@ -43,7 +45,9 @@ function ManagerConversation({ conversationId }: { conversationId: number }) {
     <>
       <PageTitle
         eyebrow={
-          conversation?.complaintId ? `민원 #${conversation.complaintId}` : '민원'
+          conversation?.complaintId
+            ? `민원 #${conversation.complaintId}`
+            : '민원'
         }
         title={conversation?.conversationTitle ?? 'AI 대화 원본'}
         description="입주민이 민원을 접수한 당시의 대화예요. 관리자는 읽기만 할 수 있어요."
@@ -83,9 +87,7 @@ function ConversationUnavailable({ title }: { title: string }) {
     <>
       <PageTitle title={title} />
       <section className="panel readonly-chat">
-        <div className="readonly-notice">
-          민원 상세에서 다시 들어와 주세요.
-        </div>
+        <div className="readonly-notice">민원 상세에서 다시 들어와 주세요.</div>
       </section>
     </>
   );
