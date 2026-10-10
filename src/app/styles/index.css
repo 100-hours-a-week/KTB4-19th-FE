@@ -266,7 +266,8 @@ button { cursor: pointer; }
   outline-offset: 2px;
 }
 .summary-card--editing .button-row { margin-top: 0; }
-.chat-load-more { align-self: center; }
+.chat-load-more { display: grid; }
+.chat-load-more > button { justify-self: center; }
 .chat-closed { position: sticky; bottom: var(--seed-dimension-x6); }
 .chat-end { scroll-margin-bottom: var(--seed-dimension-x6); }
 .skeleton-row { height: 64px; border-radius: var(--seed-radius-r3); background: var(--seed-color-bg-layer-fill); animation: skeleton-pulse 1.2s ease-in-out infinite alternate; }

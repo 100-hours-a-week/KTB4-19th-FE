@@ -27,6 +27,8 @@ export {
   closingCheckIntervalMs,
   isClosedAt,
 } from './lib/conversationClosing.mjs';
+export { latestMessageId, orderedMessages } from './lib/olderMessages.mjs';
+export { useOlderMessages } from './lib/useOlderMessages';
 export {
   ConversationMessage,
   PendingResidentMessage,

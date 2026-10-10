@@ -1,7 +1,10 @@
 import { useParams } from 'react-router-dom';
+import { ActionButton } from 'seed-design/ui/action-button';
 import {
   ConversationMessage,
+  orderedMessages,
   useManagerConversationMessages,
+  useOlderMessages,
 } from '@/entities/conversation';
 import { isApiError } from '@/shared/api';
 import { PageTitle, StateBoundary, type ViewState } from '@/shared/ui';
@@ -17,11 +20,11 @@ export function ManagerConversationPage() {
 
 function ManagerConversation({ conversationId }: { conversationId: number }) {
   const messagesQuery = useManagerConversationMessages(conversationId);
+  const { olderMessagesRef, loadOlderMessages } =
+    useOlderMessages(messagesQuery);
   const pages = messagesQuery.data?.pages;
   const conversation = pages?.[0];
-  const messages = pages
-    ? [...pages].reverse().flatMap((page) => page.messages)
-    : [];
+  const messages = pages ? orderedMessages(pages) : [];
 
   if (messagesQuery.isError) {
     const error = messagesQuery.error;
@@ -59,16 +62,21 @@ function ManagerConversation({ conversationId }: { conversationId: number }) {
           emptyTitle="대화 내용이 없어요"
         >
           {messagesQuery.hasNextPage && (
-            <button
-              className="text-link"
-              type="button"
-              onClick={() => messagesQuery.fetchNextPage()}
-              disabled={messagesQuery.isFetchingNextPage}
-            >
-              {messagesQuery.isFetchingNextPage
-                ? '불러오는 중'
-                : '이전 대화 더 보기'}
-            </button>
+            <div className="chat-load-more" ref={olderMessagesRef}>
+              {messagesQuery.isFetchNextPageError ? (
+                <ActionButton
+                  variant="neutralWeak"
+                  size="small"
+                  onClick={loadOlderMessages}
+                >
+                  이전 대화 다시 불러오기
+                </ActionButton>
+              ) : (
+                messagesQuery.isFetchingNextPage && (
+                  <div className="skeleton-row" aria-label="불러오는 중" />
+                )
+              )}
+            </div>
           )}
           {messages.map((message) => (
             <ConversationMessage key={message.messageId} message={message} />
