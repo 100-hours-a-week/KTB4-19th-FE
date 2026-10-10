@@ -9,7 +9,10 @@ import {
   closedStatusLabel,
   closingCheckIntervalMs,
   isClosedAt,
+  latestMessageId,
+  orderedMessages,
   useConversationMessages,
+  useOlderMessages,
   type ConversationMessagesResponse,
 } from '@/entities/conversation';
 import {
@@ -124,13 +127,13 @@ function ConversationChat({ conversationId }: { conversationId: number }) {
   const [createdComplaint, setCreatedComplaint] =
     useState<ComplaintCreateResponse | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const { olderMessagesRef, loadOlderMessages } =
+    useOlderMessages(messagesQuery);
 
-  const pages = messagesQuery.data?.pages;
-  const messageCount =
-    pages?.reduce((count, page) => count + page.messages.length, 0) ?? 0;
+  const latestId = latestMessageId(messagesQuery.data?.pages);
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ block: 'end' });
-  }, [messageCount, sendMessage.isPending]);
+  }, [latestId, sendMessage.isPending]);
 
   if (messagesQuery.isPending) {
     return (
@@ -158,10 +161,7 @@ function ConversationChat({ conversationId }: { conversationId: number }) {
   }
 
   const conversation = messagesQuery.data.pages[0];
-  // 페이지는 최신 → 과거 순으로 쌓이므로 뒤집어서 오래된 메시지부터 그린다.
-  const messages = [...messagesQuery.data.pages]
-    .reverse()
-    .flatMap((page) => page.messages);
+  const messages = orderedMessages(messagesQuery.data.pages);
   const closedByIdle =
     !sendMessage.isPending && isClosedAt(conversation.closesAt, now);
   const isActive =
@@ -220,15 +220,21 @@ function ConversationChat({ conversationId }: { conversationId: number }) {
     >
       <div className="chat-body">
         {messagesQuery.hasNextPage ? (
-          <ActionButton
-            className="chat-load-more"
-            variant="neutralWeak"
-            size="small"
-            loading={messagesQuery.isFetchingNextPage}
-            onClick={() => messagesQuery.fetchNextPage()}
-          >
-            이전 메시지 보기
-          </ActionButton>
+          <div className="chat-load-more" ref={olderMessagesRef}>
+            {messagesQuery.isFetchNextPageError ? (
+              <ActionButton
+                variant="neutralWeak"
+                size="small"
+                onClick={loadOlderMessages}
+              >
+                이전 메시지 다시 불러오기
+              </ActionButton>
+            ) : (
+              messagesQuery.isFetchingNextPage && (
+                <div className="skeleton-row" aria-label="불러오는 중" />
+              )
+            )}
+          </div>
         ) : (
           <ConversationMessage
             message={{

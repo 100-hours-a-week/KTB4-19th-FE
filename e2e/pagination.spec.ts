@@ -37,7 +37,7 @@ test('대화 목록은 끝까지 내리면 다음 대화를 더 불러온다', a
   await expect(rows).toHaveCount(21);
 });
 
-test('채팅방에서 이전 메시지 보기를 누르면 앞선 메시지가 보인다', async ({
+test('채팅방에서 맨 위로 올리면 앞선 메시지를 불러오고 보던 위치를 유지한다', async ({
   page,
 }) => {
   const { resident } = await createResidence();
@@ -49,12 +49,13 @@ test('채팅방에서 이전 메시지 보기를 누르면 앞선 메시지가 �
     .getByText(firstQuestion, { exact: true });
   await expect(firstMessage).toHaveCount(0);
 
-  await page.getByRole('button', { name: '이전 메시지 보기' }).click();
+  await page.locator('.chat-load-more').scrollIntoViewIfNeeded();
 
   await expect(firstMessage).toBeVisible();
+  await expect(page.locator('.chat-end')).not.toBeInViewport();
 });
 
-test('관리자 대화 원본에서 이전 대화 더 보기를 누르면 앞선 메시지가 보인다', async ({
+test('관리자 대화 원본은 맨 위가 보이면 앞선 메시지를 불러와 오래된 순으로 보여준다', async ({
   page,
 }) => {
   const { manager, resident } = await createResidence();
@@ -75,9 +76,9 @@ test('관리자 대화 원본에서 이전 대화 더 보기를 누르면 앞선
   const firstMessage = page
     .locator('.readonly-chat')
     .getByText(firstQuestion, { exact: true });
-  await expect(firstMessage).toHaveCount(0);
-
-  await page.getByRole('button', { name: '이전 대화 더 보기' }).click();
 
   await expect(firstMessage).toBeVisible();
+  await expect(page.locator('.readonly-chat .message').first()).toContainText(
+    firstQuestion,
+  );
 });
