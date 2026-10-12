@@ -1,4 +1,5 @@
 import { IconCheckmarkCircleFill } from '@karrotmarket/react-monochrome-icon';
+import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { ActionButton } from 'seed-design/ui/action-button';
@@ -9,13 +10,14 @@ import {
   type RoomConnectionResponse,
   type InvitationCodeValidationResponse,
 } from '@/entities/room';
-import { useAuth } from '@/entities/session';
+import { sessionKeys, useAuth } from '@/entities/session';
 import { isApiError } from '@/shared/api';
 import { formatRoomNo } from '@/shared/lib';
 import { FullPageLoading, Logo } from '@/shared/ui';
 
 export function ResidentConnectPage() {
   const auth = useAuth();
+  const queryClient = useQueryClient();
   const [step, setStep] = useState<'input' | 'confirm' | 'done'>('input');
   const [code, setCode] = useState('');
   const [room, setRoom] = useState<InvitationCodeValidationResponse | null>(
@@ -63,6 +65,9 @@ export function ResidentConnectPage() {
     setErrorMessage(null);
     try {
       setConnected(await roomApi.connectRoom(code));
+      await queryClient.invalidateQueries({
+        queryKey: sessionKeys.onboardingStatus(),
+      });
       setStep('done');
     } catch (error) {
       setErrorMessage(

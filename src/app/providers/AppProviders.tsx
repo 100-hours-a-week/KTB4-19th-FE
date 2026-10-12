@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from '@/entities/session';
 import { ViewModeProvider } from '@/features/switch-view-mode';
+import { NotificationProvider } from '@/features/notification-sync';
 import { isApiError } from '@/shared/api';
 
 const queryClient = new QueryClient({
@@ -23,7 +24,9 @@ export function AppProviders({ children }: { children: ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <AuthProvider>
-          <ViewModeProvider>{children}</ViewModeProvider>
+          <NotificationProvider>
+            <ViewModeProvider>{children}</ViewModeProvider>
+          </NotificationProvider>
         </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>
