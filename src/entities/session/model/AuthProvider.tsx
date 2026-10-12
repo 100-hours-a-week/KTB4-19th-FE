@@ -5,6 +5,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
@@ -52,6 +53,7 @@ function restoreSession() {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
+  const sessionChange = useRef(0);
   const [state, setState] = useState<AuthState>({
     status: 'loading',
     user: null,
@@ -59,8 +61,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
+    const change = sessionChange.current;
     restoreSession().then((user) => {
-      if (cancelled) return;
+      if (cancelled || change !== sessionChange.current) return;
       setState(
         user
           ? { status: 'authenticated', user }
@@ -88,12 +91,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const login = useCallback(async (request: LoginRequest) => {
-    const result = await authApi.login(request);
-    tokenStore.set(result.accessToken);
-    const onboarding = await authApi.onboardingStatus();
-    setState({ status: "authenticated", user: { ...result.user, onboarding } });
-    return result.user;
-  }, []);
+    sessionChange.current++;
+    setState({ status: 'loading', user: null });
+    tokenStore.set(null);
+    queryClient.clear();
+    try {
+      const result = await authApi.login(request);
+      tokenStore.set(result.accessToken);
+      const onboarding = await authApi.onboardingStatus();
+      setState({ status: 'authenticated', user: { ...result.user, onboarding } });
+      return result.user;
+    } catch (error) {
+      tokenStore.set(null);
+      setState({ status: 'anonymous', user: null });
+      throw error;
+    }
+  }, [queryClient]);
 
   const selectRole = useCallback(async (role: SelectedUserRole) => {
     const result = await authApi.selectRole({ userRole: role });
@@ -128,6 +141,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const logout = useCallback(async () => {
+    sessionChange.current++;
     try {
       await authApi.logout();
     } catch {

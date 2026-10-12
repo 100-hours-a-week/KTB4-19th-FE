@@ -7,6 +7,7 @@ import type { RouteRole } from '@/shared/config';
 import { Logo } from '@/shared/ui';
 import { backTarget } from '../model/backTarget.mjs';
 import { managerNav, residentNav } from '../model/navigation';
+import { NotificationBell, NotificationConnectionNotice } from './NotificationBell';
 
 type Props = {
   role: RouteRole;
@@ -68,9 +69,11 @@ export function AppShell({ role, children }: Props) {
             )}
             {location.pathname.startsWith('/terms/') && <button className="topbar-back" type="button" onClick={() => navigate(-1)}>← 돌아가기</button>}
             <FeedbackButton />
+            <NotificationBell role={role} />
             <ViewModeToggle className="view-mode-toggle--topbar" />
           </div>
         </header>
+        <NotificationConnectionNotice />
         <main className="content" key={location.pathname}>
           {children}
         </main>

@@ -130,10 +130,11 @@ export const sessionKeys = {
   onboardingStatus: () => ['session', 'onboarding-status'] as const,
 };
 
-export function useOnboardingStatus(enabled = true) {
+export function useOnboardingStatus(enabled = true, initialData?: OnboardingStatus) {
   return useQuery({
     queryKey: sessionKeys.onboardingStatus(),
     queryFn: authApi.onboardingStatus,
+    initialData,
     enabled,
     retry: false,
   });

@@ -20,6 +20,7 @@ let reissuePromise: Promise<string | null> | null = null;
  */
 export function reissueAccessToken(): Promise<string | null> {
   if (!reissuePromise) {
+    const revision = tokenStore.getRevision();
     reissuePromise = fetch(`${apiBase}/auth/reissue`, {
       method: 'POST',
       credentials: 'include',
@@ -35,6 +36,7 @@ export function reissueAccessToken(): Promise<string | null> {
       })
       .catch(() => null)
       .then((token) => {
+        if (tokenStore.getRevision() !== revision) return null;
         tokenStore.set(token);
         return token;
       })
@@ -51,8 +53,10 @@ export async function apiRequest<T>(
 ): Promise<T> {
   const { auth = true } = options;
   const response = await send(path, options);
+  options.signal?.throwIfAborted();
   if (response.status === 401 && auth) {
     const token = await reissueAccessToken();
+    options.signal?.throwIfAborted();
     if (token) {
       return parse<T>(await send(path, options));
     }
