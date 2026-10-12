@@ -1,14 +1,18 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useQueryClient, type QueryClient } from '@tanstack/react-query';
 import {
   appendMessages,
+  appendReplyDelta,
   conversationKeys,
+  conversationReplyDeltaEvent,
   conversationReplyEvent,
   conversationReplyFailedEvent,
   isAwaitingReply,
   orderedMessages,
   parseConversationReply,
+  parseConversationReplyDelta,
   parseConversationReplyFailure,
+  type ConversationReplyDelta,
   type ConversationReplyFailure,
   type MessagesData,
 } from '@/entities/conversation';
@@ -91,6 +95,22 @@ export function useConversationReplyFailure(
       }),
     [conversationId],
   );
+}
+
+export function useStreamingReply(conversationId: number) {
+  const [streaming, setStreaming] = useState<ConversationReplyDelta | null>(
+    null,
+  );
+  useEffect(
+    () =>
+      subscribeSseEvent(conversationReplyDeltaEvent, (data) => {
+        const delta = parseConversationReplyDelta(data);
+        if (delta?.conversationId === conversationId)
+          setStreaming((current) => appendReplyDelta(current, delta));
+      }),
+    [conversationId],
+  );
+  return { text: streaming?.text, clear: () => setStreaming(null) };
 }
 
 async function finishLoading(

@@ -1,6 +1,8 @@
+export const conversationReplyDeltaEvent = 'chat-delta';
 export const conversationReplyEvent = 'chat-done';
 export const conversationReplyFailedEvent = 'chat-error';
 export const conversationReplyEvents = [
+  conversationReplyDeltaEvent,
   conversationReplyEvent,
   conversationReplyFailedEvent,
 ];
@@ -13,6 +15,25 @@ export function parseConversationReply(data) {
   )
     return null;
   return reply;
+}
+
+export function parseConversationReplyDelta(data) {
+  const delta = parseJson(data);
+  if (
+    !isConversationId(delta?.conversationId) ||
+    !Number.isSafeInteger(delta.seq) ||
+    delta.seq < 1 ||
+    typeof delta.text !== 'string'
+  )
+    return null;
+  return delta;
+}
+
+export function appendReplyDelta(streaming, delta) {
+  if (delta.seq === 1) return delta;
+  if (streaming?.seq === delta.seq - 1)
+    return { ...delta, text: streaming.text + delta.text };
+  return streaming;
 }
 
 export function parseConversationReplyFailure(data) {

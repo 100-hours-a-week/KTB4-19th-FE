@@ -59,6 +59,12 @@ export type ConversationReply = {
   closesAt: string | null;
 };
 
+export type ConversationReplyDelta = {
+  conversationId: number;
+  seq: number;
+  text: string;
+};
+
 export type ConversationReplyFailure = {
   conversationId: number;
   code: string;

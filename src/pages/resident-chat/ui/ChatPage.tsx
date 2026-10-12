@@ -31,6 +31,7 @@ import {
   useConversationReplyFailure,
   useSendMessage,
   useStartConversation,
+  useStreamingReply,
   type SelectedImage,
 } from '@/features/send-message';
 import { isApiError, type ApiError } from '@/shared/api';
@@ -139,6 +140,7 @@ export function ChatPage() {
 function ConversationChat({ conversationId }: { conversationId: number }) {
   const messagesQuery = useConversationMessages(conversationId);
   const sendMessage = useSendMessage(conversationId);
+  const streamingReply = useStreamingReply(conversationId);
   const createComplaint = useCreateComplaint();
   const countdown = useRetryCountdown();
   const now = useNow(closingCheckIntervalMs);
@@ -218,6 +220,7 @@ function ConversationChat({ conversationId }: { conversationId: number }) {
   const submitMessage = () => {
     setSendError(null);
     setReplyFailed(false);
+    streamingReply.clear();
     lastSentContent.current = input.trim();
     sendMessage.mutate(
       { content: input.trim(), images },
@@ -309,7 +312,9 @@ function ConversationChat({ conversationId }: { conversationId: number }) {
             imageCount={sendMessage.variables?.images.length}
           />
         )}
-        {isActive && awaitingReply && <PendingAssistantMessage />}
+        {isActive && awaitingReply && (
+          <PendingAssistantMessage text={streamingReply.text} />
+        )}
       </div>
       {!isActive ? (
         <ClosedNotice
