@@ -62,3 +62,12 @@ export function PendingResidentMessage({
     </div>
   );
 }
+
+export function PendingAssistantMessage() {
+  return (
+    <div className="message assistant message--pending" aria-live="polite">
+      <span className="message-name">zipsAI</span>
+      <p>답변을 준비하고 있어요</p>
+    </div>
+  );
+}

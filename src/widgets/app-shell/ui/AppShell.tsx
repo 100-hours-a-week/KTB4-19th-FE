@@ -7,6 +7,7 @@ import type { RouteRole } from '@/shared/config';
 import { Logo } from '@/shared/ui';
 import { backTarget } from '../model/backTarget.mjs';
 import { managerNav, residentNav } from '../model/navigation';
+import { ConversationReplySync } from './ConversationReplySync';
 import { NotificationBell, NotificationConnectionNotice } from './NotificationBell';
 
 type Props = {
@@ -74,6 +75,7 @@ export function AppShell({ role, children }: Props) {
           </div>
         </header>
         <NotificationConnectionNotice />
+        {role === 'resident' && <ConversationReplySync />}
         <main className="content" key={location.pathname}>
           {children}
         </main>

@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
+  appendMessages,
   conversationApi,
   conversationKeys,
   conversationMessagesQuery,
@@ -47,12 +48,7 @@ export function useSendMessage(conversationId: number) {
     onSuccess: (sent) => {
       queryClient.setQueryData<MessagesData>(
         conversationKeys.messages(conversationId),
-        (data) =>
-          appendTurn(
-            data,
-            [toResidentMessage(sent), sent.assistantMessage],
-            sent.closesAt,
-          ),
+        (data) => appendMessages(data, [toResidentMessage(sent)]),
       );
       queryClient.invalidateQueries({ queryKey: conversationKeys.lists() });
     },
@@ -73,23 +69,6 @@ async function uploadImages(images: SelectedImage[]) {
   } catch {
     throw new ImageUploadError();
   }
-}
-
-/** 이번 턴의 메시지를 최신 페이지에 반영한다. 접수 확인 카드는 AI 메시지에 실려 온다. */
-function appendTurn(
-  data: MessagesData | undefined,
-  messages: Message[],
-  closesAt: string | null,
-): MessagesData | undefined {
-  if (!data || data.pages.length === 0) return data;
-  const [latest, ...older] = data.pages;
-  return {
-    ...data,
-    pages: [
-      { ...latest, closesAt, messages: [...latest.messages, ...messages] },
-      ...older,
-    ],
-  };
 }
 
 function toResidentMessage(sent: MessageSendResponse): Message {

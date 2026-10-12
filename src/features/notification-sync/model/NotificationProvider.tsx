@@ -7,6 +7,7 @@ import {
 } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useLocation } from 'react-router-dom';
+import { conversationReplyEvents } from '@/entities/conversation';
 import { useAuth, useOnboardingStatus } from '@/entities/session';
 import {
   notificationBase,
@@ -78,6 +79,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       tokens: tokenStore,
       reissue: reissueAccessToken,
       sync,
+      relayEvents: conversationReplyEvents,
       onStatus: (value) => {
         if (live) setStatus(value);
       },

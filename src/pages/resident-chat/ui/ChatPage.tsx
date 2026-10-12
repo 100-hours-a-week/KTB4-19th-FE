@@ -1,13 +1,15 @@
 import { Badge } from '@seed-design/react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ActionButton } from 'seed-design/ui/action-button';
 import { Callout } from 'seed-design/ui/callout';
 import {
   ConversationMessage,
+  PendingAssistantMessage,
   PendingResidentMessage,
   closedStatusLabel,
   closingCheckIntervalMs,
+  isAwaitingReply,
   isClosedAt,
   latestMessageId,
   orderedMessages,
@@ -26,6 +28,7 @@ import {
   ChatComposer,
   ImageUploadError,
   releaseImages,
+  useConversationReplyFailure,
   useSendMessage,
   useStartConversation,
   type SelectedImage,
@@ -38,6 +41,11 @@ const greeting = '불편한 점이나 궁금한 점을 편하게 말씀해 주�
 
 type SendError = ApiError | ImageUploadError;
 
+type FailedReplyState = { failedReplyContent?: string };
+
+const replyFailedMessage =
+  '답변을 받지 못했어요. 입력한 내용은 그대로 두었으니 다시 전송해 주세요.';
+
 // 받으면 화면의 대화 상태가 서버와 어긋났다는 뜻이라 상세를 다시 받아온다.
 const conversationStateCodes = [
   'CONVERSATION_CLOSED',
@@ -46,8 +54,14 @@ const conversationStateCodes = [
 
 export function NewChatPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const failedReplyContent = (location.state as FailedReplyState | null)
+    ?.failedReplyContent;
   const startConversation = useStartConversation();
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState(failedReplyContent ?? '');
+  const [replyFailed, setReplyFailed] = useState(
+    failedReplyContent !== undefined,
+  );
   const [images, setImages] = useState<SelectedImage[]>([]);
   const countdown = useRetryCountdown();
   const [error, setError] = useState<SendError | null>(null);
@@ -55,6 +69,7 @@ export function NewChatPage() {
 
   const submit = () => {
     setError(null);
+    setReplyFailed(false);
     startConversation.mutate(
       { content: input.trim(), images },
       {
@@ -100,7 +115,13 @@ export function NewChatPage() {
         onSubmit={submit}
         sending={startConversation.isPending}
         lockedSeconds={countdown.remaining}
-        errorMessage={error && !noRoom ? sendErrorMessage(error) : undefined}
+        errorMessage={
+          error && !noRoom
+            ? sendErrorMessage(error)
+            : replyFailed
+              ? replyFailedMessage
+              : undefined
+        }
       />
     </ChatLayout>
   );
@@ -124,11 +145,27 @@ function ConversationChat({ conversationId }: { conversationId: number }) {
   const [input, setInput] = useState('');
   const [images, setImages] = useState<SelectedImage[]>([]);
   const [sendError, setSendError] = useState<SendError | null>(null);
+  const [replyFailed, setReplyFailed] = useState(false);
+  const lastSentContent = useRef('');
+  const navigate = useNavigate();
   const [createdComplaint, setCreatedComplaint] =
     useState<ComplaintCreateResponse | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const { olderMessagesRef, loadOlderMessages } =
     useOlderMessages(messagesQuery);
+
+  useConversationReplyFailure(conversationId, () => {
+    const sent = orderedMessages(messagesQuery.data?.pages ?? []);
+    if (sent.length <= 1) {
+      navigate('/resident/conversations/new', {
+        replace: true,
+        state: { failedReplyContent: sent[0]?.content ?? '' },
+      });
+      return;
+    }
+    setReplyFailed(true);
+    setInput((current) => current || lastSentContent.current);
+  });
 
   const latestId = latestMessageId(messagesQuery.data?.pages);
   useEffect(() => {
@@ -162,8 +199,11 @@ function ConversationChat({ conversationId }: { conversationId: number }) {
 
   const conversation = messagesQuery.data.pages[0];
   const messages = orderedMessages(messagesQuery.data.pages);
+  const awaitingReply = !sendMessage.isPending && isAwaitingReply(messages);
   const closedByIdle =
-    !sendMessage.isPending && isClosedAt(conversation.closesAt, now);
+    !sendMessage.isPending &&
+    !awaitingReply &&
+    isClosedAt(conversation.closesAt, now);
   const isActive =
     conversation.conversationStatus === 'ACTIVE' && !closedByIdle;
   // 접수 확인 카드는 SUMMARY_CARD 메시지에 실려 온다. 접수 후에도 기록으로 남기되 버튼은 진행 중일 때만 누를 수 있다.
@@ -177,6 +217,8 @@ function ConversationChat({ conversationId }: { conversationId: number }) {
 
   const submitMessage = () => {
     setSendError(null);
+    setReplyFailed(false);
+    lastSentContent.current = input.trim();
     sendMessage.mutate(
       { content: input.trim(), images },
       {
@@ -267,6 +309,7 @@ function ConversationChat({ conversationId }: { conversationId: number }) {
             imageCount={sendMessage.variables?.images.length}
           />
         )}
+        {isActive && awaitingReply && <PendingAssistantMessage />}
       </div>
       {!isActive ? (
         <ClosedNotice
@@ -298,7 +341,13 @@ function ConversationChat({ conversationId }: { conversationId: number }) {
             onSubmit={submitMessage}
             sending={sendMessage.isPending}
             lockedSeconds={countdown.remaining}
-            errorMessage={sendError ? sendErrorMessage(sendError) : undefined}
+            errorMessage={
+              sendError
+                ? sendErrorMessage(sendError)
+                : replyFailed
+                  ? replyFailedMessage
+                  : undefined
+            }
           />
         </>
       )}

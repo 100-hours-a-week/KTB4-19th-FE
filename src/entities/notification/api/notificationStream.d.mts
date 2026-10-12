@@ -3,5 +3,6 @@ export type { SseStreamStatus as StreamStatus } from '../../../shared/api/sseStr
 export function startNotificationStream(
   options: Omit<SseStreamOptions, 'events' | 'onConnected' | 'onEvent'> & {
     sync: () => void;
+    relayEvents?: string[];
   },
 ): () => void;
