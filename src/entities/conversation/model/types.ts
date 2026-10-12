@@ -41,11 +41,6 @@ export type ContentRequest = {
 
 export type ConversationCreateResponse = {
   conversationId: number;
-  conversationType: ConversationType;
-  conversationStatus: ConversationStatus;
-  conversationTitle: string;
-  message: Message;
-  assistantMessage: Message;
 };
 
 export type MessageSendResponse = {
@@ -56,8 +51,18 @@ export type MessageSendResponse = {
   content: string;
   attachments: Attachment[];
   createdAt: string;
+};
+
+export type ConversationReply = {
+  conversationId: number;
   assistantMessage: Message;
   closesAt: string | null;
+};
+
+export type ConversationReplyFailure = {
+  conversationId: number;
+  code: string;
+  message: string;
 };
 
 export type ConversationListItem = {

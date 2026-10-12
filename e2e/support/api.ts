@@ -221,7 +221,7 @@ export async function submitComplaint(
 export async function startConversation(resident: Account, content: string) {
   const api = await newApi();
   try {
-    return await call<{ conversationId: number }>(
+    const created = await call<{ conversationId: number }>(
       api,
       'POST',
       '/residents/me/conversations',
@@ -230,6 +230,8 @@ export async function startConversation(resident: Account, content: string) {
         data: { content },
       },
     );
+    await waitForReply(api, resident, created.conversationId);
+    return created;
   } finally {
     await api.dispose();
   }
@@ -263,7 +265,34 @@ export async function sendConversationMessage(
         data: { content },
       },
     );
+    await waitForReply(api, resident, conversationId);
   } finally {
     await api.dispose();
   }
+}
+
+async function waitForReply(
+  api: APIRequestContext,
+  resident: Account,
+  conversationId: number,
+) {
+  await expect
+    .poll(
+      async () => {
+        const conversation = await call<{
+          messages: { senderType: string }[];
+        }>(
+          api,
+          'GET',
+          `/residents/me/conversations/${conversationId}/messages`,
+          {
+            token: resident.accessToken,
+          },
+        );
+        return conversation.messages[conversation.messages.length - 1]
+          ?.senderType;
+      },
+      { timeout: 30_000 },
+    )
+    .not.toBe('RESIDENT');
 }
