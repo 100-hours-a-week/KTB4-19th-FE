@@ -63,7 +63,14 @@ export function PendingResidentMessage({
   );
 }
 
-export function PendingAssistantMessage() {
+export function PendingAssistantMessage({ text }: { text?: string }) {
+  if (text)
+    return (
+      <div className="message assistant">
+        <span className="message-name">zipsAI</span>
+        <p>{text}</p>
+      </div>
+    );
   return (
     <div className="message assistant message--pending" aria-live="polite">
       <span className="message-name">zipsAI</span>

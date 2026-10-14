@@ -15,6 +15,7 @@ export type {
   ConversationListResponse,
   ConversationMessagesResponse,
   ConversationReply,
+  ConversationReplyDelta,
   ConversationReplyFailure,
   ConversationStatus,
   ConversationType,
@@ -31,11 +32,14 @@ export {
 } from './lib/conversationClosing.mjs';
 export {
   appendMessages,
+  appendReplyDelta,
+  conversationReplyDeltaEvent,
   conversationReplyEvent,
   conversationReplyEvents,
   conversationReplyFailedEvent,
   isAwaitingReply,
   parseConversationReply,
+  parseConversationReplyDelta,
   parseConversationReplyFailure,
 } from './lib/conversationReply.mjs';
 export { latestMessageId, orderedMessages } from './lib/olderMessages.mjs';
