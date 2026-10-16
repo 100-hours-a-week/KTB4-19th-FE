@@ -43,6 +43,12 @@ export {
   parseConversationReplyFailure,
 } from './lib/conversationReply.mjs';
 export { latestMessageId, orderedMessages } from './lib/olderMessages.mjs';
+export {
+  characterCount,
+  nextTypedLength,
+  replyTypingIntervalMs,
+  typedText,
+} from './lib/replyTyping.mjs';
 export { useOlderMessages } from './lib/useOlderMessages';
 export {
   ConversationMessage,

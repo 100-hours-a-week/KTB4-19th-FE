@@ -10,5 +10,6 @@ export {
   useConversationReplySync,
   useStreamingReply,
 } from './model/conversationReplySync';
+export { useReplyTyping } from './model/useReplyTyping';
 export { releaseImages, type SelectedImage } from './lib/selectedImage';
 export { ChatComposer } from './ui/ChatComposer';

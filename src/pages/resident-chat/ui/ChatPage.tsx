@@ -31,6 +31,7 @@ import {
   useConversationReplyFailure,
   useSendMessage,
   useStartConversation,
+  useReplyTyping,
   useStreamingReply,
   type SelectedImage,
 } from '@/features/send-message';
@@ -169,10 +170,17 @@ function ConversationChat({ conversationId }: { conversationId: number }) {
     setInput((current) => current || lastSentContent.current);
   });
 
+  const loadedMessages = orderedMessages(messagesQuery.data?.pages ?? []);
+  const replyTyping = useReplyTyping(
+    !sendMessage.isPending && isAwaitingReply(loadedMessages),
+    streamingReply.text,
+    loadedMessages.at(-1),
+  );
+
   const latestId = latestMessageId(messagesQuery.data?.pages);
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ block: 'end' });
-  }, [latestId, sendMessage.isPending]);
+  }, [latestId, sendMessage.isPending, replyTyping.typedText]);
 
   if (messagesQuery.isPending) {
     return (
@@ -289,9 +297,17 @@ function ConversationChat({ conversationId }: { conversationId: number }) {
             }}
           />
         )}
-        {messages.map((message) => (
-          <ConversationMessage message={message} key={message.messageId} />
-        ))}
+        {messages.map((message) =>
+          message.messageId === replyTyping.typingMessageId ? (
+            <ConversationMessage
+              message={message}
+              typedContent={replyTyping.typedText}
+              key={message.messageId}
+            />
+          ) : (
+            <ConversationMessage message={message} key={message.messageId} />
+          ),
+        )}
         {summaryCard && (
           <ComplaintSummaryCard
             summaryCard={summaryCard}
@@ -313,7 +329,10 @@ function ConversationChat({ conversationId }: { conversationId: number }) {
           />
         )}
         {isActive && awaitingReply && (
-          <PendingAssistantMessage text={streamingReply.text} />
+          <PendingAssistantMessage
+            text={replyTyping.pendingText}
+            typedText={replyTyping.typedText}
+          />
         )}
       </div>
       {!isActive ? (

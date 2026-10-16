@@ -4,12 +4,15 @@ import type { Message } from '../model/types';
 
 export function ConversationMessage({
   message,
+  typedContent,
   children,
 }: {
   message: Pick<Message, 'senderType' | 'content' | 'createdAt'> &
     Partial<Pick<Message, 'attachments'>>;
+  typedContent?: string;
   children?: ReactNode;
 }) {
+  const typing = typedContent !== undefined;
   const isResident = message.senderType === 'RESIDENT';
   const images = (message.attachments ?? []).filter(
     (attachment) => attachment.fileUrl,
@@ -17,7 +20,12 @@ export function ConversationMessage({
   return (
     <div className={`message ${isResident ? 'resident' : 'assistant'}`}>
       {!isResident && <span className="message-name">zipsAI</span>}
-      {message.content && <p>{message.content}</p>}
+      {message.content &&
+        (typing ? (
+          <TypingText text={message.content} typedText={typedContent} />
+        ) : (
+          <p>{message.content}</p>
+        ))}
       {images.length > 0 && (
         <div className="message-images">
           {images.map((attachment) => (
@@ -38,7 +46,10 @@ export function ConversationMessage({
       )}
       {children}
       {message.createdAt && (
-        <time className="message-time" dateTime={message.createdAt}>
+        <time
+          className={`message-time${typing ? ' message-time--reserved' : ''}`}
+          dateTime={message.createdAt}
+        >
           {formatMessageTime(message.createdAt)}
         </time>
       )}
@@ -63,12 +74,19 @@ export function PendingResidentMessage({
   );
 }
 
-export function PendingAssistantMessage({ text }: { text?: string }) {
+export function PendingAssistantMessage({
+  text,
+  typedText,
+}: {
+  text?: string;
+  typedText: string;
+}) {
   if (text)
     return (
       <div className="message assistant">
         <span className="message-name">zipsAI</span>
-        <p>{text}</p>
+        <TypingText text={text} typedText={typedText} />
+        <span className="message-time message-time--reserved">&nbsp;</span>
       </div>
     );
   return (
@@ -76,5 +94,16 @@ export function PendingAssistantMessage({ text }: { text?: string }) {
       <span className="message-name">zipsAI</span>
       <p>답변을 준비하고 있어요</p>
     </div>
+  );
+}
+
+function TypingText({ text, typedText }: { text: string; typedText: string }) {
+  return (
+    <p className="message-typing">
+      <span className="message-typing-full" aria-hidden="true">
+        {text}
+      </span>
+      <span>{typedText}</span>
+    </p>
   );
 }
