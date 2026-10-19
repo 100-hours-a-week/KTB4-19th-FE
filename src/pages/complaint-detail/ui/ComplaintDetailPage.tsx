@@ -2,7 +2,6 @@ import {
   IconChevronRightLine,
   IconSparkle2Line,
 } from '@karrotmarket/react-monochrome-icon';
-import { Badge } from '@seed-design/react';
 import { Link, useParams } from 'react-router-dom';
 import { Callout } from 'seed-design/ui/callout';
 import {
@@ -16,6 +15,7 @@ import {
   ComplaintStatusBadge,
   type ComplaintType,
   ComplaintTypeBadge,
+  ComplaintUrgentBadge,
   useManagerComplaint,
   useResidentComplaint,
   useUpdateManagerComplaintStatus,
@@ -126,12 +126,7 @@ function ManagerComplaintDetail({ complaintId }: { complaintId: number }) {
                 <div className="complaint-heading">
                   <ComplaintTypeBadge type={complaint.complaintType} />
                   <ComplaintStatusBadge status={complaint.statusCode} />
-                  <Badge
-                    tone={complaint.isUrgent ? 'critical' : 'neutral'}
-                    variant="weak"
-                  >
-                    긴급도 {complaint.urgency}
-                  </Badge>
+                  <ComplaintUrgentBadge isUrgent={complaint.isUrgent} />
                 </div>
                 <section>
                   <h2>AI 요약</h2>

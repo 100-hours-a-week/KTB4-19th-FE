@@ -29,6 +29,7 @@ export { complaints } from './model/mock';
 export type { ComplaintStatus, ComplaintType } from './model/types';
 export { ComplaintStatusBadge } from './ui/ComplaintStatusBadge';
 export { ComplaintTypeBadge } from './ui/ComplaintTypeBadge';
+export { ComplaintUrgentBadge } from './ui/ComplaintUrgentBadge';
 export { ComplaintPhotoGrid } from './ui/ComplaintPhotoGrid';
 export { ComplaintThumbnail } from './ui/ComplaintThumbnail';
 export {

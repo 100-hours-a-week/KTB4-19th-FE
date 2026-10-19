@@ -13,6 +13,7 @@ import {
   ComplaintStatusBadge,
   ComplaintThumbnail,
   ComplaintTypeBadge,
+  ComplaintUrgentBadge,
   useManagerComplaints,
   useResidentComplaints,
   type ComplaintStatus,
@@ -106,6 +107,7 @@ function ManagerComplaintsPage() {
                       <strong>{item.title}</strong>
                       <ComplaintTypeBadge type={item.complaintType} />
                       <ComplaintStatusBadge status={item.statusCode} />
+                      <ComplaintUrgentBadge isUrgent={item.isUrgent} />
                     </div>
                     <p>
                       {item.buildingName} · {formatRoomNo(item.roomNo)} ·{' '}
@@ -113,11 +115,6 @@ function ManagerComplaintsPage() {
                     </p>
                   </div>
                 </div>
-                <span
-                  className={`urgency-label ${item.isUrgent ? 'urgent' : ''}`}
-                >
-                  긴급도 {item.urgency}
-                </span>
                 <IconChevronRightLine />
               </Link>
             ))}
