@@ -50,6 +50,8 @@ jobs:
 
       - name: Build frontend
         run: npm run build
+        env:
+          VITE_API_ORIGIN: ${{ vars.VITE_API_ORIGIN }}
 
   build-artifact:
     name: Main Artifact Build
@@ -74,6 +76,8 @@ jobs:
       # main 병합 후에는 동일한 Test·Lint를 반복하지 않고 최종 dist/만 생성한다.
       - name: Build frontend
         run: npm run build
+        env:
+          VITE_API_ORIGIN: ${{ vars.VITE_API_ORIGIN }}
 
       # GitHub 화면에 표시되는 짧은 Commit SHA와 같은 앞 7자리를 Artifact 이름에 사용한다.
       - name: Set short Artifact tag
