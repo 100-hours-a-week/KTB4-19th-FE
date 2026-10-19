@@ -1,0 +1,81 @@
+name: Frontend CI V2
+
+# 기존 V1 frontend-ci.yml과 별도로 추가한다. AWS 권한을 사용하지 않는다.
+on:
+  pull_request:
+    branches: [staging, main]
+  push:
+    branches: [staging]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: frontend-ci-v2-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+        env:
+          VITE_API_ORIGIN: https://api-v2.zipsai.co.kr
+
+  artifact:
+    needs: validate
+    if: github.event_name == 'push' && github.ref == 'refs/heads/staging'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [staging, production]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Build environment-specific artifact
+        env:
+          TARGET: ${{ matrix.target }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$TARGET" == staging ]]; then
+            export VITE_API_ORIGIN=https://api-v2.zipsai.co.kr
+          else
+            export VITE_API_ORIGIN=https://api.zipsai.co.kr
+          fi
+          npm run build
+          python3 - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          root = Path('dist')
+          assert (root / 'index.html').is_file()
+          files = {p.relative_to(root).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
+                   for p in sorted(root.rglob('*')) if p.is_file()}
+          manifest = dict(schema_version=1, commit=os.environ['GITHUB_SHA'],
+                          run_id=os.environ['GITHUB_RUN_ID'], environment=os.environ['TARGET'],
+                          api_origin=os.environ['VITE_API_ORIGIN'], files=files)
+          Path('manifest.json').write_text(json.dumps(manifest, sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: frontend-v2-${{ matrix.target }}-${{ github.sha }}
+          path: |
+            dist/
+            manifest.json
+          if-no-files-found: error
+          retention-days: 90

@@ -1,0 +1,260 @@
+name: Frontend CD V2
+
+# main과 staging 양쪽에 추가한다. 기존 V1 CD는 유지한다.
+# GitHub Environments: staging / production
+# 환경 Variable: AWS_FRONTEND_CD_V2_ROLE_ARN, FRONTEND_DISTRIBUTION_ID
+# prod는 staging에서 검증한 CI 실행 ID를 지정한다. CD에서 재빌드하지 않는다.
+on:
+  workflow_run:
+    workflows: [Frontend CI V2]
+    types: [completed]
+    branches: [staging]
+  workflow_dispatch:
+    inputs:
+      ci_run_id:
+        description: Staging 배포가 성공한 Frontend CI V2 실행 ID (숫자)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  select:
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_branch == 'staging' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-latest
+    outputs:
+      target: ${{ steps.select.outputs.target }}
+      run_id: ${{ steps.select.outputs.run_id }}
+      sha: ${{ steps.select.outputs.sha }}
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - name: Select trusted successful CI run
+        id: select
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
+          AUTO_RUN_ID: ${{ github.event.workflow_run.id }}
+          INPUT_RUN_ID: ${{ inputs.ci_run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$EVENT_NAME" == workflow_run ]]; then
+            target=staging
+            run_id="$AUTO_RUN_ID"
+          else
+            target=production
+            run_id="$INPUT_RUN_ID"
+          fi
+          [[ "$run_id" =~ ^[0-9]+$ ]]
+          run="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run_id")"
+          jq -e --arg repo "$GITHUB_REPOSITORY" '
+            .conclusion == "success" and .event == "push" and .head_branch == "staging" and
+            .path == ".github/workflows/frontend-ci-v2.yml" and .head_repository.full_name == $repo
+          ' <<< "$run" > /dev/null
+          sha="$(jq -r .head_sha <<< "$run")"
+          [[ "$sha" =~ ^[0-9a-f]{40}$ ]]
+          echo "target=$target" >> "$GITHUB_OUTPUT"
+          echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    needs: select
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    environment: ${{ needs.select.outputs.target }}
+    concurrency:
+      group: frontend-cd-v2-${{ needs.select.outputs.target }}
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+    env:
+      AWS_REGION: ap-northeast-2
+      TARGET: ${{ needs.select.outputs.target }}
+      CI_RUN_ID: ${{ needs.select.outputs.run_id }}
+      COMMIT_SHA: ${{ needs.select.outputs.sha }}
+      DISTRIBUTION_ID: ${{ vars.FRONTEND_DISTRIBUTION_ID }}
+    steps:
+      - name: Skip superseded automatic deployment
+        id: freshness
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          proceed=true
+          if [[ "$EVENT_NAME" == workflow_run ]]; then
+            latest="$(gh api "repos/$GITHUB_REPOSITORY/branches/staging" --jq .commit.sha)"
+            if [[ "$latest" != "$COMMIT_SHA" ]]; then proceed=false; fi
+          fi
+          echo "proceed=$proceed" >> "$GITHUB_OUTPUT"
+
+      - name: Download exact CI artifact
+        if: steps.freshness.outputs.proceed == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-v2-${{ env.TARGET }}-${{ env.COMMIT_SHA }}
+          path: ${{ runner.temp }}/frontend-v2
+          run-id: ${{ env.CI_RUN_ID }}
+          github-token: ${{ github.token }}
+
+      - name: Verify manifest and artifact contents
+        if: steps.freshness.outputs.proceed == 'true'
+        shell: python
+        run: |
+          import hashlib, json, os
+          from pathlib import Path
+          root = Path(os.environ['RUNNER_TEMP']) / 'frontend-v2'
+          manifest = json.loads((root / 'manifest.json').read_text())
+          expected_origin = {'staging': 'https://api-v2.zipsai.co.kr',
+                             'production': 'https://api.zipsai.co.kr'}[os.environ['TARGET']]
+          assert manifest['schema_version'] == 1
+          assert manifest['commit'] == os.environ['COMMIT_SHA']
+          assert manifest['run_id'] == os.environ['CI_RUN_ID']
+          assert manifest['environment'] == os.environ['TARGET']
+          assert manifest['api_origin'] == expected_origin
+          dist = root / 'dist'
+          assert (dist / 'index.html').is_file()
+          assert not any(p.is_symlink() for p in root.rglob('*'))
+          actual = {p.relative_to(dist).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
+                    for p in sorted(dist.rglob('*')) if p.is_file()}
+          assert actual == manifest['files'], 'Artifact contents differ from manifest'
+
+      - name: Configure AWS credentials
+        if: steps.freshness.outputs.proceed == 'true'
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ vars.AWS_FRONTEND_CD_V2_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy static files and verify delivery
+        if: steps.freshness.outputs.proceed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          : "${DISTRIBUTION_ID:?FRONTEND_DISTRIBUTION_ID is required}"
+          if [[ "$TARGET" == staging ]]; then
+            bucket=zipsai-staging-frontend-origin
+          else
+            bucket=zipsai-prod-frontend-origin
+          fi
+          # 배포 ID를 잘못 설정해도 V1 배포를 무효화하지 않는다.
+          config="$(aws cloudfront get-distribution --id "$DISTRIBUTION_ID")"
+          jq -e --arg prefix "$bucket.s3." '
+            any(.Distribution.DistributionConfig.Origins.Items[]; .DomainName | startswith($prefix))
+          ' <<< "$config" > /dev/null
+          domain="$(jq -r .Distribution.DomainName <<< "$config")"
+          export FRONTEND_CHECK_DOMAIN="$domain"
+          verification="/zipsai/staging/deploy/frontend/verified-runs/$CI_RUN_ID"
+          # staging 검증 이후 같은 run 재실행으로 prod Artifact가 교체되면 승격을 차단한다.
+          artifacts="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$CI_RUN_ID/artifacts?per_page=100")"
+          candidate="$(jq -ce --arg name "frontend-v2-production-$COMMIT_SHA" '
+            [.artifacts[] | select(.name == $name and .expired == false)] |
+            if length == 1 then .[0] else error("expected one production artifact") end
+          ' <<< "$artifacts")"
+          candidate_id="$(jq -r .id <<< "$candidate")"
+          candidate_digest="$(jq -r .digest <<< "$candidate")"
+          [[ "$candidate_digest" =~ ^sha256:[0-9a-f]{64}$ ]]
+          if [[ "$TARGET" == production ]]; then
+            record="$(aws ssm get-parameter --name "$verification" --query Parameter.Value --output text)"
+            jq -e --arg sha "$COMMIT_SHA" --arg run "$CI_RUN_ID" \
+              --arg id "$candidate_id" --arg digest "$candidate_digest" '
+              .commit == $sha and .run_id == $run and .status == "verified" and
+              .production_artifact_id == $id and .production_artifact_digest == $digest
+            ' <<< "$record" > /dev/null
+          fi
+          dist="$RUNNER_TEMP/frontend-v2/dist"
+          previous="$RUNNER_TEMP/frontend-v2-previous-index.html"
+          # AccessDenied를 최초 배포로 오인하지 않는다. 파일 부재만 별도 처리한다.
+          objects="$(aws s3api list-objects-v2 --bucket "$bucket" --prefix index.html --max-keys 2)"
+          had_previous=false
+          if jq -e 'any(.Contents[]?; .Key == "index.html")' <<< "$objects" > /dev/null; then
+            aws s3 cp "s3://$bucket/index.html" "$previous" --only-show-errors
+            had_previous=true
+          fi
+          invalidate() {
+            local invalidation
+            invalidation="$(aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" \
+              --paths '/*' --query Invalidation.Id --output text)"
+            aws cloudfront wait invalidation-completed --distribution-id "$DISTRIBUTION_ID" --id "$invalidation"
+          }
+          verify_index() {
+            local expected="$1"
+            curl --fail --silent --show-error --retry 5 --retry-all-errors --retry-delay 3 \
+              --connect-timeout 5 --max-time 30 "https://$domain/" -o "$RUNNER_TEMP/frontend-v2-served.html" || return 1
+            cmp -s "$expected" "$RUNNER_TEMP/frontend-v2-served.html"
+          }
+          verify_entry_assets() {
+            python3 - <<'PY'
+          import hashlib, os, urllib.parse, urllib.request
+          from html.parser import HTMLParser
+          from pathlib import Path
+          root = Path(os.environ['RUNNER_TEMP']) / 'frontend-v2' / 'dist'
+          class References(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.paths = set()
+              def handle_starttag(self, tag, attrs):
+                  values = dict(attrs)
+                  ref = values.get('src') if tag == 'script' else values.get('href') if tag == 'link' else None
+                  if ref:
+                      url = urllib.parse.urlsplit(ref)
+                      if not url.scheme and not url.netloc and url.path.endswith(('.js', '.css')):
+                          self.paths.add(url.path.lstrip('/'))
+          parser = References()
+          parser.feed((root / 'index.html').read_text())
+          assert parser.paths, 'No entry JS/CSS found'
+          for path in parser.paths:
+              local = (root / path).resolve()
+              assert local.is_relative_to(root.resolve()) and local.is_file()
+              url = 'https://' + os.environ['FRONTEND_CHECK_DOMAIN'] + '/' + urllib.parse.quote(path)
+              with urllib.request.urlopen(url, timeout=30) as response:
+                  actual = hashlib.sha256(response.read()).digest()
+              assert actual == hashlib.sha256(local.read_bytes()).digest(), 'Entry asset hash mismatch'
+          PY
+          }
+          rollback() {
+            if [[ "$had_previous" == true ]]; then
+              aws s3 cp "$previous" "s3://$bucket/index.html" --content-type text/html \
+                --cache-control 'no-cache' --only-show-errors && invalidate && verify_index "$previous"
+            else
+              echo '이전 index.html이 없어 자동 복구할 수 없습니다.' >&2
+              return 1
+            fi
+          }
+          publish() {
+            # 기존 assets는 이전 화면과 롤백이 계속 참조하므로 삭제하지 않는다.
+            aws s3 sync "$dist/" "s3://$bucket/" --exclude index.html --only-show-errors || return 1
+            # 참조하는 파일 업로드가 끝난 후 index.html만 마지막에 교체한다.
+            aws s3 cp "$dist/index.html" "s3://$bucket/index.html" --content-type text/html \
+              --cache-control 'no-cache' --only-show-errors || return 1
+            invalidate || return 1
+            verify_index "$dist/index.html" || return 1
+            verify_entry_assets || return 1
+          }
+          if ! publish; then
+            echo '배포 검증 실패. 이전 HTML 복구를 시도합니다.' >&2
+            rollback || echo '자동 복구 실패: 운영자 확인 필요' >&2
+            exit 1
+          fi
+          if [[ "$TARGET" == staging ]]; then
+            record="$(jq -cn --arg sha "$COMMIT_SHA" --arg run "$CI_RUN_ID" \
+              --arg id "$candidate_id" --arg digest "$candidate_digest" \
+              '{commit:$sha,run_id:$run,status:"verified",production_artifact_id:$id,production_artifact_digest:$digest}')"
+            aws ssm put-parameter --name "$verification" --type String --value "$record" --overwrite > /dev/null
+          fi
+          echo "### $TARGET 배포 완료: $COMMIT_SHA (CI $CI_RUN_ID)" >> "$GITHUB_STEP_SUMMARY"
+          echo '정적 HTML 전달 확인 완료. 실제 로그인·SSE·챗봇 검증은 별도 필요.' >> "$GITHUB_STEP_SUMMARY"
