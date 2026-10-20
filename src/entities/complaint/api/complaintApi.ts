@@ -14,8 +14,8 @@ export type ManagerComplaintItem = {
   complaintType: ComplaintType | null;
   statusCode: ComplaintStatus;
   statusLabel: string;
-  urgency: number;
-  isUrgent: boolean;
+  urgency: number | null;
+  isUrgent: boolean | null;
   fileUrl: string | null;
   createdAt: string;
 };
@@ -45,8 +45,8 @@ export type ManagerComplaintDetailResponse = {
   complaintType: ComplaintType | null;
   statusCode: ComplaintStatus;
   statusLabel: string;
-  urgency: number;
-  isUrgent: boolean;
+  urgency: number | null;
+  isUrgent: boolean | null;
   location: string | null;
   occurredTime: string | null;
   symptom: string | null;

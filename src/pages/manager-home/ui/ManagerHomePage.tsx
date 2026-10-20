@@ -11,6 +11,7 @@ import { BuildingRequired, useManagerBuilding } from '@/entities/building';
 import {
   ComplaintStatusBadge,
   ComplaintTypeBadge,
+  ComplaintUrgentBadge,
   useManagerComplaintSummary,
   useManagerComplaints,
 } from '@/entities/complaint';
@@ -196,13 +197,13 @@ function ComplaintRows({ compact = false }: { compact?: boolean }) {
                 <strong>{item.title}</strong>
                 <ComplaintTypeBadge type={item.complaintType} />
                 <ComplaintStatusBadge status={item.statusCode} />
+                <ComplaintUrgentBadge isUrgent={item.isUrgent} />
               </div>
               <p>
                 {formatRoomNo(item.roomNo)} · {formatListTime(item.createdAt)}
               </p>
             </div>
           </div>
-          <span className="urgency-label">긴급도 {item.urgency}</span>
           <IconChevronRightLine />
         </Link>
       ))}
