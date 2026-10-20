@@ -3,7 +3,7 @@ name: Frontend CD V2
 # main과 staging 양쪽에 추가한다. 기존 V1 CD는 유지한다.
 # GitHub Environments: staging / production
 # 환경 Variable: AWS_FRONTEND_CD_V2_ROLE_ARN, FRONTEND_DISTRIBUTION_ID
-# prod는 staging에서 검증한 CI 실행 ID를 지정한다. CD에서 재빌드하지 않는다.
+# prod는 staging에서 검증한 커밋 SHA7을 지정한다. CI 실행은 자동 조회하며 재빌드하지 않는다.
 on:
   workflow_run:
     workflows: [Frontend CI V2]
@@ -11,8 +11,8 @@ on:
     branches: [staging]
   workflow_dispatch:
     inputs:
-      ci_run_id:
-        description: Staging 배포가 성공한 Frontend CI V2 실행 ID (숫자)
+      commit_sha:
+        description: Staging에서 검증한 빌드의 커밋 SHA 앞 7자리
         required: true
         type: string
 
@@ -43,7 +43,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           EVENT_NAME: ${{ github.event_name }}
           AUTO_RUN_ID: ${{ github.event.workflow_run.id }}
-          INPUT_RUN_ID: ${{ inputs.ci_run_id }}
+          INPUT_SHA: ${{ inputs.commit_sha }}
         shell: bash
         run: |
           set -euo pipefail
@@ -52,7 +52,28 @@ jobs:
             run_id="$AUTO_RUN_ID"
           else
             target=production
-            run_id="$INPUT_RUN_ID"
+            [[ "$INPUT_SHA" =~ ^[0-9a-f]{7}$ ]] || {
+              echo 'BE와 동일하게 커밋 SHA 앞 7자리 소문자 16진수를 입력하세요.' >&2
+              exit 1
+            }
+            # GitHub가 짧은 SHA를 유일한 전체 SHA로 해석한다. 모호하면 실패한다.
+            requested_sha="$(gh api "repos/$GITHUB_REPOSITORY/commits/$INPUT_SHA" --jq .sha)"
+            [[ "$requested_sha" =~ ^[0-9a-f]{40}$ && "${requested_sha:0:7}" == "$INPUT_SHA" ]] || {
+              echo '입력 SHA와 조회된 커밋이 일치하지 않습니다.' >&2
+              exit 1
+            }
+            runs="$(gh api --method GET --paginate --slurp \
+              "repos/$GITHUB_REPOSITORY/actions/workflows/frontend-ci-v2.yml/runs" \
+              -f head_sha="$requested_sha" -f branch=staging -f event=push -f status=completed -f per_page=100)"
+            # 여러 실행의 결과물을 임의로 고르지 않는다. rerun은 같은 run ID다.
+            run_id="$(jq -er --arg sha "$requested_sha" --arg repo "$GITHUB_REPOSITORY" '
+              [.[].workflow_runs[] | select(
+                .head_sha == $sha and .conclusion == "success" and .event == "push" and
+                .head_branch == "staging" and .path == ".github/workflows/frontend-ci-v2.yml" and
+                .head_repository.full_name == $repo)] | unique_by(.id) |
+              if length == 1 then .[0].id
+              else error("expected exactly one successful staging CI run for this SHA; none or ambiguous") end
+            ' <<< "$runs")"
           fi
           [[ "$run_id" =~ ^[0-9]+$ ]]
           run="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run_id")"
@@ -62,6 +83,10 @@ jobs:
           ' <<< "$run" > /dev/null
           sha="$(jq -r .head_sha <<< "$run")"
           [[ "$sha" =~ ^[0-9a-f]{40}$ ]]
+          if [[ "$target" == production && "$sha" != "$requested_sha" ]]; then
+            echo '선택한 CI 실행의 커밋이 입력 SHA와 다릅니다.' >&2
+            exit 1
+          fi
           echo "target=$target" >> "$GITHUB_OUTPUT"
           echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
