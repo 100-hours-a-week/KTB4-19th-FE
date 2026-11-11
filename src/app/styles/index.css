@@ -208,7 +208,7 @@ button { cursor: pointer; }
 .chat-header { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--seed-dimension-x4); padding-bottom: var(--seed-dimension-x5); border-bottom: 1px solid var(--seed-color-stroke-neutral-muted); }
 .chat-body { padding: var(--seed-dimension-x6) 0; display: flex; flex-direction: column; gap: var(--seed-dimension-x4); }
 .message { max-width: 74%; line-height: 1.6; }
-.message > p { padding: var(--seed-dimension-x4); border-radius: var(--seed-radius-r4); background: var(--seed-color-bg-layer-default); border: 1px solid var(--seed-color-stroke-neutral-muted); }
+.message > p, .message-markdown { padding: var(--seed-dimension-x4); border-radius: var(--seed-radius-r4); background: var(--seed-color-bg-layer-default); border: 1px solid var(--seed-color-stroke-neutral-muted); }
 .message.assistant { align-self: flex-start; }
 .message.resident { align-self: flex-end; }
 .message.resident > p { color: var(--seed-color-fg-neutral-inverted); background: var(--seed-color-bg-brand-solid); border-color: transparent; }
@@ -224,7 +224,10 @@ button { cursor: pointer; }
 .message.resident .message-time { text-align: right; }
 .message-time--reserved { visibility: hidden; }
 .message-typing { display: grid; }
-.message-typing > span { grid-area: 1 / 1; }
+.message-typing > div { grid-area: 1 / 1; }
+.message-markdown :is(p, ul, ol, h1, h2, h3, h4, h5, h6) + * { margin-top: var(--seed-dimension-x2); }
+.message-markdown :is(ul, ol) { margin: 0; padding-left: var(--seed-dimension-x5); }
+.message-markdown :is(h1, h2, h3, h4, h5, h6) { margin: 0; font-size: inherit; }
 .message-typing-full { visibility: hidden; }
 .message--pending > p { opacity: .6; }
 .message-images { display: flex; flex-wrap: wrap; gap: var(--seed-dimension-x2); margin-top: var(--seed-dimension-x2); }
@@ -457,7 +460,7 @@ button { cursor: pointer; }
   .bottom-nav svg { width: 22px; height: 22px; }
   .resident-hero { padding: var(--seed-dimension-x5); gap: var(--seed-dimension-x6); }
   .message { max-width: 88%; }
-  .message > p { padding: var(--seed-dimension-x3); }
+  .message > p, .message-markdown { padding: var(--seed-dimension-x3); }
   .summary-card { min-width: min(430px, 84cqw); }
   .content:has(.chat-layout) { padding-bottom: calc(68px + var(--app-safe-bottom)); }
   .chat-layout { min-height: calc(var(--app-vh) - 58px - var(--seed-dimension-x5) - 68px - var(--app-safe-bottom)); }

@@ -4,4 +4,8 @@ export function nextTypedLength(
   typedLength: number,
   textLength: number,
 ): number;
-export function typedText(text: string, typedLength: number): string;
+export function renderableText(
+  text: string,
+  length: number,
+  complete: boolean,
+): string;
