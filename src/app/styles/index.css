@@ -141,6 +141,8 @@ button { cursor: pointer; }
 .list-tools { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--seed-dimension-x4); min-width: 0; }
 .list-tools > :first-child { width: min(360px, 100%); min-width: 0; }
 .list-tools > :last-child { min-width: 0; }
+.list-tools--manager { align-items: flex-start; }
+.complaint-list-filters { display: grid; gap: var(--seed-dimension-x2); }
 .list-stack { display: grid; }
 .list-row, .notification-row { width: 100%; border: 0; border-bottom: 1px solid var(--seed-color-stroke-neutral-muted); background: transparent; padding: var(--seed-dimension-x4) 0; display: flex; align-items: center; gap: var(--seed-dimension-x4); text-align: left; }
 .list-row:hover, .notification-row:hover { background: var(--seed-color-bg-layer-default-pressed); }

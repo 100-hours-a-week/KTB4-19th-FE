@@ -1,6 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/shared/api';
-import type { ComplaintStatus, ComplaintType } from '../model/types';
+import type {
+  ComplaintStatus,
+  ComplaintType,
+  ComplaintUrgencyLevel,
+} from '../model/types';
 
 const managerBuildingBase = '/managers/me/building';
 const managerComplaintsBase = '/managers/me/complaints';
@@ -15,6 +19,7 @@ export type ManagerComplaintItem = {
   statusCode: ComplaintStatus;
   statusLabel: string;
   urgency: number | null;
+  urgencyLevel: ComplaintUrgencyLevel | null;
   isUrgent: boolean | null;
   fileUrl: string | null;
   createdAt: string;
@@ -46,6 +51,7 @@ export type ManagerComplaintDetailResponse = {
   statusCode: ComplaintStatus;
   statusLabel: string;
   urgency: number | null;
+  urgencyLevel: ComplaintUrgencyLevel | null;
   isUrgent: boolean | null;
   location: string | null;
   occurredTime: string | null;
@@ -151,6 +157,7 @@ export type ManagerComplaintListParams = {
   keyword?: string;
   status?: readonly ComplaintStatus[];
   urgentOnly?: boolean;
+  urgencyLevel?: ComplaintUrgencyLevel;
   page?: number;
   size?: number;
 };
@@ -193,6 +200,7 @@ export const complaintApi = {
         keyword: params.keyword,
         status: params.status,
         urgentOnly: params.urgentOnly,
+        urgencyLevel: params.urgencyLevel,
         page: params.page ?? 0,
         size: params.size ?? 20,
       },
@@ -247,6 +255,7 @@ export function useManagerComplaints(params: ManagerComplaintListParams = {}) {
     keyword: params.keyword?.trim() || undefined,
     status: params.status,
     urgentOnly: params.urgentOnly,
+    urgencyLevel: params.urgencyLevel,
     page: params.page ?? 0,
     size: params.size ?? 20,
   };
