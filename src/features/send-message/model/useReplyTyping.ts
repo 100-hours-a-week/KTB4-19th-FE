@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import {
   characterCount,
   nextTypedLength,
+  renderableText,
   replyTypingIntervalMs,
-  typedText,
   type Message,
 } from '@/entities/conversation';
 
@@ -47,10 +47,13 @@ export function useReplyTyping(
     return () => clearTimeout(timer);
   }, [typing, typedLength, targetLength]);
 
-  const shownText = animate ? typedText(target, typedLength) : target;
+  const complete = !awaitingReply;
+  const fullText = renderableText(target, targetLength, complete);
   return {
-    pendingText: target || undefined,
+    pendingText: fullText || undefined,
     typingMessageId: typing && typingMessage ? typingMessage.messageId : null,
-    typedText: shownText,
+    typedText: animate
+      ? renderableText(target, typedLength, complete)
+      : fullText,
   };
 }

@@ -11,11 +11,14 @@ import {
   emailAvailabilityFeedback,
   NAME_MAX_LENGTH,
   PASSWORD_MAX_LENGTH,
-  PHONE_MAX_LENGTH,
 } from '@/entities/session';
 import { useTerms } from '@/entities/terms';
 import { isApiError, type ApiError } from '@/shared/api';
-import { useRetryCountdown } from '@/shared/lib';
+import {
+  formatPhoneNumber,
+  nextPhoneInput,
+  useRetryCountdown,
+} from '@/shared/lib';
 import {
   parseSignupDraft,
   signupDraftKey,
@@ -29,7 +32,9 @@ export function SignupForm() {
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [userName, setUserName] = useState(savedDraft?.userName ?? '');
-  const [phone, setPhone] = useState(savedDraft?.phone ?? '');
+  const [phone, setPhone] = useState(() =>
+    formatPhoneNumber(savedDraft?.phone ?? ''),
+  );
   const [acceptedServiceTerms, setAcceptedServiceTerms] = useState(
     savedDraft?.acceptedServiceTerms ?? false,
   );
@@ -179,7 +184,11 @@ export function SignupForm() {
       ? null
       : emailAvailabilityFeedback({ isAvailable: emailAvailable });
   const emailError = error?.violationFor('email');
-  const passwordError = error?.violationFor('password');
+  const passwordRule = `영문, 숫자, 특수문자를 포함해 8~${PASSWORD_MAX_LENGTH}자`;
+  const passwordViolation = error?.violationFor('password');
+  const passwordError =
+    passwordViolation &&
+    `${passwordViolation} ${passwordRule}로 입력해 주세요.`;
   const passwordConfirmError = error?.violationFor('passwordConfirm');
   const nameError = error?.violationFor('userName');
   const phoneError = error?.violationFor('phone');
@@ -241,7 +250,7 @@ export function SignupForm() {
         </div>
         <TextField
           label="비밀번호"
-          description={`영문, 숫자, 특수문자를 포함해 8~${PASSWORD_MAX_LENGTH}자`}
+          description={passwordRule}
           invalid={!!passwordError}
           errorMessage={passwordError}
           disabled={pending}
@@ -287,16 +296,22 @@ export function SignupForm() {
         >
           <TextFieldInput
             type="tel"
+            inputMode="numeric"
             autoComplete="tel"
             placeholder="010-0000-0000"
             value={phone}
-            onChange={(event) =>
-              setPhone(
-                event.currentTarget.value
-                  .replace(/[^0-9-]/g, '')
-                  .slice(0, PHONE_MAX_LENGTH),
-              )
-            }
+            onChange={(event) => {
+              const input = event.currentTarget;
+              const next = nextPhoneInput(
+                phone,
+                input.value,
+                input.selectionStart ?? input.value.length,
+              );
+              setPhone(next.value);
+              requestAnimationFrame(() =>
+                input.setSelectionRange(next.caret, next.caret),
+              );
+            }}
           />
         </TextField>
         <div className="signup-terms">

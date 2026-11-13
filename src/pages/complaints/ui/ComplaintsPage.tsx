@@ -17,6 +17,7 @@ import {
   useManagerComplaints,
   useResidentComplaints,
   type ComplaintStatus,
+  type ComplaintUrgencyLevel,
 } from '@/entities/complaint';
 import type { RouteRole } from '@/shared/config';
 import { formatListTime, formatRoomNo } from '@/shared/lib';
@@ -32,11 +33,16 @@ export function ComplaintsPage({ role }: { role: RouteRole }) {
 
 function ManagerComplaintsPage() {
   const [status, setStatus] = useState<'ALL' | ComplaintStatus>('ALL');
+  const [urgencyLevel, setUrgencyLevel] = useState<
+    'ALL' | ComplaintUrgencyLevel
+  >('ALL');
   const [input, setInput] = useState('');
   const [keyword, setKeyword] = useState('');
   const query = useManagerComplaints({
     keyword,
     status: status === 'ALL' ? undefined : [status],
+    urgencyLevel: urgencyLevel === 'ALL' ? undefined : urgencyLevel,
+    page: 0,
   });
   const viewState: ViewState = query.isPending
     ? 'loading'
@@ -59,7 +65,7 @@ function ManagerComplaintsPage() {
         description="긴급도와 처리 상태를 기준으로 빠르게 대응하세요."
       />
       <section className="panel list-panel">
-        <div className="list-tools">
+        <div className="list-tools list-tools--manager">
           <form onSubmit={search} role="search">
             <TextField
               prefixIcon={<IconMagnifyingglassLine />}
@@ -72,18 +78,34 @@ function ManagerComplaintsPage() {
               />
             </TextField>
           </form>
-          <SegmentedControl
-            aria-label="민원 처리 상태"
-            value={status}
-            onValueChange={(value) => setStatus(value as typeof status)}
-          >
-            <SegmentedControlItem value="ALL">전체</SegmentedControlItem>
-            <SegmentedControlItem value="PENDING">처리전</SegmentedControlItem>
-            <SegmentedControlItem value="IN_PROGRESS">
-              처리중
-            </SegmentedControlItem>
-            <SegmentedControlItem value="DONE">완료</SegmentedControlItem>
-          </SegmentedControl>
+          <div className="complaint-list-filters">
+            <SegmentedControl
+              aria-label="민원 처리 상태"
+              value={status}
+              onValueChange={(value) => setStatus(value as typeof status)}
+            >
+              <SegmentedControlItem value="ALL">전체</SegmentedControlItem>
+              <SegmentedControlItem value="PENDING">
+                처리전
+              </SegmentedControlItem>
+              <SegmentedControlItem value="IN_PROGRESS">
+                처리중
+              </SegmentedControlItem>
+              <SegmentedControlItem value="DONE">완료</SegmentedControlItem>
+            </SegmentedControl>
+            <SegmentedControl
+              aria-label="민원 긴급도"
+              value={urgencyLevel}
+              onValueChange={(value) =>
+                setUrgencyLevel(value as typeof urgencyLevel)
+              }
+            >
+              <SegmentedControlItem value="ALL">전체</SegmentedControlItem>
+              <SegmentedControlItem value="URGENT">긴급</SegmentedControlItem>
+              <SegmentedControlItem value="PRIORITY">우선</SegmentedControlItem>
+              <SegmentedControlItem value="NORMAL">일반</SegmentedControlItem>
+            </SegmentedControl>
+          </div>
         </div>
         <StateBoundary
           state={viewState}
