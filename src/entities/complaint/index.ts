@@ -26,7 +26,11 @@ export {
   type ResidentComplaintListResponse,
 } from './api/complaintApi';
 export { complaints } from './model/mock';
-export type { ComplaintStatus, ComplaintType } from './model/types';
+export type {
+  ComplaintStatus,
+  ComplaintType,
+  ComplaintUrgencyLevel,
+} from './model/types';
 export { ComplaintStatusBadge } from './ui/ComplaintStatusBadge';
 export { ComplaintTypeBadge } from './ui/ComplaintTypeBadge';
 export { ComplaintUrgentBadge } from './ui/ComplaintUrgentBadge';

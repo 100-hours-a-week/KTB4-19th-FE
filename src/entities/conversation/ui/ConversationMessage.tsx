@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import Markdown from 'react-markdown';
 import { formatMessageTime } from '@/shared/lib';
 import type { Message } from '../model/types';
 
@@ -23,8 +24,12 @@ export function ConversationMessage({
       {message.content &&
         (typing ? (
           <TypingText text={message.content} typedText={typedContent} />
-        ) : (
+        ) : isResident ? (
           <p>{message.content}</p>
+        ) : (
+          <div className="message-markdown">
+            <Markdown>{message.content}</Markdown>
+          </div>
         ))}
       {images.length > 0 && (
         <div className="message-images">
@@ -99,11 +104,13 @@ export function PendingAssistantMessage({
 
 function TypingText({ text, typedText }: { text: string; typedText: string }) {
   return (
-    <p className="message-typing">
-      <span className="message-typing-full" aria-hidden="true">
-        {text}
-      </span>
-      <span>{typedText}</span>
-    </p>
+    <div className="message-markdown message-typing">
+      <div className="message-typing-full" aria-hidden="true">
+        <Markdown>{text}</Markdown>
+      </div>
+      <div>
+        <Markdown>{typedText}</Markdown>
+      </div>
+    </div>
   );
 }

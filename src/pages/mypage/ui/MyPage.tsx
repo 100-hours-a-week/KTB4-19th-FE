@@ -5,7 +5,6 @@ import { ActionButton } from 'seed-design/ui/action-button';
 import {
   authApi,
   EMAIL_MAX_LENGTH,
-  PHONE_MAX_LENGTH,
   useAuth,
   useManagerMyPage,
   useResidentMyPage,
@@ -13,6 +12,7 @@ import {
 } from '@/entities/session';
 import { useTerms } from '@/entities/terms';
 import type { RouteRole } from '@/shared/config';
+import { formatPhoneNumber, nextPhoneInput } from '@/shared/lib';
 import { InfoRow, PageTitle, StateBoundary } from '@/shared/ui';
 
 export function MyPage({ role }: { role: RouteRole }) {
@@ -193,7 +193,7 @@ function MyPageLayout({
               <ActionButton variant="brandSolid" loading={saving} onClick={() => void saveProfile()}>저장</ActionButton>
             </div>
           ) : (
-            <ActionButton variant="neutralOutline" onClick={() => { setDraft(profile); setEditing(true); }}>
+            <ActionButton variant="neutralOutline" onClick={() => { setDraft({ ...profile, phone: formatPhoneNumber(profile.phone) }); setEditing(true); }}>
               프로필 수정
             </ActionButton>
           )}
@@ -201,7 +201,12 @@ function MyPageLayout({
         {editing ? (
           <div className="profile-edit-fields">
             <label>이메일<input type="text" inputMode="email" autoComplete="email" maxLength={EMAIL_MAX_LENGTH} value={draft.email} onChange={(event) => setDraft({ ...draft, email: event.target.value })} /></label>
-            <label>연락처<input type="tel" inputMode="tel" autoComplete="tel" value={draft.phone} onChange={(event) => setDraft({ ...draft, phone: event.target.value.replace(/[^0-9-]/g, '').slice(0, PHONE_MAX_LENGTH) })} /></label>
+            <label>연락처<input type="tel" inputMode="numeric" autoComplete="tel" placeholder="010-0000-0000" value={draft.phone} onChange={(event) => {
+              const input = event.currentTarget;
+              const next = nextPhoneInput(draft.phone, input.value, input.selectionStart ?? input.value.length);
+              setDraft({ ...draft, phone: next.value });
+              requestAnimationFrame(() => input.setSelectionRange(next.caret, next.caret));
+            }} /></label>
             {error && <p role="alert">{error}</p>}
           </div>
         ) : (

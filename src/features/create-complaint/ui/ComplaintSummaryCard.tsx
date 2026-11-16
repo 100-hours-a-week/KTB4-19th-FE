@@ -305,7 +305,7 @@ function DraftField({
       }
       maxGraphemeCount={limits[field]}
     >
-      <TextFieldInput />
+      <TextFieldInput maxLength={limits[field]}/>
     </TextField>
   );
 }

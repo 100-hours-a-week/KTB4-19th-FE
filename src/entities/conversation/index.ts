@@ -46,8 +46,8 @@ export { latestMessageId, orderedMessages } from './lib/olderMessages.mjs';
 export {
   characterCount,
   nextTypedLength,
+  renderableText,
   replyTypingIntervalMs,
-  typedText,
 } from './lib/replyTyping.mjs';
 export { useOlderMessages } from './lib/useOlderMessages';
 export {
